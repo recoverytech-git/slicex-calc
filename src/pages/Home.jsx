@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Landmark, Percent, Scissors } from "lucide-react";
+import { Landmark, Percent, Scissors, Car } from "lucide-react";
 import Header from "../components/Header";
 import ModuleCard from "../components/ModuleCard";
 import PageTransition from "../components/PageTransition";
@@ -25,6 +25,13 @@ const MODULES = [
     title: "Amortização Extra",
     description: "Fez um aporte no financiamento? Descubra se compensa mais reduzir prazo ou reduzir parcela.",
     tag: "Simulador",
+  },
+  {
+    to: "/calcula-car",
+    icon: Car,
+    title: "Calcula-Car",
+    description: "Analise a compra e venda de um veículo: FIPE, financiamento, custos e o resultado líquido da operação.",
+    tag: "Compra & Venda",
   },
 ];
 

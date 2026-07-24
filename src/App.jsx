@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 const Financiamento = lazy(() => import("./pages/Financiamento"));
 const Percentual = lazy(() => import("./pages/Percentual"));
 const Amortizacao = lazy(() => import("./pages/Amortizacao"));
+const CalculaCar = lazy(() => import("./pages/CalculaCar"));
 
 function RouteFallback() {
   return (
@@ -27,6 +28,7 @@ function AnimatedRoutes() {
           <Route path="/financiamento" element={<Financiamento />} />
           <Route path="/percentual" element={<Percentual />} />
           <Route path="/amortizacao" element={<Amortizacao />} />
+          <Route path="/calcula-car" element={<CalculaCar />} />
         </Routes>
       </Suspense>
     </AnimatePresence>
