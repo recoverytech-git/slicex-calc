@@ -1,10 +1,12 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Car, TrendingUp, Wallet, Landmark, Plus, Trash2, PieChart, Download, FileText, BarChart3, Grid3x3, Table2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Car, TrendingUp, Wallet, Landmark, Plus, Trash2, Pencil, PieChart, Download, FileText, BarChart3, Grid3x3, Table2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import Field from "../components/Field";
+import CurrencyField from "../components/CurrencyField";
+import Modal from "../components/Modal";
 import Kpi from "../components/Kpi";
 import PrimaryButton from "../components/PrimaryButton";
 import SaldoAreaChart from "../components/SaldoAreaChart";
@@ -48,8 +50,10 @@ export default function CalculaCar() {
 
   // Bloco 5 — custos adicionais
   const [custos, setCustos] = useState([]);
-  const [novoDesc, setNovoDesc] = useState("");
-  const [novoValor, setNovoValor] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [draftDesc, setDraftDesc] = useState("");
+  const [draftCents, setDraftCents] = useState(0);
 
   // Bloco 7 — exportação
   const [dlState, setDlState] = useState(null); // null | "xlsx" | "pdf" | { ok, tipo } | { err }
@@ -100,11 +104,18 @@ export default function CalculaCar() {
     }));
   }, [finRows]);
 
-  const addCusto = () => {
-    const valor = toF(novoValor);
-    if (!novoDesc.trim() || valor <= 0) return;
-    setCustos((c) => [...c, { id: Date.now(), descricao: novoDesc.trim(), valor }]);
-    setNovoDesc(""); setNovoValor("");
+  const openModal = () => { setEditingId(null); setDraftDesc(""); setDraftCents(0); setModalOpen(true); };
+  const closeModal = () => setModalOpen(false);
+  const startEdit = (item) => { setEditingId(item.id); setDraftDesc(item.descricao); setDraftCents(Math.round(item.valor * 100)); };
+  const addOrUpdateCusto = () => {
+    const valor = draftCents / 100;
+    if (!draftDesc.trim() || valor <= 0) return;
+    if (editingId) {
+      setCustos((c) => c.map((x) => (x.id === editingId ? { ...x, descricao: draftDesc.trim(), valor } : x)));
+    } else {
+      setCustos((c) => [...c, { id: Date.now(), descricao: draftDesc.trim(), valor }]);
+    }
+    setEditingId(null); setDraftDesc(""); setDraftCents(0);
   };
   const removeCusto = (id) => setCustos((c) => c.filter((x) => x.id !== id));
 
@@ -364,29 +375,68 @@ export default function CalculaCar() {
                   {custos.length > 0 && <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{fmt(totalCustosAdicionais)}</span>}
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 160px auto", gap: 10, alignItems: "end" }}>
-                  <Field label="Descrição do custo" val={novoDesc} set={setNovoDesc} hint="Ex: Pneus, documentação, revisão…" />
-                  <Field label="Valor (R$)" val={novoValor} set={setNovoValor} hint="Ex: 850" />
-                  <PrimaryButton onClick={addCusto} style={{ padding: "11px 16px", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
-                    <Plus size={16} /> Adicionar
-                  </PrimaryButton>
-                </div>
+                <PrimaryButton onClick={openModal} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}>
+                  <Plus size={16} /> Adicionar custo
+                </PrimaryButton>
 
                 {custos.length > 0 && (
-                  <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
-                    {custos.map((c) => (
-                      <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: "var(--bg-elevated)", borderRadius: "var(--r-sm)", fontSize: 13 }}>
-                        <span style={{ color: "var(--text-dim)" }}>{c.descricao}</span>
-                        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ marginTop: 16 }}>
+                    <p style={{ margin: "0 0 8px", fontSize: 11, color: "var(--text-mute)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.6 }}>Custos adicionados</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {custos.map((c) => (
+                        <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 4px", fontSize: 13 }}>
+                          <span style={{ color: "var(--text-dim)", display: "flex", alignItems: "center", gap: 8 }}>
+                            <CheckCircle2 size={14} color="var(--accent-soft)" /> {c.descricao}
+                          </span>
                           <span style={{ color: "var(--text)", fontWeight: 700 }}>{fmt(c.valor)}</span>
-                          <button onClick={() => removeCusto(c.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-mute)", display: "flex" }}>
-                            <Trash2 size={15} />
-                          </button>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+                      <span style={{ fontSize: 12, color: "var(--text-mute)", fontWeight: 700, textTransform: "uppercase" }}>Total dos custos</span>
+                      <span style={{ fontSize: 15, color: "var(--text)", fontWeight: 800 }}>{fmt(totalCustosAdicionais)}</span>
+                    </div>
                   </div>
                 )}
+
+                <Modal
+                  open={modalOpen}
+                  onClose={closeModal}
+                  title="Adicionar novo custo"
+                  footer={
+                    <PrimaryButton onClick={closeModal} style={{ width: "100%" }}>Concluir</PrimaryButton>
+                  }
+                >
+                  <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                    <Field label="Descrição do custo" val={draftDesc} set={setDraftDesc} hint="Ex.: Pneus, Revisão, Documentação…" />
+                    <CurrencyField label="Valor" cents={draftCents} setCents={setDraftCents} />
+                    <PrimaryButton onClick={addOrUpdateCusto} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}>
+                      <Plus size={16} /> {editingId ? "Salvar alteração" : "Adicionar"}
+                    </PrimaryButton>
+                  </div>
+
+                  {custos.length > 0 && (
+                    <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+                      {custos.map((c) => (
+                        <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: "var(--bg-elevated)", borderRadius: "var(--r-sm)", fontSize: 13 }}>
+                          <span style={{ color: "var(--text-dim)", display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                            <CheckCircle2 size={14} color="var(--accent-soft)" style={{ flexShrink: 0 }} />
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.descricao}</span>
+                          </span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                            <span style={{ color: "var(--text)", fontWeight: 700 }}>{fmt(c.valor)}</span>
+                            <button onClick={() => startEdit(c)} aria-label="Editar" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-mute)", display: "flex" }}>
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => removeCusto(c.id)} aria-label="Excluir" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-mute)", display: "flex" }}>
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Modal>
               </motion.div>
             )}
           </AnimatePresence>
