@@ -5,6 +5,8 @@ import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import Field from "../components/Field";
+import MoneyField from "../components/MoneyField";
+import { parseMoeda } from "../lib/moeda";
 import PrimaryButton from "../components/PrimaryButton";
 import AnimatedNumber from "../components/AnimatedNumber";
 import { fmt, toF } from "../lib/format";
@@ -65,7 +67,7 @@ function StrategyCard({ icon: Icon, title, subtitle, rows, winner, index }) {
 
 export default function Amortizacao() {
   const [saldo, setSaldo] = useState("120000");
-  const [taxa, setTaxa] = useState("1.2");
+  const [taxa, setTaxa] = useState("3.9");
   const [parcelas, setParcelas] = useState("48");
   const [aporte, setAporte] = useState("10000");
   const [sistema, setSistema] = useState("Price");
@@ -131,10 +133,10 @@ export default function Amortizacao() {
               Dados Atuais do Financiamento
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14 }}>
-              <Field label="Saldo devedor atual (R$)" val={saldo} set={setSaldo} hint="Ex: 120000" onChange={reset} />
-              <Field label="Taxa de juros mensal (%)" val={taxa} set={setTaxa} hint="Ex: 1.2" onChange={reset} />
+              <MoneyField label="Saldo devedor atual (R$)" valor={parseMoeda(saldo)} onChange={(n) => { setSaldo(String(n)); reset?.(); }} />
+              <Field label="Taxa de juros mensal (%)" val={taxa} set={setTaxa} hint="Ex: 3.9" onChange={reset} />
               <Field label="Parcelas restantes" val={parcelas} set={setParcelas} hint="Ex: 48" onChange={reset} />
-              <Field label="Valor do aporte extra (R$)" val={aporte} set={setAporte} hint="Ex: 10000" onChange={reset} />
+              <MoneyField label="Valor do aporte extra (R$)" valor={parseMoeda(aporte)} onChange={(n) => { setAporte(String(n)); reset?.(); }} />
             </div>
 
             {aporteNum >= saldoNum && aporteNum > 0 && (

@@ -5,6 +5,8 @@ import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import Field from "../components/Field";
+import MoneyField from "../components/MoneyField";
+import { parseMoeda } from "../lib/moeda";
 import CurrencyField from "../components/CurrencyField";
 import Modal from "../components/Modal";
 import Kpi from "../components/Kpi";
@@ -43,7 +45,7 @@ export default function CalculaCar() {
   // Bloco 4 — financiamento (reaproveita exatamente os campos/lógica da calculadora existente)
   const [valorBemStr, setValorBemStr] = useState("50000");
   const [entradaStr, setEntradaStr] = useState("0");
-  const [taxaStr, setTaxaStr] = useState("1.2");
+  const [taxaStr, setTaxaStr] = useState("3.9");
   const [mesesStr, setMesesStr] = useState("48");
   const [sistema, setSistema] = useState("Price");
   const [tab, setTab] = useState("grafico");
@@ -207,8 +209,8 @@ export default function CalculaCar() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14 }}>
               <Field label="Modelo do veículo" val={modelo} set={setModelo} hint="Ex: Toyota Corolla XEi 2.0" />
               <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" />
-              <Field label="Valor FIPE (R$)" val={fipeStr} set={setFipeStr} hint="Ex: 75000" />
-              <Field label="Valor de compra (R$)" val={compraStr} set={setCompraStr} hint="Ex: 50000" />
+              <MoneyField label="Valor FIPE (R$)" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
+              <MoneyField label="Valor de compra (R$)" valor={parseMoeda(compraStr)} onChange={(n) => { setCompraStr(String(n)); reset?.(); }} />
             </div>
           </div>
 
@@ -296,9 +298,9 @@ export default function CalculaCar() {
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 14 }}>
-                  <Field label="Valor financiado (R$)" val={valorBemStr} set={setValorBemStr} hint="Ex: 50000" />
-                  <Field label="Entrada (R$)" val={entradaStr} set={setEntradaStr} hint="Ex: 0" />
-                  <Field label="Taxa de juros mensal (%)" val={taxaStr} set={setTaxaStr} hint="Ex: 1.2" />
+                  <MoneyField label="Valor financiado (R$)" valor={parseMoeda(valorBemStr)} onChange={(n) => { setValorBemStr(String(n)); reset?.(); }} />
+                  <MoneyField label="Entrada (R$)" valor={parseMoeda(entradaStr)} onChange={(n) => { setEntradaStr(String(n)); reset?.(); }} />
+                  <Field label="Taxa de juros mensal (%)" val={taxaStr} set={setTaxaStr} hint="Ex: 3.9" />
                   <Field label="Prazo (meses)" val={mesesStr} set={setMesesStr} hint="Ex: 48" />
                 </div>
 

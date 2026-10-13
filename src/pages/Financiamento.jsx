@@ -5,6 +5,8 @@ import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import Field from "../components/Field";
+import MoneyField from "../components/MoneyField";
+import { parseMoeda } from "../lib/moeda";
 import Kpi from "../components/Kpi";
 import PrimaryButton from "../components/PrimaryButton";
 import SaldoAreaChart from "../components/SaldoAreaChart";
@@ -16,7 +18,7 @@ const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border
 
 export default function Financiamento() {
   const [valor, setValor] = useState("150000");
-  const [taxa, setTaxa] = useState("3");
+  const [taxa, setTaxa] = useState("3.9");
   const [meses, setMeses] = useState("60");
   const [entrada, setEntrada] = useState("0");
   const [sistema, setSistema] = useState("Price");
@@ -121,9 +123,9 @@ export default function Financiamento() {
               Dados do Financiamento
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14 }}>
-              <Field label="Valor do bem (R$)" val={valor} set={setValor} hint="Ex: 150000" onChange={reset} />
-              <Field label="Entrada (R$)" val={entrada} set={setEntrada} hint="Ex: 0" onChange={reset} />
-              <Field label="Taxa de juros mensal (%)" val={taxa} set={setTaxa} hint="Ex: 3" onChange={reset} />
+              <MoneyField label="Valor do bem (R$)" valor={parseMoeda(valor)} onChange={(n) => { setValor(String(n)); reset?.(); }} />
+              <MoneyField label="Entrada (R$)" valor={parseMoeda(entrada)} onChange={(n) => { setEntrada(String(n)); reset?.(); }} />
+              <Field label="Taxa de juros mensal (%)" val={taxa} set={setTaxa} hint="Ex: 3.9" onChange={reset} />
               <Field label="Nº de meses" val={meses} set={setMeses} hint="Ex: 60" onChange={reset} />
             </div>
             {valid && (
