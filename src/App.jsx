@@ -11,6 +11,7 @@ const Financiamento = lazy(() => import("./pages/Financiamento"));
 const Percentual = lazy(() => import("./pages/Percentual"));
 const Amortizacao = lazy(() => import("./pages/Amortizacao"));
 const CalculaCar = lazy(() => import("./pages/CalculaCar"));
+const Estoque = lazy(() => import("./pages/Estoque"));
 
 function RouteFallback() {
   return (
@@ -32,6 +33,7 @@ function AnimatedRoutes() {
           <Route path="/amortizacao" element={<Amortizacao />} />
           <Route path="/calcula-car" element={<CalculaCar />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/estoque" element={<RotaPrivada><Estoque /></RotaPrivada>} />
         </Routes>
       </Suspense>
     </AnimatePresence>
