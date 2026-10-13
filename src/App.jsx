@@ -2,6 +2,8 @@ import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
+import { AuthProvider } from "./lib/auth";
 
 // Code-splitting por rota: cada calculadora só baixa seu próprio código
 // (e dependências pesadas, como o xlsx) quando o usuário de fato a visita.
@@ -29,6 +31,7 @@ function AnimatedRoutes() {
           <Route path="/percentual" element={<Percentual />} />
           <Route path="/amortizacao" element={<Amortizacao />} />
           <Route path="/calcula-car" element={<CalculaCar />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Suspense>
     </AnimatePresence>
@@ -38,7 +41,9 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AnimatedRoutes />
+      <AuthProvider>
+        <AnimatedRoutes />
+      </AuthProvider>
     </BrowserRouter>
   );
 }
