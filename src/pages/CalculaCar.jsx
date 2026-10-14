@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Car, TrendingUp, Wallet, Landmark, Plus, Trash2, Pencil, PieChart, Download, FileText, BarChart3, Grid3x3, Table2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Car, TrendingUp, Wallet, Landmark, Plus, Trash2, Pencil, PieChart, Download, FileText, BarChart3, Grid3x3, Table2, AlertTriangle, CheckCircle2, Coins, Target, Briefcase, TrendingDown, Ruler, CalendarDays, CreditCard } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
@@ -41,6 +41,13 @@ export default function CalculaCar() {
   const [compraStr, setCompraStr] = useState("50000");
   const [renavam, setRenavam] = useState("");
   const [chassi, setChassi] = useState("");
+  const [anoFab, setAnoFab] = useState("");
+  const [anoMod, setAnoMod] = useState("");
+  const [cor, setCor] = useState("");
+  const [km, setKm] = useState("");
+  const [combustivel, setCombustivel] = useState("");
+  const [cambio, setCambio] = useState("");
+  const [observacoes, setObservacoes] = useState("");
 
   // Bloco 3 — capital
   const [tipoCapital, setTipoCapital] = useState("Próprio");
@@ -214,6 +221,13 @@ export default function CalculaCar() {
               <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" />
               <Field label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
               <Field label="Chassi" val={chassi} set={setChassi} hint="17 caracteres" />
+              <Field label="Ano de fabricação" val={anoFab} set={setAnoFab} hint="Ex: 2020" />
+              <Field label="Ano do modelo" val={anoMod} set={setAnoMod} hint="Ex: 2021" />
+              <Field label="Cor" val={cor} set={setCor} hint="Ex: Prata" />
+              <Field label="Quilometragem (km)" val={km} set={setKm} hint="Ex: 45000" />
+              <Field label="Combustível" val={combustivel} set={setCombustivel} hint="Ex: Flex" />
+              <Field label="Câmbio" val={cambio} set={setCambio} hint="Ex: Automático" />
+              <Field label="Observações" val={observacoes} set={setObservacoes} hint="Opcional" />
               <MoneyField label="Valor FIPE (R$)" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
               <MoneyField label="Valor de compra (R$)" valor={parseMoeda(compraStr)} onChange={(n) => { setCompraStr(String(n)); reset?.(); }} />
             </div>
@@ -226,14 +240,14 @@ export default function CalculaCar() {
                 style={{ ...card, padding: 22, marginTop: 14 }}>
                 <SectionTitle icon={TrendingUp} n={2}>Análise FIPE x Compra</SectionTitle>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10 }}>
-                  <Kpi label="Diferença em reais" value={diferenca.diferencaReais} format={fmt} color="var(--text)" icon="💰" index={0} />
+                  <Kpi label="Diferença em reais" value={diferenca.diferencaReais} format={fmt} color="var(--text)" icon={<Coins size={18} />} index={0} />
                   <Kpi
                     label="Diferença percentual"
                     value={diferenca.diferencaPercentual ?? 0}
                     format={(v) => (diferenca.diferencaPercentual === null ? "—" : `${v.toFixed(2)}%`)}
-                    color="var(--accent-soft)" icon="📊" index={1}
+                    color="var(--accent-soft)" icon={<BarChart3 size={18} />} index={1}
                   />
-                  <Kpi label="Margem de referência" value={MARGEM_REFERENCIA_PCT} format={(v) => `${v}%`} color="var(--text-dim)" icon="🎯" index={2} />
+                  <Kpi label="Margem de referência" value={MARGEM_REFERENCIA_PCT} format={(v) => `${v}%`} color="var(--text-dim)" icon={<Target size={18} />} index={2} />
                 </div>
 
                 <div style={{
@@ -297,7 +311,7 @@ export default function CalculaCar() {
                 <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
                   {["Price", "SAC"].map((s) => (
                     <button key={s} onClick={() => setSistema(s)} style={sysBtn(s)}>
-                      {s === "Price" ? "📏 Sistema Price" : "📉 Sistema SAC"}
+                      {s === "Price" ? "Sistema Price" : "Sistema SAC"}
                     </button>
                   ))}
                 </div>
@@ -312,10 +326,10 @@ export default function CalculaCar() {
                 {financiamento && (
                   <>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))", gap: 10, marginTop: 16 }}>
-                      <Kpi label="Parcela" value={finRows[0]?.parcela || 0} format={fmt} icon="📅" index={0} />
-                      <Kpi label="Total de juros" value={finTotalJuros} format={fmt} color="var(--text-dim)" icon="📈" index={1} />
-                      <Kpi label="Total pago" value={finTotalPago} format={fmt} icon="💳" index={2} />
-                      <Kpi label="Total financiado" value={pv} format={fmt} color="var(--accent-soft)" icon="🏦" index={3} />
+                      <Kpi label="Parcela" value={finRows[0]?.parcela || 0} format={fmt} icon={<CalendarDays size={18} />} index={0} />
+                      <Kpi label="Total de juros" value={finTotalJuros} format={fmt} color="var(--text-dim)" icon={<TrendingUp size={18} />} index={1} />
+                      <Kpi label="Total pago" value={finTotalPago} format={fmt} icon={<CreditCard size={18} />} index={2} />
+                      <Kpi label="Total financiado" value={pv} format={fmt} color="var(--accent-soft)" icon={<Landmark size={18} />} index={3} />
                     </div>
 
                     <div style={{ display: "flex", gap: 8, marginTop: 18, flexWrap: "wrap" }}>
@@ -455,14 +469,14 @@ export default function CalculaCar() {
                 style={{ ...card, padding: 22, marginTop: 14, borderColor: "var(--border-focus)", boxShadow: "var(--shadow-glow)" }}>
                 <SectionTitle icon={PieChart} n={6}>Resultado da Operação</SectionTitle>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10 }}>
-                  <Kpi label="Investimento total" value={resultado.investimentoTotal} format={fmt} icon="💼" index={0} />
-                  <Kpi label="Margem potencial" value={resultado.margemPotencial} format={fmt} color="var(--accent-soft)" icon="🎯" index={1} />
-                  <Kpi label="Custos totais" value={resultado.custosTotais} format={fmt} color="var(--text-dim)" icon="📉" index={2} />
-                  <Kpi label="Resultado líquido" value={resultado.resultadoLiquido} format={fmt} color="var(--text)" icon="✅" index={3} />
-                  <Kpi label="Margem final" value={margemFinalPct ?? 0} format={(v) => `${v.toFixed(2)}%`} color="var(--accent-soft)" icon="📐" index={4} />
+                  <Kpi label="Investimento total" value={resultado.investimentoTotal} format={fmt} icon={<Briefcase size={18} />} index={0} />
+                  <Kpi label="Margem potencial" value={resultado.margemPotencial} format={fmt} color="var(--accent-soft)" icon={<Target size={18} />} index={1} />
+                  <Kpi label="Custos totais" value={resultado.custosTotais} format={fmt} color="var(--text-dim)" icon={<TrendingDown size={18} />} index={2} />
+                  <Kpi label="Resultado líquido" value={resultado.resultadoLiquido} format={fmt} color="var(--text)" icon={<CheckCircle2 size={18} />} index={3} />
+                  <Kpi label="Margem final" value={margemFinalPct ?? 0} format={(v) => `${v.toFixed(2)}%`} color="var(--accent-soft)" icon={<Ruler size={18} />} index={4} />
                 </div>
                 <p style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 12, marginBottom: 0 }}>
-                  Valores baseados no valor FIPE como referência de venda (R$ {fmt(valorVenda)}).
+                  Valores baseados no valor FIPE como referência de venda ({fmt(valorVenda)}).
                 </p>
               </motion.div>
             )}
@@ -476,23 +490,23 @@ export default function CalculaCar() {
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <PrimaryButton onClick={handleExcel} disabled={isLoading} style={{ flex: 1, minWidth: 160, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                     <Download size={16} />
-                    {dlState === "xlsx" ? "Gerando…" : dlState?.tipo === "xlsx" && isSuccess ? "✅ Salvo!" : "Exportar Excel"}
+                    {dlState === "xlsx" ? "Gerando…" : dlState?.tipo === "xlsx" && isSuccess ? "Salvo!" : "Exportar Excel"}
                   </PrimaryButton>
                   <PrimaryButton onClick={handlePDF} disabled={isLoading} style={{ flex: 1, minWidth: 160, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                     <FileText size={16} />
-                    {dlState === "pdf" ? "Gerando…" : dlState?.tipo === "pdf" && isSuccess ? "✅ Baixado!" : "Exportar PDF"}
+                    {dlState === "pdf" ? "Gerando…" : dlState?.tipo === "pdf" && isSuccess ? "Baixado!" : "Exportar PDF"}
                   </PrimaryButton>
                 </div>
                 {isErr && (
                   <div style={{ marginTop: 10, padding: "9px 13px", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 600, background: "var(--bg-elevated)", color: "var(--text)", border: "1px solid var(--border-strong)" }}>
-                    ❌ Erro: {dlState.err}
+                    Erro: {dlState.err}
                   </div>
                 )}
               </motion.div>
             )}
           </AnimatePresence>
 
-          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, fipe, compra, valorVenda, tipoCapital }} />
+          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, observacoes, fipe, compra, valorVenda, tipoCapital }} />
           <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
             Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional
           </p>

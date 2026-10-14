@@ -40,6 +40,13 @@ export default function SalvarNoEstoque({ dados }) {
         preco_venda_pretendido: dados.valorVenda,
         tipo_aquisicao: dados.tipoCapital === "Financiamento" ? "financiamento" : "capital_proprio",
         status: "em_preparacao",
+        ano_fabricacao: dados.anoFab ? parseInt(dados.anoFab, 10) : null,
+        ano_modelo: dados.anoMod ? parseInt(dados.anoMod, 10) : null,
+        cor: dados.cor || null,
+        quilometragem: dados.km ? parseInt(dados.km, 10) : null,
+        combustivel: dados.combustivel || null,
+        cambio: dados.cambio || null,
+        observacoes: dados.observacoes || null,
       });
       setEstado(error
         ? { tipo: "erro", texto: `Não foi salvo: ${error.message}` }
