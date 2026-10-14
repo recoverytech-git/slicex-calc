@@ -3,10 +3,11 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import RotaPrivada from "./components/RotaPrivada";
+import Sidebar from "./components/Sidebar";
+import BottomNav from "./components/BottomNav";
 import { AuthProvider } from "./lib/auth";
 
-// Code-splitting por rota: cada calculadora só baixa seu próprio código
-// (e dependências pesadas, como o xlsx) quando o usuário de fato a visita.
 const Financiamento = lazy(() => import("./pages/Financiamento"));
 const Percentual = lazy(() => import("./pages/Percentual"));
 const Amortizacao = lazy(() => import("./pages/Amortizacao"));
@@ -40,11 +41,23 @@ function AnimatedRoutes() {
   );
 }
 
+function Shell() {
+  return (
+    <div className="app-shell">
+      <Sidebar />
+      <div className="app-main">
+        <AnimatedRoutes />
+      </div>
+      <BottomNav />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AnimatedRoutes />
+        <Shell />
       </AuthProvider>
     </BrowserRouter>
   );

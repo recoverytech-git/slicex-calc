@@ -16,6 +16,7 @@ import ComposicaoBarChart from "../components/ComposicaoBarChart";
 import { fmt, toF } from "../lib/format";
 import { calcPrice, calcSAC, downloadXLSX, MIME } from "../lib/financiamento";
 import { calcDiferenca, calcResultado, buildCalculaCarXLSX, buildCalculaCarPDF, MARGEM_REFERENCIA_PCT } from "../lib/calculaCar";
+import SalvarNoEstoque from "../components/SalvarNoEstoque";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)" };
 
@@ -38,6 +39,8 @@ export default function CalculaCar() {
   const [placa, setPlaca] = useState("");
   const [fipeStr, setFipeStr] = useState("75000");
   const [compraStr, setCompraStr] = useState("50000");
+  const [renavam, setRenavam] = useState("");
+  const [chassi, setChassi] = useState("");
 
   // Bloco 3 — capital
   const [tipoCapital, setTipoCapital] = useState("Próprio");
@@ -209,6 +212,8 @@ export default function CalculaCar() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14 }}>
               <Field label="Modelo do veículo" val={modelo} set={setModelo} hint="Ex: Toyota Corolla XEi 2.0" />
               <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" />
+              <Field label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
+              <Field label="Chassi" val={chassi} set={setChassi} hint="17 caracteres" />
               <MoneyField label="Valor FIPE (R$)" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
               <MoneyField label="Valor de compra (R$)" valor={parseMoeda(compraStr)} onChange={(n) => { setCompraStr(String(n)); reset?.(); }} />
             </div>
@@ -487,6 +492,7 @@ export default function CalculaCar() {
             )}
           </AnimatePresence>
 
+          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, fipe, compra, valorVenda, tipoCapital }} />
           <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
             Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional
           </p>
