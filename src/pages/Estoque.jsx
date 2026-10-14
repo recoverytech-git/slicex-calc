@@ -1,13 +1,15 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Car } from "lucide-react";
+import { Car, FileDown } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import Field from "../components/Field";
+import PrimaryButton from "../components/PrimaryButton";
 import { listarVeiculos, normalizar } from "../lib/estoque";
 import { supabaseConfigurado } from "../lib/supabase";
 import { formatarBRL } from "../lib/moeda";
+import { buildEstoquePDF } from "../lib/estoqueRelatorio";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)" };
 const ROTULO = { em_preparacao: "Em preparação", disponivel: "Disponível", reservado: "Reservado", vendido: "Vendido", retirado: "Retirado" };
@@ -18,6 +20,7 @@ export default function Estoque() {
   const [status, setStatus] = useState("");
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
+  const [exportando, setExportando] = useState(false);
 
   useEffect(() => {
     let vivo = true;
@@ -31,7 +34,6 @@ export default function Estoque() {
     return () => { vivo = false; };
   }, [status]);
 
-  // Busca por placa, RENAVAM, chassi ou modelo, também em memória (resposta imediata).
   const filtrados = useMemo(() => {
     const b = busca.trim();
     if (!b) return itens;
@@ -41,15 +43,31 @@ export default function Estoque() {
       normalizar(v.chassi).includes(nb) || (v.modelo || "").toLowerCase().includes(b.toLowerCase()));
   }, [itens, busca]);
 
+  const exportarPDF = async () => {
+    setExportando(true);
+    try {
+      const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
+      buildEstoquePDF({ jsPDF, autoTable, itens: filtrados, rotulos: ROTULO }).save("estoque.pdf");
+    } finally {
+      setExportando(false);
+    }
+  };
+
   return (
     <PageTransition>
       <div className="page-bg">
         <Header subtitle="Estoque de veículos" />
         <div className="container" style={{ paddingTop: 8 }}>
           <BackLink />
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: "22px 0 6px", color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
-            <Car size={22} /> Estoque
-          </h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, margin: "22px 0 6px" }}>
+            <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
+              <Car size={22} /> Estoque
+            </h1>
+            <PrimaryButton onClick={exportarPDF} disabled={exportando || filtrados.length === 0}
+              style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <FileDown size={16} /> {exportando ? "Gerando…" : "Exportar PDF"}
+            </PrimaryButton>
+          </div>
           <p style={{ fontSize: 13, color: "var(--text-dim)", margin: "0 0 16px" }}>
             Busque por placa, RENAVAM, chassi ou modelo.
           </p>

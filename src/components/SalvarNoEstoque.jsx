@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Save } from "lucide-react";
 import PrimaryButton from "./PrimaryButton";
+import UploadFotos from "./UploadFotos";
 import { useAuth } from "../lib/auth";
 import { buscarDuplicado, salvarVeiculo } from "../lib/estoque";
 
@@ -10,6 +11,7 @@ export default function SalvarNoEstoque({ dados }) {
   const { sessao, supabaseConfigurado } = useAuth();
   const [estado, setEstado] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [veiculoId, setVeiculoId] = useState(null);
 
   if (!supabaseConfigurado || !sessao) return null;
 
@@ -30,7 +32,7 @@ export default function SalvarNoEstoque({ dados }) {
         setEstado({ tipo: "erro", texto: `Já existe no estoque: ${dup.data.modelo}${dup.data.placa ? ` (placa ${dup.data.placa})` : ""}.` });
         return;
       }
-      const { error } = await salvarVeiculo({
+      const { data: criado, error } = await salvarVeiculo({
         modelo: dados.modelo.trim(),
         placa: dados.placa || null,
         renavam: dados.renavam || null,
@@ -48,9 +50,12 @@ export default function SalvarNoEstoque({ dados }) {
         cambio: dados.cambio || null,
         observacoes: dados.observacoes || null,
       });
-      setEstado(error
-        ? { tipo: "erro", texto: `Não foi salvo: ${error.message}` }
-        : { tipo: "ok", texto: "Veículo salvo no estoque." });
+      if (error) {
+        setEstado({ tipo: "erro", texto: `Não foi salvo: ${error.message}` });
+        return;
+      }
+      setVeiculoId(criado.id);
+      setEstado({ tipo: "ok", texto: "Veículo salvo no estoque. Agora você pode adicionar as fotos." });
     } finally {
       setSalvando(false);
     }
@@ -58,16 +63,19 @@ export default function SalvarNoEstoque({ dados }) {
 
   return (
     <div style={card}>
-      <PrimaryButton onClick={salvar} disabled={salvando}
-        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}>
-        <Save size={16} /> {salvando ? "Salvando…" : "Salvar no estoque"}
-      </PrimaryButton>
+      {!veiculoId && (
+        <PrimaryButton onClick={salvar} disabled={salvando}
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}>
+          <Save size={16} /> {salvando ? "Salvando…" : "Salvar no estoque"}
+        </PrimaryButton>
+      )}
       {estado && (
         <div role="status" style={{ marginTop: 12, padding: "10px 14px", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 600,
           background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", color: "var(--text)" }}>
           {estado.texto}
         </div>
       )}
+      {veiculoId && <UploadFotos veiculoId={veiculoId} />}
     </div>
   );
 }
