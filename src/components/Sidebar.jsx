@@ -4,7 +4,7 @@ import { NAV_PRINCIPAL } from "./navItems";
 import { useAuth } from "../lib/auth";
 import logo from "../assets/logo.png";
 
-export default function Sidebar() {
+export default function Sidebar({ aberta = true }) {
   const { sair, perfil } = useAuth();
   const navigate = useNavigate();
   const podeGerirUsuarios = ["admin_master", "proprietario"].includes(perfil?.papel);
@@ -12,13 +12,15 @@ export default function Sidebar() {
     ? [...NAV_PRINCIPAL, { to: "/admin/usuarios", label: "Usuários", icon: Users }]
     : NAV_PRINCIPAL;
 
+  // Navega para a landing ANTES de encerrar a sessão, para que a rota privada
+  // atual não redirecione para /login durante o logout.
   const onSair = async () => {
-    await sair();
     navigate("/", { replace: true });
+    await sair();
   };
 
   return (
-    <aside className="sidebar" aria-label="Navegação principal">
+    <aside className={`sidebar${aberta ? "" : " fechada"}`} aria-label="Navegação principal">
       <div className="sidebar-brand">
         <img src={logo} alt="SliceX.calc" style={{ height: 26, width: "auto" }} />
       </div>

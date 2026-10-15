@@ -1,6 +1,7 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -49,11 +50,21 @@ function AnimatedRoutes() {
 function Shell() {
   const { pathname } = useLocation();
   const { sessao } = useAuth();
+  const [menuAberto, setMenuAberto] = useState(true);
   const publico = pathname === "/" || pathname === "/login";
   const comNav = Boolean(sessao) && !publico;
+  const classes = ["app-shell", comNav && "com-nav", comNav && !menuAberto && "menu-fechado"].filter(Boolean).join(" ");
+
   return (
-    <div className={`app-shell${comNav ? " com-nav" : ""}`}>
-      {comNav && <Sidebar />}
+    <div className={classes}>
+      {comNav && <Sidebar aberta={menuAberto} />}
+      {comNav && (
+        <button type="button" className="menu-toggle" onClick={() => setMenuAberto((v) => !v)}
+          aria-label={menuAberto ? "Fechar menu" : "Abrir menu"} aria-expanded={menuAberto}
+          style={{ left: menuAberto ? 232 : 0 }}>
+          {menuAberto ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+        </button>
+      )}
       <div className="app-main">
         <AnimatedRoutes />
       </div>

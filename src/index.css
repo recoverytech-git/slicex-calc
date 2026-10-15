@@ -101,6 +101,7 @@ button { font-family: inherit; }
 .app-shell { min-height: 100vh; }
 .app-main { min-width: 0; }
 .sidebar {
+  transition: transform 0.25s ease;
   display: none; flex-direction: column; gap: 18px;
   position: fixed; top: 0; left: 0; bottom: 0; width: 232px; z-index: 40;
   background: #000; border-right: 1px solid var(--border); padding: 20px 14px; overflow-y: auto;
@@ -130,9 +131,22 @@ button { font-family: inherit; }
 .bottomnav-link.ativo { color: var(--text); }
 @media (min-width: 900px) {
   .com-nav .sidebar { display: flex; }
-  .com-nav .app-main { padding-left: 232px; }
+  .com-nav:not(.menu-fechado) .app-main { padding-left: 232px; }
 }
 @media (max-width: 899px) {
   .com-nav .bottomnav { display: grid; }
   .com-nav .app-main { padding-bottom: 84px; }
 }
+
+/* ── Menu recolhível (desktop) ─────────────────────────────────────────── */
+.app-main { transition: padding-left 0.25s ease; }
+.sidebar.fechada { transform: translateX(-100%); }
+.menu-toggle {
+  position: fixed; top: 50%; transform: translateY(-50%); z-index: 50;
+  width: 22px; height: 56px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-strong); border-left: none;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: #000; color: var(--text); cursor: pointer;
+  transition: left 0.25s ease;
+}
+@media (max-width: 899px) { .menu-toggle { display: none; } }
