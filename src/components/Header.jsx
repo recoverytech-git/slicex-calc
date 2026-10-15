@@ -14,7 +14,7 @@ export default function Header({ subtitle }) {
         gap: 16,
       }}
     >
-      <Link to="/" style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <Link to="/app" style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <motion.img
           src={logo}
           alt="SliceX.calc"

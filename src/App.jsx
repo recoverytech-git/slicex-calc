@@ -1,18 +1,20 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import Landing from "./pages/Landing";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import RotaPrivada from "./components/RotaPrivada";
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
-import { AuthProvider } from "./lib/auth";
+import { AuthProvider, useAuth } from "./lib/auth";
 
 const Financiamento = lazy(() => import("./pages/Financiamento"));
 const Percentual = lazy(() => import("./pages/Percentual"));
 const Amortizacao = lazy(() => import("./pages/Amortizacao"));
 const CalculaCar = lazy(() => import("./pages/CalculaCar"));
 const Estoque = lazy(() => import("./pages/Estoque"));
+const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
 
 function RouteFallback() {
   return (
@@ -28,13 +30,16 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Suspense fallback={<RouteFallback />}>
         <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Home />} />
-          <Route path="/financiamento" element={<Financiamento />} />
-          <Route path="/percentual" element={<Percentual />} />
-          <Route path="/amortizacao" element={<Amortizacao />} />
-          <Route path="/calcula-car" element={<CalculaCar />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/app" element={<RotaPrivada><Home /></RotaPrivada>} />
+          <Route path="/financiamento" element={<RotaPrivada><Financiamento /></RotaPrivada>} />
+          <Route path="/percentual" element={<RotaPrivada><Percentual /></RotaPrivada>} />
+          <Route path="/amortizacao" element={<RotaPrivada><Amortizacao /></RotaPrivada>} />
+          <Route path="/calcula-car" element={<RotaPrivada><CalculaCar /></RotaPrivada>} />
           <Route path="/estoque" element={<RotaPrivada><Estoque /></RotaPrivada>} />
+          <Route path="/admin/usuarios" element={<RotaPrivada><AdminUsuarios /></RotaPrivada>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </AnimatePresence>
@@ -42,13 +47,17 @@ function AnimatedRoutes() {
 }
 
 function Shell() {
+  const { pathname } = useLocation();
+  const { sessao } = useAuth();
+  const publico = pathname === "/" || pathname === "/login";
+  const comNav = Boolean(sessao) && !publico;
   return (
-    <div className="app-shell">
-      <Sidebar />
+    <div className={`app-shell${comNav ? " com-nav" : ""}`}>
+      {comNav && <Sidebar />}
       <div className="app-main">
         <AnimatedRoutes />
       </div>
-      <BottomNav />
+      {comNav && <BottomNav />}
     </div>
   );
 }

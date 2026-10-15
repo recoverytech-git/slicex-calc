@@ -2,18 +2,20 @@ import { useState } from "react";
 import { Save } from "lucide-react";
 import PrimaryButton from "./PrimaryButton";
 import UploadFotos from "./UploadFotos";
+import ChecklistVeiculo from "./ChecklistVeiculo";
+import VendaVeiculo from "./VendaVeiculo";
 import { useAuth } from "../lib/auth";
 import { buscarDuplicado, salvarVeiculo } from "../lib/estoque";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", padding: "16px 18px", marginTop: 14 };
 
 export default function SalvarNoEstoque({ dados }) {
-  const { sessao, supabaseConfigurado } = useAuth();
+  const { sessao, supabaseConfigurado, perfil } = useAuth();
   const [estado, setEstado] = useState(null);
   const [salvando, setSalvando] = useState(false);
   const [veiculoId, setVeiculoId] = useState(null);
 
-  if (!supabaseConfigurado || !sessao) return null;
+  if (!supabaseConfigurado || !sessao || !["admin_master", "proprietario"].includes(perfil?.papel)) return null;
 
   const salvar = async () => {
     setEstado(null);
@@ -76,6 +78,8 @@ export default function SalvarNoEstoque({ dados }) {
         </div>
       )}
       {veiculoId && <UploadFotos veiculoId={veiculoId} />}
+      {veiculoId && <ChecklistVeiculo veiculoId={veiculoId} />}
+      {veiculoId && <VendaVeiculo veiculoId={veiculoId} />}
     </div>
   );
 }

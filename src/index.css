@@ -97,11 +97,11 @@ button { font-family: inherit; }
   padding-bottom: 60px;
 }
 
-/* ── Navegação: sidebar (desktop) e barra inferior (mobile) ───────────── */
+/* ── Navegação: só para usuário logado, fora da landing e do login ───── */
 .app-shell { min-height: 100vh; }
 .app-main { min-width: 0; }
 .sidebar {
-  display: flex; flex-direction: column; gap: 18px;
+  display: none; flex-direction: column; gap: 18px;
   position: fixed; top: 0; left: 0; bottom: 0; width: 232px; z-index: 40;
   background: #000; border-right: 1px solid var(--border); padding: 20px 14px; overflow-y: auto;
 }
@@ -117,7 +117,7 @@ button { font-family: inherit; }
 .sidebar-link:hover { color: var(--text); background: var(--surface); }
 .sidebar-link.ativo { color: var(--text); background: var(--surface-3); border-color: var(--border-strong); }
 .bottomnav {
-  display: grid; grid-template-columns: repeat(6, 1fr);
+  display: none; grid-template-columns: repeat(6, 1fr);
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
   background: #000; border-top: 1px solid var(--border);
   padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
@@ -129,10 +129,10 @@ button { font-family: inherit; }
 }
 .bottomnav-link.ativo { color: var(--text); }
 @media (min-width: 900px) {
-  .app-main { padding-left: 232px; }
-  .bottomnav { display: none; }
+  .com-nav .sidebar { display: flex; }
+  .com-nav .app-main { padding-left: 232px; }
 }
 @media (max-width: 899px) {
-  .sidebar { display: none; }
-  .app-main { padding-bottom: 84px; }
+  .com-nav .bottomnav { display: grid; }
+  .com-nav .app-main { padding-bottom: 84px; }
 }

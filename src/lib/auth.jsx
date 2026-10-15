@@ -4,13 +4,12 @@ import { supabase, supabaseConfigurado } from "./supabase";
 const AuthCtx = createContext(null);
 
 /**
- * Sessão do usuário. Sem Supabase configurado, o app continua funcionando
- * com as calculadoras (que não dependem de login) — só as rotas privadas
- * ficam bloqueadas.
+ * perfil: undefined = carregando, null = sem perfil cadastrado, objeto = perfil.
+ * A autorização real é feita pelo RLS no banco; este estado só controla a interface.
  */
 export function AuthProvider({ children }) {
   const [sessao, setSessao] = useState(null);
-  const [perfil, setPerfil] = useState(null);
+  const [perfil, setPerfil] = useState(undefined);
   const [carregando, setCarregando] = useState(supabaseConfigurado);
 
   useEffect(() => {
@@ -21,9 +20,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (!supabase || !sessao) { setPerfil(null); return; }
-    // Papel vem da tabela perfis (fonte confiável), nunca de user_metadata editável.
-    supabase.from("perfis").select("papel, organizacao_id, ativo").eq("id", sessao.user.id).single()
+    if (!supabase) return;
+    if (!sessao) { setPerfil(null); return; }
+    setPerfil(undefined);
+    supabase.from("perfis").select("papel, organizacao_id, ativo, nome").eq("id", sessao.user.id).maybeSingle()
       .then(({ data }) => setPerfil(data ?? null));
   }, [sessao]);
 

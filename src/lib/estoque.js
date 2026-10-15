@@ -1,24 +1,22 @@
 import { supabase, supabaseConfigurado } from "./supabase";
 
 /**
- * Repositório de veículos (estoque). Toda persistência passa por aqui.
- * Sem Supabase configurado, nada é gravado: as funções retornam erro claro,
- * em vez de fingir que salvaram (regra: não declarar sucesso sem persistir).
+ * Repositório de veículos. Vendedor lê a view com campos básicos;
+ * os demais perfis leem a tabela (o RLS decide o que cada um vê).
+ * Sem Supabase configurado, nada é gravado e a função devolve erro claro.
  */
-
 const SEM_BANCO = { error: { message: "Banco de dados não configurado. Nada foi salvo." } };
+const COLUNAS_GESTAO = "id, modelo, placa, renavam, chassi, ano_fabricacao, ano_modelo, cor, quilometragem, status, preco_venda_pretendido, criado_em";
+const COLUNAS_VENDEDOR = "id, modelo, ano_modelo, quilometragem, status, preco_venda_pretendido";
 
-/** Normaliza placa/RENAVAM/chassi para comparação (sem espaços, maiúsculas). */
 export const normalizar = (s) => String(s ?? "").replace(/[\s.-]/g, "").toUpperCase();
 
-export async function listarVeiculos({ busca = "", status = null } = {}) {
+export async function listarVeiculos({ status = null, vendedor = false } = {}) {
   if (!supabaseConfigurado) return { data: [], ...SEM_BANCO };
-  let q = supabase.from("veiculos").select("id, modelo, placa, renavam, chassi, ano_fabricacao, ano_modelo, cor, quilometragem, status, preco_venda_pretendido, criado_em").order("criado_em", { ascending: false });
+  const tabela = vendedor ? "v_veiculos_vendedor" : "veiculos";
+  let q = supabase.from(tabela).select(vendedor ? COLUNAS_VENDEDOR : COLUNAS_GESTAO);
+  q = vendedor ? q.order("modelo") : q.order("criado_em", { ascending: false });
   if (status) q = q.eq("status", status);
-  if (busca) {
-    const b = normalizar(busca);
-    q = q.or(`placa.ilike.%${b}%,renavam.ilike.%${b}%,chassi.ilike.%${b}%,modelo.ilike.%${busca}%`);
-  }
   return q;
 }
 

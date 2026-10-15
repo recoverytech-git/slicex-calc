@@ -1,12 +1,16 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LogIn, LogOut } from "lucide-react";
+import { LogOut, Users } from "lucide-react";
 import { NAV_PRINCIPAL } from "./navItems";
 import { useAuth } from "../lib/auth";
 import logo from "../assets/logo.png";
 
 export default function Sidebar() {
-  const { sessao, sair, supabaseConfigurado } = useAuth();
+  const { sair, perfil } = useAuth();
   const navigate = useNavigate();
+  const podeGerirUsuarios = ["admin_master", "proprietario"].includes(perfil?.papel);
+  const itens = podeGerirUsuarios
+    ? [...NAV_PRINCIPAL, { to: "/admin/usuarios", label: "Usuários", icon: Users }]
+    : NAV_PRINCIPAL;
 
   const onSair = async () => {
     await sair();
@@ -19,19 +23,14 @@ export default function Sidebar() {
         <img src={logo} alt="SliceX.calc" style={{ height: 26, width: "auto" }} />
       </div>
       <nav className="sidebar-nav">
-        {NAV_PRINCIPAL.map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to} end={to === "/"}
-            className={({ isActive }) => `sidebar-link${isActive ? " ativo" : ""}`}>
+        {itens.map(({ to, label, icon: Icon }) => (
+          <NavLink key={to} to={to} end={to === "/app"} className={({ isActive }) => `sidebar-link${isActive ? " ativo" : ""}`}>
             <Icon size={17} /> {label}
           </NavLink>
         ))}
       </nav>
       <div className="sidebar-foot">
-        {supabaseConfigurado && (sessao ? (
-          <button className="sidebar-link" onClick={onSair}><LogOut size={17} /> Sair</button>
-        ) : (
-          <NavLink to="/login" className="sidebar-link"><LogIn size={17} /> Entrar</NavLink>
-        ))}
+        <button className="sidebar-link" onClick={onSair}><LogOut size={17} /> Sair</button>
       </div>
     </aside>
   );

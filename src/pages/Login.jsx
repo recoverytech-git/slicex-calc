@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "../components/Header";
 import Field from "../components/Field";
@@ -10,7 +10,7 @@ import { useAuth } from "../lib/auth";
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)" };
 
 export default function Login() {
-  const { entrar, recuperarSenha, supabaseConfigurado } = useAuth();
+  const { entrar, recuperarSenha, supabaseConfigurado, sessao } = useAuth();
   const navigate = useNavigate();
   const local = useLocation();
   const [email, setEmail] = useState("");
@@ -18,6 +18,8 @@ export default function Login() {
   const [modo, setModo] = useState("entrar"); // entrar | recuperar
   const [msg, setMsg] = useState(null);
   const [carregando, setCarregando] = useState(false);
+
+  if (sessao) return <Navigate to="/app" replace />;
 
   const enviar = async (e) => {
     e.preventDefault();
@@ -30,7 +32,7 @@ export default function Login() {
       } else {
         const { error } = await entrar(email, senha);
         if (error) setMsg({ tipo: "erro", texto: "E-mail ou senha incorretos." });
-        else navigate(local.state?.de || "/", { replace: true });
+        else navigate(local.state?.de || "/app", { replace: true });
       }
     } catch {
       setMsg({ tipo: "erro", texto: "Falha de conexão. Tente novamente." });
