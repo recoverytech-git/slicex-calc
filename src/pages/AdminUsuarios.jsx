@@ -1,34 +1,34 @@
 import { useEffect, useState, useCallback } from "react";
-import { Users, Ban, CheckCircle2, Trash2 } from "lucide-react";
+import { Users, Ban, CheckCircle2, Trash2, Pencil } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import Field from "../components/Field";
 import PrimaryButton from "../components/PrimaryButton";
+import Modal from "../components/Modal";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
+import { formatarCPF, formatarCNPJ, formatarTelefone, soDigitos, cpfValido, cnpjValido, telefoneValido } from "../lib/mascaras";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)" };
 const sel = { width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 };
 const btn = { display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 10px", borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "transparent", color: "var(--text-dim)", fontSize: 12, fontWeight: 600, cursor: "pointer" };
 const ROTULO = { admin_master: "Administrador", proprietario: "Lojista", gerente: "Gerente", vendedor: "Vendedor" };
-async function chamarFuncao(corpo) {
-  let res;
-  if (corpo.acao === "criar") {
-    res = await supabase.rpc("admin_criar_usuario", {
-      p_email: corpo.email, p_senha: corpo.senha, p_nome: corpo.nome, p_papel: corpo.papel,
-      p_organizacao: corpo.organizacao_id || null, p_nome_loja: corpo.nome_loja || null,
-    });
-  } else if (corpo.acao === "excluir") {
-    res = await supabase.rpc("admin_excluir_usuario", { p_id: corpo.id });
-  } else {
-    res = await supabase.rpc("admin_definir_suspenso", { p_id: corpo.id, p_suspenso: corpo.acao === "suspender" });
-  }
-  if (res.error) return { erro: res.error.message };
-  return { data: res.data };
+const FORM_VAZIO = { nome: "", email: "", senha: "", cpf: "", telefone: "", papel: "vendedor", organizacao_id: "", nome_loja: "", cnpj: "", telefone_comercial: "", endereco: "" };
+
+async function rpc(nome, args) {
+  const { data, error } = await supabase.rpc(nome, args);
+  return error ? { erro: error.message } : { data };
 }
 
-const FORM_VAZIO = { nome: "", email: "", senha: "", papel: "vendedor", organizacao_id: "", nome_loja: "" };
+function Campo({ label, children }) {
+  return (
+    <div>
+      <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>{label}</label>
+      {children}
+    </div>
+  );
+}
 
 export default function AdminUsuarios() {
   const { perfil, sessao } = useAuth();
@@ -38,10 +38,11 @@ export default function AdminUsuarios() {
   const [msg, setMsg] = useState(null);
   const [form, setForm] = useState(FORM_VAZIO);
   const [salvando, setSalvando] = useState(false);
+  const [editando, setEditando] = useState(null);
 
   const carregar = useCallback(async () => {
-    const { data, error } = await supabase.rpc("admin_listar_usuarios");
-    if (error) { setMsg({ tipo: "erro", texto: error.message }); return; }
+    const { data, erro } = await rpc("admin_listar_usuarios");
+    if (erro) { setMsg({ tipo: "erro", texto: erro }); return; }
     setLista(data ?? []);
     const { data: os } = await supabase.from("organizacoes").select("id, nome");
     setOrgs(os ?? []);
@@ -64,19 +65,38 @@ export default function AdminUsuarios() {
   }
 
   const papeis = souAdmin ? ["admin_master", "proprietario", "gerente", "vendedor"] : ["gerente", "vendedor"];
+  const ehLojista = form.papel === "proprietario";
+  const precisaLoja = souAdmin && !["admin_master", "proprietario"].includes(form.papel);
+
+  const validarCadastro = () => {
+    if (form.cpf && !cpfValido(form.cpf)) return "CPF incompleto.";
+    if (form.telefone && !telefoneValido(form.telefone)) return "Telefone incompleto.";
+    if (ehLojista && souAdmin && !form.organizacao_id) {
+      if (!form.nome_loja.trim()) return "Informe o nome da loja.";
+      if (form.cnpj && !cnpjValido(form.cnpj)) return "CNPJ incompleto.";
+      if (form.telefone_comercial && !telefoneValido(form.telefone_comercial)) return "Telefone comercial incompleto.";
+    }
+    return null;
+  };
 
   const criar = async (e) => {
     e.preventDefault();
     setMsg(null);
+    const invalido = validarCadastro();
+    if (invalido) { setMsg({ tipo: "erro", texto: invalido }); return; }
     setSalvando(true);
-    const { erro } = await chamarFuncao({
-      acao: "criar",
-      email: form.email,
-      senha: form.senha,
-      nome: form.nome,
-      papel: form.papel,
-      organizacao_id: form.organizacao_id || null,
-      nome_loja: form.nome_loja || null,
+    const { erro } = await rpc("admin_criar_usuario", {
+      p_email: form.email,
+      p_senha: form.senha,
+      p_nome: form.nome,
+      p_papel: form.papel,
+      p_cpf: soDigitos(form.cpf) || null,
+      p_telefone: soDigitos(form.telefone) || null,
+      p_organizacao: form.organizacao_id || null,
+      p_nome_loja: form.nome_loja || null,
+      p_cnpj: soDigitos(form.cnpj) || null,
+      p_telefone_comercial: soDigitos(form.telefone_comercial) || null,
+      p_endereco: form.endereco || null,
     });
     setSalvando(false);
     if (erro) { setMsg({ tipo: "erro", texto: erro }); return; }
@@ -85,17 +105,48 @@ export default function AdminUsuarios() {
     carregar();
   };
 
+  const abrirEdicao = (u) => setEditando({
+    id: u.id, nome: u.nome ?? "", cpf: formatarCPF(u.cpf ?? ""), telefone: formatarTelefone(u.telefone ?? ""),
+    papel: u.papel, organizacao_id: u.organizacao_id, org_nome: u.organizacao_nome ?? "",
+    org_cnpj: formatarCNPJ(u.organizacao_cnpj ?? ""), org_telefone: formatarTelefone(u.organizacao_telefone ?? ""),
+    org_endereco: u.organizacao_endereco ?? "",
+  });
+
+  const salvarEdicao = async () => {
+    setMsg(null);
+    if (editando.cpf && !cpfValido(editando.cpf)) { setMsg({ tipo: "erro", texto: "CPF incompleto." }); return; }
+    if (editando.telefone && !telefoneValido(editando.telefone)) { setMsg({ tipo: "erro", texto: "Telefone incompleto." }); return; }
+    const { erro: erroUsuario } = await rpc("admin_atualizar_usuario", {
+      p_id: editando.id, p_nome: editando.nome, p_papel: editando.papel,
+      p_cpf: soDigitos(editando.cpf), p_telefone: soDigitos(editando.telefone),
+    });
+    if (erroUsuario) { setMsg({ tipo: "erro", texto: erroUsuario }); return; }
+    if (editando.papel === "proprietario" && editando.organizacao_id) {
+      const { erro: erroLoja } = await rpc("admin_atualizar_organizacao", {
+        p_org: editando.organizacao_id, p_nome: editando.org_nome,
+        p_cnpj: soDigitos(editando.org_cnpj), p_telefone: soDigitos(editando.org_telefone),
+        p_endereco: editando.org_endereco,
+      });
+      if (erroLoja) { setMsg({ tipo: "erro", texto: erroLoja }); return; }
+    }
+    setEditando(null);
+    setMsg({ tipo: "ok", texto: "Dados atualizados." });
+    carregar();
+  };
+
   const executar = async (acao, id) => {
     if (acao === "excluir" && !window.confirm("Excluir este usuário? A ação não pode ser desfeita.")) return;
     setMsg(null);
-    const { erro } = await chamarFuncao({ acao, id });
+    const { erro } = acao === "excluir"
+      ? await rpc("admin_excluir_usuario", { p_id: id })
+      : await rpc("admin_definir_suspenso", { p_id: id, p_suspenso: acao === "suspender" });
     if (erro) setMsg({ tipo: "erro", texto: erro }); else carregar();
   };
 
-  const mudarPapel = async (id, papel) => {
+  const mudarPapel = async (u, papel) => {
     setMsg(null);
-    const { error } = await supabase.rpc("admin_atualizar_usuario", { p_id: id, p_nome: null, p_papel: papel });
-    if (error) setMsg({ tipo: "erro", texto: error.message }); else carregar();
+    const { erro } = await rpc("admin_atualizar_usuario", { p_id: u.id, p_nome: null, p_papel: papel, p_cpf: "", p_telefone: "" });
+    if (erro) setMsg({ tipo: "erro", texto: erro }); else carregar();
   };
 
   return (
@@ -117,25 +168,32 @@ export default function AdminUsuarios() {
               <Field label="Nome" val={form.nome} set={(v) => setForm({ ...form, nome: v })} hint="Nome completo" />
               <Field label="E-mail" val={form.email} set={(v) => setForm({ ...form, email: v })} hint="usuario@loja.com.br" />
               <Field label="Senha temporária" val={form.senha} set={(v) => setForm({ ...form, senha: v })} hint="Mínimo 8 caracteres" />
-              <div>
-                <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Papel</label>
+              <Field label="CPF" val={form.cpf} set={(v) => setForm({ ...form, cpf: formatarCPF(v) })} hint="000.000.000-00" />
+              <Field label="Telefone / WhatsApp" val={form.telefone} set={(v) => setForm({ ...form, telefone: formatarTelefone(v) })} hint="(00) 00000-0000" />
+              <Campo label="Papel">
                 <select value={form.papel} onChange={(e) => setForm({ ...form, papel: e.target.value })} style={sel}>
                   {papeis.map((p) => <option key={p} value={p}>{ROTULO[p]}</option>)}
                 </select>
-              </div>
-              {souAdmin && form.papel === "proprietario" && (
-                <Field label="Nome da loja (nova)" val={form.nome_loja} set={(v) => setForm({ ...form, nome_loja: v })} hint="Ex: Auto Center Silva" />
-              )}
-              {souAdmin && !["admin_master", "proprietario"].includes(form.papel) && (
-                <div>
-                  <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Loja</label>
+              </Campo>
+              {precisaLoja && (
+                <Campo label="Loja">
                   <select value={form.organizacao_id} onChange={(e) => setForm({ ...form, organizacao_id: e.target.value })} style={sel}>
                     <option value="">Selecione…</option>
                     {orgs.map((o) => <option key={o.id} value={o.id}>{o.nome}</option>)}
                   </select>
-                </div>
+                </Campo>
               )}
             </div>
+
+            {ehLojista && souAdmin && !form.organizacao_id && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 14 }}>
+                <Field label="Nome da loja" val={form.nome_loja} set={(v) => setForm({ ...form, nome_loja: v })} hint="Ex: Auto Center Silva" />
+                <Field label="CNPJ da loja" val={form.cnpj} set={(v) => setForm({ ...form, cnpj: formatarCNPJ(v) })} hint="00.000.000/0000-00" />
+                <Field label="Telefone comercial" val={form.telefone_comercial} set={(v) => setForm({ ...form, telefone_comercial: formatarTelefone(v) })} hint="(00) 0000-0000" />
+                <Field label="Endereço" val={form.endereco} set={(v) => setForm({ ...form, endereco: v })} hint="Rua, número, bairro, cidade/UF" />
+              </div>
+            )}
+
             <PrimaryButton type="submit" disabled={salvando} style={{ width: "100%" }}>
               {salvando ? "Criando…" : "Criar usuário"}
             </PrimaryButton>
@@ -154,13 +212,17 @@ export default function AdminUsuarios() {
                   <div style={{ fontWeight: 700, color: "var(--text)" }}>
                     {u.nome || "Sem nome"}{!u.ativo && <span style={{ fontSize: 11, color: "var(--text-mute)" }}> · suspenso</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-mute)" }}>{u.email ?? "—"} · {u.organizacao_nome ?? "Sem loja"}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-mute)" }}>
+                    {u.email ?? "—"}{u.cpf ? ` · CPF ${formatarCPF(u.cpf)}` : ""}{u.telefone ? ` · ${formatarTelefone(u.telefone)}` : ""}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-mute)" }}>{u.organizacao_nome ?? "Sem loja"}</div>
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <select value={u.papel} onChange={(e) => mudarPapel(u.id, e.target.value)}
+                  <select value={u.papel} onChange={(e) => mudarPapel(u, e.target.value)}
                     style={{ ...sel, width: "auto", padding: "7px 10px", fontSize: 12 }} disabled={u.id === sessao?.user?.id}>
                     {papeis.map((p) => <option key={p} value={p}>{ROTULO[p]}</option>)}
                   </select>
+                  <button style={btn} onClick={() => abrirEdicao(u)}><Pencil size={13} /> Editar</button>
                   {u.id !== sessao?.user?.id && (
                     <>
                       {u.ativo
@@ -175,6 +237,31 @@ export default function AdminUsuarios() {
           </div>
         </div>
       </div>
+
+      <Modal open={!!editando} onClose={() => setEditando(null)} title="Editar usuário"
+        footer={<PrimaryButton onClick={salvarEdicao} style={{ width: "100%" }}>Salvar alterações</PrimaryButton>}>
+        {editando && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Field label="Nome" val={editando.nome} set={(v) => setEditando({ ...editando, nome: v })} />
+            <Field label="CPF" val={editando.cpf} set={(v) => setEditando({ ...editando, cpf: formatarCPF(v) })} hint="000.000.000-00" />
+            <Field label="Telefone / WhatsApp" val={editando.telefone} set={(v) => setEditando({ ...editando, telefone: formatarTelefone(v) })} hint="(00) 00000-0000" />
+            <Campo label="Papel">
+              <select value={editando.papel} onChange={(e) => setEditando({ ...editando, papel: e.target.value })} style={sel}
+                disabled={!souAdmin && editando.papel === "proprietario"}>
+                {papeis.map((p) => <option key={p} value={p}>{ROTULO[p]}</option>)}
+              </select>
+            </Campo>
+            {editando.papel === "proprietario" && editando.organizacao_id && (
+              <>
+                <Field label="Nome da loja" val={editando.org_nome} set={(v) => setEditando({ ...editando, org_nome: v })} />
+                <Field label="CNPJ da loja" val={editando.org_cnpj} set={(v) => setEditando({ ...editando, org_cnpj: formatarCNPJ(v) })} hint="00.000.000/0000-00" />
+                <Field label="Telefone comercial" val={editando.org_telefone} set={(v) => setEditando({ ...editando, org_telefone: formatarTelefone(v) })} hint="(00) 0000-0000" />
+                <Field label="Endereço" val={editando.org_endereco} set={(v) => setEditando({ ...editando, org_endereco: v })} />
+              </>
+            )}
+          </div>
+        )}
+      </Modal>
     </PageTransition>
   );
 }

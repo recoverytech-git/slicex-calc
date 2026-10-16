@@ -4,18 +4,20 @@ import PrimaryButton from "./PrimaryButton";
 import { enviarFotos, MAX_FOTOS, validarArquivo } from "../lib/fotos";
 import { useAuth } from "../lib/auth";
 
-export default function UploadFotos({ veiculoId }) {
+/** Envia fotos de um veículo. `jaExistentes` = fotos que o veículo já tem. */
+export default function UploadFotos({ veiculoId, jaExistentes = 0, onEnviado }) {
   const { sessao, perfil } = useAuth();
   const ref = useRef(null);
   const [arquivos, setArquivos] = useState([]);
   const [enviadas, setEnviadas] = useState(0);
   const [enviando, setEnviando] = useState(false);
   const [msg, setMsg] = useState(null);
+  const total = jaExistentes + enviadas;
 
   const escolher = (e) => {
     setMsg(null);
     const lista = Array.from(e.target.files || []);
-    if (enviadas + lista.length > MAX_FOTOS) {
+    if (total + lista.length > MAX_FOTOS) {
       setMsg({ tipo: "erro", texto: `Limite de ${MAX_FOTOS} fotos por veículo.` });
       setArquivos([]);
       return;
@@ -33,17 +35,15 @@ export default function UploadFotos({ veiculoId }) {
       veiculoId,
       userId: sessao?.user?.id,
       arquivos,
-      jaEnviadas: enviadas,
+      jaEnviadas: total,
     });
     setEnviando(false);
     setEnviadas((n) => n + (enviados?.length ?? 0));
-    if (error) {
-      setMsg({ tipo: "erro", texto: `Algumas fotos não foram enviadas: ${error.message}` });
-      return;
-    }
+    if (error) { setMsg({ tipo: "erro", texto: `Algumas fotos não foram enviadas: ${error.message}` }); onEnviado?.(); return; }
     setMsg({ tipo: "ok", texto: `${arquivos.length} foto(s) enviada(s).` });
     setArquivos([]);
     if (ref.current) ref.current.value = "";
+    onEnviado?.();
   };
 
   return (
@@ -54,7 +54,7 @@ export default function UploadFotos({ veiculoId }) {
           <Camera size={16} /> Escolher fotos
         </label>
         <span style={{ fontSize: 12, color: "var(--text-mute)" }}>
-          {arquivos.length ? `${arquivos.length} selecionada(s)` : `${enviadas} de ${MAX_FOTOS} enviada(s)`}
+          {arquivos.length ? `${arquivos.length} selecionada(s)` : `${total} de ${MAX_FOTOS} foto(s)`}
         </span>
         {arquivos.length > 0 && (
           <PrimaryButton onClick={enviar} disabled={enviando} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -62,11 +62,7 @@ export default function UploadFotos({ veiculoId }) {
           </PrimaryButton>
         )}
       </div>
-      {msg && (
-        <div role="status" style={{ padding: "10px 14px", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 600, background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", color: "var(--text)" }}>
-          {msg.texto}
-        </div>
-      )}
+      {msg && <div role="status" style={{ padding: "10px 14px", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 600, background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", color: "var(--text)" }}>{msg.texto}</div>}
     </div>
   );
 }

@@ -40,3 +40,15 @@ export async function salvarVeiculo(dados) {
   };
   return supabase.from("veiculos").insert(linha).select().single();
 }
+
+/** Exclui o veículo e suas fotos. As fotos do Storage são removidas antes, pelo cliente. */
+export async function excluirVeiculo(id) {
+  if (!supabaseConfigurado) return SEM_BANCO;
+  const { data: fotos } = await supabase.from("veiculo_fotos").select("caminho_storage").eq("veiculo_id", id);
+  const caminhos = (fotos ?? []).map((f) => f.caminho_storage);
+  if (caminhos.length) {
+    const { error: erroStorage } = await supabase.storage.from("veiculos-fotos").remove(caminhos);
+    if (erroStorage) return { error: erroStorage };
+  }
+  return supabase.rpc("excluir_veiculo", { p_veiculo: id });
+}
