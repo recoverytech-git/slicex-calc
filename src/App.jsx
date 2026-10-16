@@ -16,6 +16,7 @@ const Amortizacao = lazy(() => import("./pages/Amortizacao"));
 const CalculaCar = lazy(() => import("./pages/CalculaCar"));
 const Estoque = lazy(() => import("./pages/Estoque"));
 const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
+const VeiculoDetalhe = lazy(() => import("./pages/VeiculoDetalhe"));
 
 function RouteFallback() {
   return (
@@ -39,6 +40,7 @@ function AnimatedRoutes() {
           <Route path="/amortizacao" element={<RotaPrivada><Amortizacao /></RotaPrivada>} />
           <Route path="/calcula-car" element={<RotaPrivada><CalculaCar /></RotaPrivada>} />
           <Route path="/estoque" element={<RotaPrivada><Estoque /></RotaPrivada>} />
+          <Route path="/estoque/:id" element={<RotaPrivada><VeiculoDetalhe /></RotaPrivada>} />
           <Route path="/admin/usuarios" element={<RotaPrivada><AdminUsuarios /></RotaPrivada>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

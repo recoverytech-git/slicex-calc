@@ -17,3 +17,10 @@
 
 ## f17e7ab — módulo Calcula-Car
 - Análise de compra e venda de veículos.
+
+## Entrega atual
+- Landing pública; sistema e calculadoras exigem login.
+- Gestão de usuários feita em SQL (funções `admin_*`), sem Edge Function.
+- Permissões por papel (administrador, lojista, gerente, vendedor) no banco.
+- Detalhe do veículo: dados, status, fotos, checklist e vendas.
+- Sidebar recolhível no desktop; logout volta para a landing.

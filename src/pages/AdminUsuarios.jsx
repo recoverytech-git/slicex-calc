@@ -12,17 +12,6 @@ const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border
 const sel = { width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 };
 const btn = { display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 10px", borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "transparent", color: "var(--text-dim)", fontSize: 12, fontWeight: 600, cursor: "pointer" };
 const ROTULO = { admin_master: "Administrador", proprietario: "Lojista", gerente: "Gerente", vendedor: "Vendedor" };
-
-async function chamar(acao, corpo = {}) {
-  const { data, error } = await supabase.functions.invoke("admin-usuarios", { body: { acao, ...corpo } });
-  if (error) {
-    let texto = error.message;
-    try { const j = await error.context.json(); if (j?.error) texto = j.error; } catch { /* mantém a mensagem padrão */ }
-    return { erro: texto };
-  }
-  return { data };
-}
-
 const FORM_VAZIO = { nome: "", email: "", senha: "", papel: "vendedor", organizacao_id: "", nome_loja: "" };
 
 export default function AdminUsuarios() {
@@ -35,9 +24,11 @@ export default function AdminUsuarios() {
   const [salvando, setSalvando] = useState(false);
 
   const carregar = useCallback(async () => {
-    const { data, erro } = await chamar("listar");
-    if (erro) setMsg({ tipo: "erro", texto: erro });
-    else { setLista(data.usuarios ?? []); setOrgs(data.organizacoes ?? []); }
+    const { data, error } = await supabase.rpc("admin_listar_usuarios");
+    if (error) { setMsg({ tipo: "erro", texto: error.message }); return; }
+    setLista(data ?? []);
+    const { data: os } = await supabase.from("organizacoes").select("id, nome");
+    setOrgs(os ?? []);
   }, []);
 
   useEffect(() => { if (perfil) carregar(); }, [perfil, carregar]);
@@ -62,9 +53,16 @@ export default function AdminUsuarios() {
     e.preventDefault();
     setMsg(null);
     setSalvando(true);
-    const { erro } = await chamar("criar", form);
+    const { error } = await supabase.rpc("admin_criar_usuario", {
+      p_email: form.email,
+      p_senha: form.senha,
+      p_nome: form.nome,
+      p_papel: form.papel,
+      p_organizacao: form.organizacao_id || null,
+      p_nome_loja: form.nome_loja || null,
+    });
     setSalvando(false);
-    if (erro) { setMsg({ tipo: "erro", texto: erro }); return; }
+    if (error) { setMsg({ tipo: "erro", texto: error.message }); return; }
     setMsg({ tipo: "ok", texto: "Usuário criado. Envie a senha temporária por um canal seguro." });
     setForm(FORM_VAZIO);
     carregar();
@@ -73,14 +71,17 @@ export default function AdminUsuarios() {
   const executar = async (acao, id) => {
     if (acao === "excluir" && !window.confirm("Excluir este usuário? A ação não pode ser desfeita.")) return;
     setMsg(null);
-    const { erro } = await chamar(acao, { id });
-    if (erro) setMsg({ tipo: "erro", texto: erro }); else carregar();
+    const chamada = acao === "excluir"
+      ? supabase.rpc("admin_excluir_usuario", { p_id: id })
+      : supabase.rpc("admin_definir_suspenso", { p_id: id, p_suspenso: acao === "suspender" });
+    const { error } = await chamada;
+    if (error) setMsg({ tipo: "erro", texto: error.message }); else carregar();
   };
 
   const mudarPapel = async (id, papel) => {
     setMsg(null);
-    const { erro } = await chamar("atualizar", { id, papel });
-    if (erro) setMsg({ tipo: "erro", texto: erro }); else carregar();
+    const { error } = await supabase.rpc("admin_atualizar_usuario", { p_id: id, p_nome: null, p_papel: papel });
+    if (error) setMsg({ tipo: "erro", texto: error.message }); else carregar();
   };
 
   return (
@@ -139,11 +140,11 @@ export default function AdminUsuarios() {
                   <div style={{ fontWeight: 700, color: "var(--text)" }}>
                     {u.nome || "Sem nome"}{!u.ativo && <span style={{ fontSize: 11, color: "var(--text-mute)" }}> · suspenso</span>}
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-mute)" }}>{u.email ?? "—"} · {u.organizacoes?.nome ?? "Sem loja"}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-mute)" }}>{u.email ?? "—"} · {u.organizacao_nome ?? "Sem loja"}</div>
                 </div>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <select value={u.papel} onChange={(e) => mudarPapel(u.id, e.target.value)} style={{ ...sel, width: "auto", padding: "7px 10px", fontSize: 12 }}
-                    disabled={u.id === sessao?.user?.id}>
+                  <select value={u.papel} onChange={(e) => mudarPapel(u.id, e.target.value)}
+                    style={{ ...sel, width: "auto", padding: "7px 10px", fontSize: 12 }} disabled={u.id === sessao?.user?.id}>
                     {papeis.map((p) => <option key={p} value={p}>{ROTULO[p]}</option>)}
                   </select>
                   {u.id !== sessao?.user?.id && (

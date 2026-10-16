@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Car, FileDown, ImageOff } from "lucide-react";
 import Header from "../components/Header";
@@ -26,6 +27,7 @@ export default function Estoque() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
   const [exportando, setExportando] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (perfil === undefined) return;
@@ -119,7 +121,7 @@ export default function Estoque() {
               <p style={{ color: "var(--text-mute)", fontSize: 13 }}>Nenhum veículo encontrado.</p>
             )}
             {filtrados.map((v, i) => (
-              <motion.div key={v.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+              <motion.div key={v.id} onClick={() => navigate(`/estoque/${v.id}`)} style={{ cursor: "pointer" }} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
                 style={{ ...card, padding: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                 <div style={{ display: "flex", gap: 14, alignItems: "center", minWidth: 0 }}>
                   {capas[v.id] ? (
