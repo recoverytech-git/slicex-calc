@@ -13,13 +13,19 @@ const sel = { width: "100%", boxSizing: "border-box", background: "var(--surface
 const btn = { display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 10px", borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "transparent", color: "var(--text-dim)", fontSize: 12, fontWeight: 600, cursor: "pointer" };
 const ROTULO = { admin_master: "Administrador", proprietario: "Lojista", gerente: "Gerente", vendedor: "Vendedor" };
 async function chamarFuncao(corpo) {
-  const { data, error } = await supabase.functions.invoke("gerenciar-usuarios", { body: corpo });
-  if (error) {
-    let texto = error.message;
-    try { const j = await error.context.json(); if (j?.error) texto = j.error; } catch { /* mantém a mensagem padrão */ }
-    return { erro: texto };
+  let res;
+  if (corpo.acao === "criar") {
+    res = await supabase.rpc("admin_criar_usuario", {
+      p_email: corpo.email, p_senha: corpo.senha, p_nome: corpo.nome, p_papel: corpo.papel,
+      p_organizacao: corpo.organizacao_id || null, p_nome_loja: corpo.nome_loja || null,
+    });
+  } else if (corpo.acao === "excluir") {
+    res = await supabase.rpc("admin_excluir_usuario", { p_id: corpo.id });
+  } else {
+    res = await supabase.rpc("admin_definir_suspenso", { p_id: corpo.id, p_suspenso: corpo.acao === "suspender" });
   }
-  return { data };
+  if (res.error) return { erro: res.error.message };
+  return { data: res.data };
 }
 
 const FORM_VAZIO = { nome: "", email: "", senha: "", papel: "vendedor", organizacao_id: "", nome_loja: "" };

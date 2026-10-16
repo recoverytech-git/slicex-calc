@@ -3,7 +3,6 @@ import { Save } from "lucide-react";
 import PrimaryButton from "./PrimaryButton";
 import UploadFotos from "./UploadFotos";
 import ChecklistVeiculo from "./ChecklistVeiculo";
-import VendaVeiculo from "./VendaVeiculo";
 import { useAuth } from "../lib/auth";
 import { buscarDuplicado, salvarVeiculo } from "../lib/estoque";
 
@@ -79,7 +78,6 @@ export default function SalvarNoEstoque({ dados }) {
       )}
       {veiculoId && <UploadFotos veiculoId={veiculoId} />}
       {veiculoId && <ChecklistVeiculo veiculoId={veiculoId} />}
-      {veiculoId && <VendaVeiculo veiculoId={veiculoId} />}
     </div>
   );
 }
