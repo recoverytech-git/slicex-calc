@@ -12,6 +12,16 @@ const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border
 const sel = { width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 };
 const btn = { display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 10px", borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "transparent", color: "var(--text-dim)", fontSize: 12, fontWeight: 600, cursor: "pointer" };
 const ROTULO = { admin_master: "Administrador", proprietario: "Lojista", gerente: "Gerente", vendedor: "Vendedor" };
+async function chamarFuncao(corpo) {
+  const { data, error } = await supabase.functions.invoke("gerenciar-usuarios", { body: corpo });
+  if (error) {
+    let texto = error.message;
+    try { const j = await error.context.json(); if (j?.error) texto = j.error; } catch { /* mantém a mensagem padrão */ }
+    return { erro: texto };
+  }
+  return { data };
+}
+
 const FORM_VAZIO = { nome: "", email: "", senha: "", papel: "vendedor", organizacao_id: "", nome_loja: "" };
 
 export default function AdminUsuarios() {
@@ -53,16 +63,17 @@ export default function AdminUsuarios() {
     e.preventDefault();
     setMsg(null);
     setSalvando(true);
-    const { error } = await supabase.rpc("admin_criar_usuario", {
-      p_email: form.email,
-      p_senha: form.senha,
-      p_nome: form.nome,
-      p_papel: form.papel,
-      p_organizacao: form.organizacao_id || null,
-      p_nome_loja: form.nome_loja || null,
+    const { erro } = await chamarFuncao({
+      acao: "criar",
+      email: form.email,
+      senha: form.senha,
+      nome: form.nome,
+      papel: form.papel,
+      organizacao_id: form.organizacao_id || null,
+      nome_loja: form.nome_loja || null,
     });
     setSalvando(false);
-    if (error) { setMsg({ tipo: "erro", texto: error.message }); return; }
+    if (erro) { setMsg({ tipo: "erro", texto: erro }); return; }
     setMsg({ tipo: "ok", texto: "Usuário criado. Envie a senha temporária por um canal seguro." });
     setForm(FORM_VAZIO);
     carregar();
@@ -71,11 +82,8 @@ export default function AdminUsuarios() {
   const executar = async (acao, id) => {
     if (acao === "excluir" && !window.confirm("Excluir este usuário? A ação não pode ser desfeita.")) return;
     setMsg(null);
-    const chamada = acao === "excluir"
-      ? supabase.rpc("admin_excluir_usuario", { p_id: id })
-      : supabase.rpc("admin_definir_suspenso", { p_id: id, p_suspenso: acao === "suspender" });
-    const { error } = await chamada;
-    if (error) setMsg({ tipo: "erro", texto: error.message }); else carregar();
+    const { erro } = await chamarFuncao({ acao, id });
+    if (erro) setMsg({ tipo: "erro", texto: erro }); else carregar();
   };
 
   const mudarPapel = async (id, papel) => {
