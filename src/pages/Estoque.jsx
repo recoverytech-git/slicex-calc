@@ -121,8 +121,8 @@ export default function Estoque() {
               <p style={{ color: "var(--text-mute)", fontSize: 13 }}>Nenhum veículo encontrado.</p>
             )}
             {filtrados.map((v, i) => (
-              <motion.div key={v.id} onClick={() => navigate(`/estoque/${v.id}`)} style={{ cursor: "pointer" }} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-                style={{ ...card, padding: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+              <motion.div key={v.id} onClick={() => navigate(`/estoque/${v.id}`)} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+                style={{ ...card, padding: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", cursor: "pointer" }}>
                 <div style={{ display: "flex", gap: 14, alignItems: "center", minWidth: 0 }}>
                   {capas[v.id] ? (
                     <img src={capas[v.id]} alt="" style={{ width: 84, height: 60, objectFit: "cover", borderRadius: "var(--r-sm)", border: "1px solid var(--border)" }} />
