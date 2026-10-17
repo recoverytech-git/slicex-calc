@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ScrollText, ChevronDown, RefreshCw } from "lucide-react";
+import { ScrollText, ChevronDown, RefreshCw, Search } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
@@ -62,7 +62,7 @@ export default function Logs() {
   useEffect(() => {
     if (perfil?.papel === "admin_master") consultar(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [perfil?.papel, filtros.usuario, filtros.tabela, filtros.operacao, filtros.inicio, filtros.fim]);
+  }, [perfil?.papel]);
 
   if (perfil && perfil.papel !== "admin_master") {
     return (
@@ -115,6 +115,11 @@ export default function Logs() {
             </div>
           </div>
 
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
+            <PrimaryButton onClick={() => consultar(0)} disabled={carregando} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Search size={15} /> {carregando ? "Consultando…" : "Consultar"}
+            </PrimaryButton>
+          </div>
           {erro && <p style={{ color: "var(--text-dim)", fontSize: 13 }}>Não foi possível carregar: {erro}</p>}
 
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

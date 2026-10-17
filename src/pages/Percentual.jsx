@@ -1,3 +1,4 @@
+import { ENTRADA } from "../lib/motion";
 import { useRascunho } from "../lib/rascunho";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
@@ -49,7 +50,7 @@ export default function Percentual() {
           </div>
 
           {resultado && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
+            <motion.div {...ENTRADA}
               style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 12, marginTop: 14 }}>
               <Kpi label="Variação de A para B" value={resultado.variacaoAB ?? 0}
                 format={(v) => (resultado.variacaoAB === null ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`)}

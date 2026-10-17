@@ -1,3 +1,4 @@
+import { ENTRADA } from "../lib/motion";
 // sem-rascunho: credenciais de acesso não são guardadas no navegador
 import { useState } from "react";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
@@ -45,7 +46,7 @@ export default function Login() {
       <div className="page-bg">
         <Header subtitle="Acesso restrito" />
         <div className="container" style={{ paddingTop: 40, maxWidth: 420 }}>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ ...card, padding: 24, boxShadow: "var(--shadow-md)" }}>
+          <motion.div {...ENTRADA} style={{ ...card, padding: 24, boxShadow: "var(--shadow-md)" }}>
             <h1 style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 800, color: "var(--text)" }}>
               {modo === "entrar" ? "Entrar" : "Recuperar senha"}
             </h1>

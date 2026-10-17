@@ -15,6 +15,7 @@ const MAX_BYTES = 2 * 1024 * 1024;
 const SLOTS = [
   { chave: "logo_sidebar", titulo: "Logomarca da sidebar", dica: "Aparece no menu lateral, sobre fundo preto. PNG com fundo transparente, cerca de 40 px de altura." },
   { chave: "logo_header", titulo: "Logomarca do cabeçalho", dica: "Aparece no topo de todas as páginas." },
+  { chave: "logo_claro", titulo: "Logomarca para modo claro", dica: "Usada no cabeçalho quando o tema claro estiver ativo. Logo escura ou colorida, com fundo transparente." },
   { chave: "favicon", titulo: "Favicon", dica: "Ícone da aba do navegador. PNG quadrado, 64 × 64 px ou maior." },
 ];
 
@@ -52,9 +53,9 @@ export default function Configuracoes() {
       const { error: eUp } = await supabase.storage.from("marca").upload(caminho, file, { contentType: file.type, upsert: false });
       if (eUp) throw eUp;
       const { data: pub } = supabase.storage.from("marca").getPublicUrl(caminho);
-      const { error: eCfg } = await supabase.from("configuracoes").update({
+      const { error: eCfg } = await supabase.from("configuracoes").upsert({ chave, 
         valor: pub.publicUrl, atualizado_em: new Date().toISOString(), atualizado_por: sessao?.user?.id,
-      }).eq("chave", chave);
+      }, { onConflict: "chave" });
       if (eCfg) throw eCfg;
       limparCacheMarca();
       setMsg({ tipo: "ok", texto: "Marca atualizada. A alteração já vale para todos os usuários." });
@@ -68,7 +69,7 @@ export default function Configuracoes() {
 
   const remover = async (chave) => {
     if (!window.confirm("Remover esta imagem e voltar a usar a padrão?")) return;
-    const { error } = await supabase.from("configuracoes").update({ valor: null, atualizado_em: new Date().toISOString(), atualizado_por: sessao?.user?.id }).eq("chave", chave);
+    const { error } = await supabase.from("configuracoes").upsert({ chave,  valor: null, atualizado_em: new Date().toISOString(), atualizado_por: sessao?.user?.id }, { onConflict: "chave" });
     if (error) { setMsg({ tipo: "erro", texto: error.message }); return; }
     limparCacheMarca();
     setMsg({ tipo: "ok", texto: "Imagem removida." });
@@ -97,7 +98,7 @@ export default function Configuracoes() {
                   <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{s.titulo}</p>
                   <p style={{ margin: "0 0 14px", fontSize: 12, color: "var(--text-mute)" }}>{s.dica}</p>
                   <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-                    <div style={{ width: 160, height: 90, borderRadius: "var(--r-md)", background: "#000", border: "1px solid var(--border-strong)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                    <div style={{ width: 160, height: 90, borderRadius: "var(--r-md)", background: s.chave === "logo_claro" ? "#FFFFFF" : "#000", border: "1px solid var(--border-strong)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                       {atual ? <img src={atual} alt="" style={{ maxWidth: "80%", maxHeight: "70%", objectFit: "contain" }} />
                              : <span style={{ fontSize: 11, color: "var(--text-faint)" }}>Sem imagem</span>}
                     </div>

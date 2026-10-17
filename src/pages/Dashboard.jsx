@@ -1,8 +1,9 @@
+import { ENTRADA } from "../lib/motion";
 // sem-rascunho: painel somente de consulta, sem formulário
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Landmark, Percent, Scissors, Car, Warehouse, ArrowRight, LayoutDashboard } from "lucide-react";
+import { Landmark, Percent, Scissors, Car, Warehouse, ArrowRight, LayoutDashboard, BadgeDollarSign } from "lucide-react";
 import Header from "../components/Header";
 import PageTransition from "../components/PageTransition";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
@@ -19,11 +20,12 @@ const ACESSOS = [
   { to: "/amortizacao", titulo: "Amortização extra", texto: "Reduzir o prazo ou a parcela", icon: Scissors },
   { to: "/calcula-car", titulo: "Calcula-Car", texto: "Análise de compra e venda", icon: Car },
   { to: "/estoque", titulo: "Estoque", texto: "Veículos, fotos e checklist", icon: Warehouse },
+  { to: "/vendas", titulo: "Vendidos", texto: "Vendas e resultado final", icon: BadgeDollarSign, gestao: true },
 ];
 
 function Kpi({ rotulo, valor, i = 0 }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+    <motion.div {...ENTRADA}
       style={{ ...card, padding: 16 }}>
       <p style={{ margin: 0, fontSize: 12, color: "var(--text-mute)" }}>{rotulo}</p>
       <p style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text)" }}>{valor}</p>
@@ -104,8 +106,8 @@ export default function Dashboard() {
 
           <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Acessos</p>
           <div className="grid-3" style={{ marginBottom: 22 }}>
-            {ACESSOS.map(({ to, titulo, texto, icon: Icon }, i) => (
-              <motion.div key={to} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }} whileHover={{ y: -4 }}>
+            {ACESSOS.filter((a) => !a.gestao || gestao).map(({ to, titulo, texto, icon: Icon }, i) => (
+              <motion.div key={to} {...ENTRADA} whileHover={{ y: -4 }}>
                 <Link to={to} style={{ ...card, padding: 18, display: "flex", flexDirection: "column", gap: 12, textDecoration: "none", height: "100%" }}>
                   <span style={{ width: 40, height: 40, borderRadius: "var(--r-sm)", background: "rgba(68,147,248,0.12)", border: "1px solid rgba(68,147,248,0.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Icon size={18} color="var(--accent)" />

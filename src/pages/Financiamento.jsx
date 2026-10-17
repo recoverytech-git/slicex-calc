@@ -1,3 +1,4 @@
+import { ENTRADA, FADE } from "../lib/motion";
 import IconeTexto from "../components/IconeTexto";
 import { useRascunho } from "../lib/rascunho";
 import { useState, useMemo, useCallback } from "react";
@@ -147,7 +148,7 @@ export default function Financiamento() {
 
           <AnimatePresence>
             {calculado && rows.length > 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+              <motion.div {...FADE} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 10, marginTop: 18 }}>
                   {[
@@ -203,13 +204,13 @@ export default function Financiamento() {
 
                 <AnimatePresence mode="wait">
                   {tab === "grafico" && (
-                    <motion.div key="grafico" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ ...card, padding: "18px 12px 12px", marginTop: 10 }}>
+                    <motion.div key="grafico" {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ ...card, padding: "18px 12px 12px", marginTop: 10 }}>
                       <p style={{ margin: "0 0 14px 4px", fontSize: 13, color: "var(--text-dim)", fontWeight: 600 }}>Saldo Devedor ao longo do tempo</p>
                       <SaldoAreaChart data={chartData} />
                     </motion.div>
                   )}
                   {tab === "composicao" && (
-                    <motion.div key="composicao" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ ...card, padding: "18px 12px 12px", marginTop: 10 }}>
+                    <motion.div key="composicao" {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ ...card, padding: "18px 12px 12px", marginTop: 10 }}>
                       <p style={{ margin: "0 0 14px 4px", fontSize: 13, color: "var(--text-dim)", fontWeight: 600 }}>
                         Composição {isSAC ? "(amortização constante · juros caem)" : "(amortização cresce · juros caem)"}
                       </p>
@@ -218,7 +219,7 @@ export default function Financiamento() {
                     </motion.div>
                   )}
                   {tab === "tabela" && (
-                    <motion.div key="tabela" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ ...card, marginTop: 10, overflow: "hidden" }}>
+                    <motion.div key="tabela" {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} style={{ ...card, marginTop: 10, overflow: "hidden" }}>
                       <div style={{ overflowX: "auto", maxHeight: 420, overflowY: "auto" }}>
                         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                           <thead style={{ position: "sticky", top: 0 }}>

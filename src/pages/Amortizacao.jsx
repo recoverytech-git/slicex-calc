@@ -1,3 +1,4 @@
+import { FADE } from "../lib/motion";
 import IconeTexto from "../components/IconeTexto";
 import { useRascunho } from "../lib/rascunho";
 import { useMemo, useCallback } from "react";
@@ -154,7 +155,7 @@ export default function Amortizacao() {
 
           <AnimatePresence>
             {result && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+              <motion.div {...FADE} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14, marginTop: 22 }}>
                   <StrategyCard

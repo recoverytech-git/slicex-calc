@@ -1,9 +1,12 @@
+import { ENTRADA } from "../lib/motion";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Landmark, Car, Warehouse, ShieldCheck, Users, ArrowRight, LogIn } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import logo from "../assets/logo.png";
 import { useAuth } from "../lib/auth";
+import { useTema } from "../lib/tema";
+import { Sun, Moon } from "lucide-react";
 
 const card = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: 22 };
 
@@ -22,21 +25,29 @@ const PASSOS = [
 
 export default function Landing() {
   const { sessao } = useAuth();
+  const [tema, definirTema] = useTema();
+  const claro = tema === "light";
   const destino = sessao ? "/dashboard" : "/login";
   const rotulo = sessao ? "Acessar o sistema" : "Entrar";
 
   return (
     <PageTransition>
       <div className="page-bg" style={{ paddingBottom: 40 }}>
-        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: "1px solid var(--border)", background: "#000" }}>
+        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: "1px solid var(--border)", background: "var(--bg-header)" }}>
           <img src={logo} alt="SliceX.calc" style={{ height: 30, width: "auto" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button type="button" onClick={() => definirTema(claro ? "dark" : "light")} aria-label="Alternar tema"
+            style={{ width: 36, height: 36, borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "var(--surface)", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            {claro ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
           <Link to={destino} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 16px", borderRadius: "var(--r-sm)", background: "var(--accent)", color: "var(--accent-ink)", fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
             <LogIn size={15} /> {rotulo}
           </Link>
+                  </div>
         </header>
 
         <div className="container" style={{ maxWidth: 1040, paddingTop: 56 }}>
-          <motion.section initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ textAlign: "center" }}>
+          <motion.section {...ENTRADA} style={{ textAlign: "center" }}>
             <p style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "var(--text-mute)", margin: "0 0 14px", fontWeight: 700 }}>
               Gestão para lojas de veículos
             </p>
@@ -53,7 +64,7 @@ export default function Landing() {
 
           <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 16, marginTop: 56 }}>
             {RECURSOS.map(({ icon: Icon, titulo, texto }, i) => (
-              <motion.div key={titulo} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.07 }} style={card}>
+              <motion.div key={titulo} {...ENTRADA} style={card}>
                 <div style={{ width: 40, height: 40, borderRadius: "var(--r-sm)", background: "var(--surface-3)", border: "1px solid var(--border-strong)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
                   <Icon size={18} color="var(--text)" />
                 </div>

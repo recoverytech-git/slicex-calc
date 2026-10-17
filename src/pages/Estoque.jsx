@@ -1,3 +1,4 @@
+import { ENTRADA } from "../lib/motion";
 import { useRascunho } from "../lib/rascunho";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
@@ -154,7 +155,7 @@ export default function Estoque() {
               <p style={{ color: "var(--text-mute)", fontSize: 13 }}>Nenhum veículo encontrado.</p>
             )}
             {filtrados.map((v, i) => (
-              <motion.div key={v.id} onClick={() => navigate(`/estoque/${v.id}`)} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+              <motion.div key={v.id} onClick={() => navigate(`/estoque/${v.id}`)} {...ENTRADA}
                 style={{ ...card, padding: 14, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", cursor: "pointer" }}>
                 <div style={{ display: "flex", gap: 14, alignItems: "center", minWidth: 0 }}>
                   {capas[v.id] ? (

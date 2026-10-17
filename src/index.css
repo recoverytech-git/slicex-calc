@@ -92,8 +92,8 @@ button { font-family: inherit; }
 .page-bg {
   min-height: 100vh;
   background:
-    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(255,255,255,.05), transparent 60%),
-    linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+    radial-gradient(ellipse 900px 500px at 50% -10%, var(--glow), transparent 60%),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
   padding-bottom: 60px;
 }
 
@@ -104,7 +104,7 @@ button { font-family: inherit; }
   transition: transform 0.25s ease;
   display: none; flex-direction: column; gap: 18px;
   position: fixed; top: 0; left: 0; bottom: 0; width: 232px; z-index: 40;
-  background: #000; border-right: 1px solid var(--border); padding: 20px 14px; overflow-y: auto;
+  background: var(--bg-nav); border-right: 1px solid var(--border); padding: 20px 14px; overflow-y: auto;
 }
 .sidebar-brand { display: flex; align-items: center; padding: 6px 10px 14px; }
 .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
@@ -120,7 +120,7 @@ button { font-family: inherit; }
 .bottomnav {
   display: none; grid-auto-flow: column; grid-auto-columns: minmax(72px, 1fr); overflow-x: auto;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-  background: #000; border-top: 1px solid var(--border);
+  background: var(--bg-nav); border-top: 1px solid var(--border);
   padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
 }
 .bottomnav-link {
@@ -146,7 +146,7 @@ button { font-family: inherit; }
   width: 22px; height: 56px; display: flex; align-items: center; justify-content: center;
   border: 1px solid var(--border-strong); border-left: none;
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
-  background: #000; color: var(--text); cursor: pointer;
+  background: var(--bg-nav); color: var(--text); cursor: pointer;
   transition: left 0.25s ease;
 }
 @media (max-width: 899px) { .menu-toggle { display: none; } }
@@ -187,3 +187,35 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(68,147,24
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* ── Tema escuro (padrão): paleta azul #4493F8, cinza #9198A1, preto e branco ── */
+:root {
+  --bg-top: #000000; --bg-bottom: #0a0a0a; --glow: rgba(68,147,248,0.07);
+  --bg-nav: #000000; --bg-header: #000000;
+  --nav-text: #9198A1; --nav-text-active: #ffffff; --nav-active-bg: rgba(68,147,248,0.16);
+  --shadow-glow: 0 0 0 1px rgba(68,147,248,0.14), 0 14px 40px rgba(0,0,0,0.6);
+}
+
+/* ── Tema claro: cores de referência (fundo azulado, cards brancos, navy na lateral) ── */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F5F7FB; --bg-elevated: #FFFFFF; --surface: #FFFFFF; --surface-2: #F1F4F9; --surface-3: #E8EEF7;
+  --surface-hover: #EEF2F8; --border: #E4E8F0; --border-strong: #CBD3E1; --border-focus: #4493F8;
+  --text: #0F172A; --text-dim: #475569; --text-mute: #64748B; --text-faint: #94A3B8;
+  --accent: #4493F8; --accent-ink: #FFFFFF; --accent-soft: #2F6FD6; --accent-dim: #64748B;
+  --shadow-sm: 0 2px 8px rgba(15,23,42,0.06); --shadow-md: 0 8px 24px rgba(15,23,42,0.08);
+  --shadow-lg: 0 20px 48px rgba(15,23,42,0.12);
+  --shadow-glow: 0 0 0 1px rgba(68,147,248,0.18), 0 12px 32px rgba(68,147,248,0.14);
+  --bg-top: #F5F7FB; --bg-bottom: #EDF1F7; --glow: rgba(68,147,248,0.08);
+  --bg-nav: #0E1A2E; --bg-header: #FFFFFF;
+  --nav-text: #9FB3CF; --nav-text-active: #FFFFFF; --nav-active-bg: rgba(68,147,248,0.22);
+}
+:root[data-theme="light"] ::selection { background: #4493F8; color: #ffffff; }
+:root[data-theme="light"] ::-webkit-scrollbar-thumb { background: #CBD3E1; }
+
+/* Navegação: cores vindas do tema */
+.sidebar-link { color: var(--nav-text); }
+.sidebar-link:hover { color: var(--nav-text-active); background: rgba(255,255,255,0.06); }
+.sidebar-link.ativo { color: var(--nav-text-active); background: var(--nav-active-bg); border-color: rgba(68,147,248,0.45); }
+.bottomnav-link { color: var(--nav-text); }
+.bottomnav-link.ativo { color: var(--nav-text-active); }
