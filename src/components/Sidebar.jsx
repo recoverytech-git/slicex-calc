@@ -4,11 +4,14 @@ import { itensNav } from "./navItems";
 import { useAuth } from "../lib/auth";
 import logo from "../assets/logo.png";
 import { useMarca } from "../lib/marca";
+import { useTema } from "../lib/tema";
 
 export default function Sidebar({ aberta = true }) {
   const { sair, perfil } = useAuth();
   const navigate = useNavigate();
   const marca = useMarca();
+  const [tema] = useTema();
+  const logoSidebar = tema === "light" ? (marca.logo_sidebar_claro || marca.logo_sidebar || logo) : (marca.logo_sidebar || logo);
   const itens = itensNav(perfil?.papel);
 
   // Navega para a landing ANTES de encerrar a sessão, para que a rota privada
@@ -21,7 +24,7 @@ export default function Sidebar({ aberta = true }) {
   return (
     <aside className={`sidebar${aberta ? "" : " fechada"}`} aria-label="Navegação principal">
       <div className="sidebar-brand">
-        <img src={marca.logo_sidebar || logo} alt="SliceX.calc" style={{ height: 26, width: "auto" }} />
+        <img src={logoSidebar} alt="SliceX.calc" style={{ height: 26, width: "auto" }} />
       </div>
       <nav className="sidebar-nav">
         {itens.map(({ to, label, icon: Icon }) => (

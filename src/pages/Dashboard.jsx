@@ -60,14 +60,17 @@ export default function Dashboard() {
   const gestao = GESTAO.includes(perfil?.papel);
   const [veiculos, setVeiculos] = useState([]);
   const [vendas, setVendas] = useState([]);
+  const [custos, setCustos] = useState([]);
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
     if (!supabaseConfigurado || !gestao) return;
     Promise.all([
-      supabase.from("veiculos").select("status, preco_compra, preco_venda_pretendido"),
+      supabase.from("veiculos").select("id, status, preco_compra, preco_venda_pretendido"),
       supabase.from("v_vendas_resultado").select("data_venda, valor_venda, resultado_final, investimento_total"),
-    ]).then(([v, s]) => {
+      supabase.from("veiculo_custos").select("veiculo_id, valor"),
+    ]).then(([v, s, c]) => {
+      setCustos(c.data ?? []);
       if (v.error || s.error) setErro((v.error || s.error).message);
       setVeiculos(v.data ?? []);
       setVendas(s.data ?? []);
@@ -87,12 +90,17 @@ export default function Dashboard() {
   const statusDados = Object.keys(ROTULO).map((s) => ({ rotulo: ROTULO[s], valor: veiculos.filter((v) => v.status === s).length }));
 
   const emEstoque = veiculos.filter((v) => v.status !== "vendido");
-  const capital = emEstoque.reduce((s, v) => s + Number(v.preco_compra ?? 0), 0);
+  const custosPorVeiculo = {};
+  custos.forEach((c) => { custosPorVeiculo[c.veiculo_id] = (custosPorVeiculo[c.veiculo_id] || 0) + Number(c.valor ?? 0); });
+  const totalCustosEstoque = emEstoque.reduce((s, v) => s + (custosPorVeiculo[v.id] || 0), 0);
+  // Capital investido = valor de compra + custos adicionais de todo o estoque
+  const capital = emEstoque.reduce((s, v) => s + Number(v.preco_compra ?? 0), 0) + totalCustosEstoque;
   const potencial = emEstoque.reduce((s, v) => s + Number(v.preco_venda_pretendido ?? 0), 0);
   const faturamento = vendas.reduce((s, v) => s + Number(v.valor_venda ?? 0), 0);
   const resultado = vendas.reduce((s, v) => s + Number(v.resultado_final ?? 0), 0);
   const investido = vendas.reduce((s, v) => s + Number(v.investimento_total ?? 0), 0);
-  const margem = investido > 0 ? (resultado / investido) * 100 : null;
+  // Margem sobre investido = venda pretendida - custos adicionais, de todo o estoque
+  const margemValor = emEstoque.reduce((s, v) => s + Number(v.preco_venda_pretendido ?? 0), 0) - totalCustosEstoque;
 
   return (
     <PageTransition>
@@ -137,7 +145,7 @@ export default function Dashboard() {
                 <Kpi i={0} rotulo="Vendas realizadas" valor={vendas.length} />
                 <Kpi i={1} rotulo="Faturamento" valor={formatarBRL(faturamento)} />
                 <Kpi i={2} rotulo="Resultado final" valor={formatarBRL(resultado)} />
-                <Kpi i={3} rotulo="Margem sobre investido" valor={margem == null ? "—" : `${margem.toFixed(2)}%`} />
+                <Kpi i={3} rotulo="Margem sobre investido" valor={formatarBRL(margemValor)} />
               </div>
 
               <div className="grid-2" style={{ marginBottom: 14 }}>

@@ -249,7 +249,7 @@ export default function CalculaCar() {
           {/* 2. Análise FIPE x Compra */}
           <AnimatePresence>
             {veiculoValido && diferenca && (
-              <motion.div {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+              <motion.div {...ENTRADA} exit={{ opacity: 0 }}
                 style={{ ...card, padding: 22, marginTop: 14 }}>
                 <SectionTitle icon={TrendingUp} n={2}>Análise FIPE x Compra</SectionTitle>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10 }}>
@@ -285,7 +285,7 @@ export default function CalculaCar() {
           {/* 3. Origem do Capital */}
           <AnimatePresence>
             {veiculoValido && (
-              <motion.div {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+              <motion.div {...ENTRADA} exit={{ opacity: 0 }}
                 style={{ ...card, padding: 22, marginTop: 14 }}>
                 <SectionTitle icon={Wallet} n={3}>Origem do Capital</SectionTitle>
                 <p style={{ margin: "0 0 14px", fontSize: 12, color: "var(--text-mute)" }}>Selecione a origem do capital para a compra do veículo</p>
@@ -312,7 +312,7 @@ export default function CalculaCar() {
           {/* 4. Financiamento — SOMENTE quando "Financiamento" está selecionado */}
           <AnimatePresence>
             {veiculoValido && tipoCapital === "Financiamento" && (
-              <motion.div {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+              <motion.div {...ENTRADA} exit={{ opacity: 0 }}
                 style={{ ...card, padding: 22, marginTop: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 16 }}>
                   <SectionTitle icon={Landmark} n={4}>Financiamento</SectionTitle>
@@ -402,7 +402,7 @@ export default function CalculaCar() {
           {/* 5. Custos Adicionais — sempre disponível, independente do capital */}
           <AnimatePresence>
             {veiculoValido && (
-              <motion.div {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+              <motion.div {...ENTRADA} exit={{ opacity: 0 }}
                 style={{ ...card, padding: 22, marginTop: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
                   <SectionTitle icon={Plus} n={5}>Custos Adicionais</SectionTitle>
@@ -478,7 +478,7 @@ export default function CalculaCar() {
           {/* 6. Resultado da Operação */}
           <AnimatePresence>
             {resultado && (
-              <motion.div {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+              <motion.div {...ENTRADA} exit={{ opacity: 0 }}
                 style={{ ...card, padding: 22, marginTop: 14, borderColor: "var(--border-focus)", boxShadow: "var(--shadow-glow)" }}>
                 <SectionTitle icon={PieChart} n={6}>Resultado da Operação</SectionTitle>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 10 }}>
@@ -498,7 +498,7 @@ export default function CalculaCar() {
           {/* 7. Checklist do veículo */}
           <AnimatePresence>
             {veiculoValido && (
-              <motion.div {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+              <motion.div {...ENTRADA} exit={{ opacity: 0 }}
                 style={{ ...card, padding: 22, marginTop: 14 }}>
                 <SectionTitle icon={ClipboardCheck} n={7}>Checklist do veículo</SectionTitle>
                 <ChecklistVeiculo valor={checklist} onMudar={setChecklist} />
@@ -509,7 +509,7 @@ export default function CalculaCar() {
           {/* 7. Exportação */}
           <AnimatePresence>
             {resultado && (
-              <motion.div {...ENTRADA} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+              <motion.div {...ENTRADA} exit={{ opacity: 0 }}
                 style={{ ...card, padding: "16px 18px", marginTop: 14 }}>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <PrimaryButton onClick={handleExcel} disabled={isLoading} style={{ flex: 1, minWidth: 160, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>

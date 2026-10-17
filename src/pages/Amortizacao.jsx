@@ -155,7 +155,7 @@ export default function Amortizacao() {
 
           <AnimatePresence>
             {result && (
-              <motion.div {...FADE} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+              <motion.div {...FADE} exit={{ opacity: 0 }}>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14, marginTop: 22 }}>
                   <StrategyCard

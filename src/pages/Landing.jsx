@@ -6,6 +6,7 @@ import PageTransition from "../components/PageTransition";
 import logo from "../assets/logo.png";
 import { useAuth } from "../lib/auth";
 import { useTema } from "../lib/tema";
+import { useMarca } from "../lib/marca";
 import { Sun, Moon } from "lucide-react";
 
 const card = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: 22 };
@@ -27,6 +28,11 @@ export default function Landing() {
   const { sessao } = useAuth();
   const [tema, definirTema] = useTema();
   const claro = tema === "light";
+  const marca = useMarca();
+  const logoLanding = claro
+    ? (marca.logo_landing_claro || marca.logo_claro || marca.logo_landing || marca.logo_header || logo)
+    : (marca.logo_landing || marca.logo_header || logo);
+  const logoPadraoLanding = logoLanding === logo;
   const destino = sessao ? "/dashboard" : "/login";
   const rotulo = sessao ? "Acessar o sistema" : "Entrar";
 
@@ -34,7 +40,7 @@ export default function Landing() {
     <PageTransition>
       <div className="page-bg" style={{ paddingBottom: 40 }}>
         <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: "1px solid var(--border)", background: "var(--bg-header)" }}>
-          <img src={logo} alt="SliceX.calc" style={{ height: 30, width: "auto" }} />
+          <img src={logoLanding} alt="SliceX.calc" style={{ height: 30, width: "auto", filter: claro && logoPadraoLanding ? "invert(1)" : "none" }} />
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <button type="button" onClick={() => definirTema(claro ? "dark" : "light")} aria-label="Alternar tema"
             style={{ width: 36, height: 36, borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "var(--surface)", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
