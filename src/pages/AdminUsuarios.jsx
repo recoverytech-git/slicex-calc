@@ -145,7 +145,7 @@ export default function AdminUsuarios() {
 
   const mudarPapel = async (u, papel) => {
     setMsg(null);
-    const { erro } = await rpc("admin_atualizar_usuario", { p_id: u.id, p_nome: null, p_papel: papel, p_cpf: "", p_telefone: "" });
+    const { erro } = await rpc("admin_atualizar_usuario", { p_id: u.id, p_nome: null, p_papel: papel, p_cpf: null, p_telefone: null });
     if (erro) setMsg({ tipo: "erro", texto: erro }); else carregar();
   };
 

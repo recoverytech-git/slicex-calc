@@ -9,7 +9,7 @@ export default function UploadFotos({ veiculoId, jaExistentes = 0, onEnviado }) 
   const { sessao, perfil } = useAuth();
   const ref = useRef(null);
   const [arquivos, setArquivos] = useState([]);
-  const [enviadas, setEnviadas] = useState(0);
+  const [enviadas, setEnviadas] = useState(jaExistentes ?? totalAtual);
   const [enviando, setEnviando] = useState(false);
   const [msg, setMsg] = useState(null);
   const total = jaExistentes + enviadas;
@@ -42,6 +42,7 @@ export default function UploadFotos({ veiculoId, jaExistentes = 0, onEnviado }) 
     if (error) { setMsg({ tipo: "erro", texto: `Algumas fotos não foram enviadas: ${error.message}` }); onEnviado?.(); return; }
     setMsg({ tipo: "ok", texto: `${arquivos.length} foto(s) enviada(s).` });
     setArquivos([]);
+    onEnviado?.();
     if (ref.current) ref.current.value = "";
     onEnviado?.();
   };

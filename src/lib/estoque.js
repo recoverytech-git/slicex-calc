@@ -52,3 +52,4 @@ export async function excluirVeiculo(id) {
   }
   return supabase.rpc("excluir_veiculo", { p_veiculo: id });
 }
+

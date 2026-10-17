@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRascunho, limparRascunho } from "../lib/rascunho";
 import { Car, TrendingUp, Wallet, Landmark, Plus, Trash2, Pencil, PieChart, Download, FileText, BarChart3, Grid3x3, Table2, AlertTriangle, CheckCircle2, Coins, Target, Briefcase, TrendingDown, Ruler, CalendarDays, CreditCard } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
@@ -35,33 +36,41 @@ function SectionTitle({ icon: Icon, n, children }) {
 
 export default function CalculaCar() {
   // Bloco 1 — veículo
-  const [modelo, setModelo] = useState("");
-  const [placa, setPlaca] = useState("");
-  const [fipeStr, setFipeStr] = useState("75000");
-  const [compraStr, setCompraStr] = useState("50000");
-  const [renavam, setRenavam] = useState("");
-  const [chassi, setChassi] = useState("");
-  const [anoFab, setAnoFab] = useState("");
-  const [anoMod, setAnoMod] = useState("");
-  const [cor, setCor] = useState("");
-  const [km, setKm] = useState("");
-  const [combustivel, setCombustivel] = useState("");
-  const [cambio, setCambio] = useState("");
-  const [observacoes, setObservacoes] = useState("");
+  const [modelo, setModelo] = useRascunho("cc.modelo", "");
+  const [placa, setPlaca] = useRascunho("cc.placa", "");
+  const [fipeStr, setFipeStr] = useRascunho("cc.fipeStr", "75000");
+  const [compraStr, setCompraStr] = useRascunho("cc.compraStr", "50000");
+  const [renavam, setRenavam] = useRascunho("cc.renavam", "");
+  const [chassi, setChassi] = useRascunho("cc.chassi", "");
+  const [anoFab, setAnoFab] = useRascunho("cc.anoFab", "");
+  const [anoMod, setAnoMod] = useRascunho("cc.anoMod", "");
+  const [cor, setCor] = useRascunho("cc.cor", "");
+  const [km, setKm] = useRascunho("cc.km", "");
+  const [combustivel, setCombustivel] = useRascunho("cc.combustivel", "");
+  const [cambio, setCambio] = useRascunho("cc.cambio", "");
 
   // Bloco 3 — capital
-  const [tipoCapital, setTipoCapital] = useState("Próprio");
+  const [tipoCapital, setTipoCapital] = useRascunho("cc.tipoCapital", "Próprio");
 
   // Bloco 4 — financiamento (reaproveita exatamente os campos/lógica da calculadora existente)
-  const [valorBemStr, setValorBemStr] = useState("50000");
-  const [entradaStr, setEntradaStr] = useState("0");
-  const [taxaStr, setTaxaStr] = useState("3.9");
-  const [mesesStr, setMesesStr] = useState("48");
-  const [sistema, setSistema] = useState("Price");
+  const [valorBemStr, setValorBemStr] = useRascunho("cc.valorBemStr", "50000");
+  const [entradaStr, setEntradaStr] = useRascunho("cc.entradaStr", "0");
+  const [taxaStr, setTaxaStr] = useRascunho("cc.taxaStr", "3.9");
+  const [mesesStr, setMesesStr] = useRascunho("cc.mesesStr", "48");
+  const [sistema, setSistema] = useRascunho("cc.sistema", "Price");
   const [tab, setTab] = useState("grafico");
 
   // Bloco 5 — custos adicionais
-  const [custos, setCustos] = useState([]);
+  const [custos, setCustos] = useRascunho("cc.custos", []);
+  const resetarCalcula = () => {
+    limparRascunho(["cc.modelo","cc.placa","cc.fipeStr","cc.compraStr","cc.renavam","cc.chassi","cc.anoFab","cc.anoMod",
+      "cc.cor","cc.km","cc.combustivel","cc.cambio","cc.tipoCapital","cc.valorBemStr","cc.entradaStr","cc.taxaStr",
+      "cc.mesesStr","cc.sistema","cc.custos"]);
+    setModelo(""); setPlaca(""); setFipeStr("75000"); setCompraStr("50000"); setRenavam(""); setChassi("");
+    setAnoFab(""); setAnoMod(""); setCor(""); setKm(""); setCombustivel(""); setCambio("");
+    setTipoCapital("Próprio"); setValorBemStr("50000"); setEntradaStr("0"); setTaxaStr("3.9"); setMesesStr("48");
+    setSistema("Price"); setCustos([]);
+  };
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [draftDesc, setDraftDesc] = useState("");
@@ -227,7 +236,6 @@ export default function CalculaCar() {
               <Field label="Quilometragem (km)" val={km} set={setKm} hint="Ex: 45000" />
               <Field label="Combustível" val={combustivel} set={setCombustivel} hint="Ex: Flex" />
               <Field label="Câmbio" val={cambio} set={setCambio} hint="Ex: Automático" />
-              <Field label="Observações" val={observacoes} set={setObservacoes} hint="Opcional" />
               <MoneyField label="Valor FIPE (R$)" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
               <MoneyField label="Valor de compra (R$)" valor={parseMoeda(compraStr)} onChange={(n) => { setCompraStr(String(n)); reset?.(); }} />
             </div>
@@ -506,7 +514,7 @@ export default function CalculaCar() {
             )}
           </AnimatePresence>
 
-          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, observacoes, fipe, compra, valorVenda, tipoCapital }} />
+          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda, tipoCapital, custos, financiamento }} onConcluido={resetarCalcula} />
           <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
             Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional
           </p>
