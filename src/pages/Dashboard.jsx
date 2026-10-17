@@ -100,7 +100,8 @@ export default function Dashboard() {
   const resultado = vendas.reduce((s, v) => s + Number(v.resultado_final ?? 0), 0);
   const investido = vendas.reduce((s, v) => s + Number(v.investimento_total ?? 0), 0);
   // Margem sobre investido = venda pretendida - custos adicionais, de todo o estoque
-  const margemValor = emEstoque.reduce((s, v) => s + Number(v.preco_venda_pretendido ?? 0), 0) - totalCustosEstoque;
+  // Margem = venda pretendida - compra - custos adicionais, somada para todo o estoque
+  const margemValor = emEstoque.reduce((s, v) => s + Number(v.preco_venda_pretendido ?? 0) - Number(v.preco_compra ?? 0) - (custosPorVeiculo[v.id] || 0), 0);
 
   return (
     <PageTransition>

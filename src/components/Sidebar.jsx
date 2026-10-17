@@ -11,7 +11,7 @@ export default function Sidebar({ aberta = true }) {
   const navigate = useNavigate();
   const marca = useMarca();
   const [tema] = useTema();
-  const logoSidebar = tema === "light" ? (marca.logo_sidebar_claro || marca.logo_sidebar || logo) : (marca.logo_sidebar || logo);
+  const logoSidebar = tema === "light" ? (marca.logo_sidebar_claro || logo) : (marca.logo_sidebar || logo);
   const itens = itensNav(perfil?.papel);
 
   // Navega para a landing ANTES de encerrar a sessão, para que a rota privada

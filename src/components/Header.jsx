@@ -9,7 +9,7 @@ export default function Header({ subtitle }) {
   const marca = useMarca();
   const [tema, definirTema] = useTema();
   const claro = tema === "light";
-  const logoSrc = claro ? (marca.logo_claro || marca.logo_header || logo) : (marca.logo_header || logo);
+  const logoSrc = claro ? (marca.logo_claro || logo) : (marca.logo_header || logo);
   const logoPadrao = logoSrc === logo;
   return (
     <div

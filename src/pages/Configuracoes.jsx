@@ -6,7 +6,7 @@ import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
-import { limparCacheMarca } from "../lib/marca";
+import { atualizarMarca } from "../lib/marca";
 import logoPadrao from "../assets/logo.png";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 18 };
@@ -75,6 +75,13 @@ export default function Configuracoes() {
       { chave, valor, atualizado_em: new Date().toISOString(), atualizado_por: sessao?.user?.id },
       { onConflict: "chave" });
     if (error) throw error;
+    // Confirma no banco que o valor ficou gravado (não aceita falha silenciosa)
+    const { data } = await supabase.from("configuracoes").select("valor").eq("chave", chave).maybeSingle();
+    if (valor && data?.valor !== valor) {
+      throw new Error("A imagem foi enviada, mas não ficou gravada. Verifique se a conta é de administrador.");
+    }
+    atualizarMarca(chave, valor);
+    setValores((v) => ({ ...v, [chave]: valor }));
   };
 
   const enviar = async (chave, file) => {
@@ -89,7 +96,6 @@ export default function Configuracoes() {
       if (eUp) throw eUp;
       const { data: pub } = supabase.storage.from("marca").getPublicUrl(caminho);
       await salvarValor(chave, pub.publicUrl);
-      limparCacheMarca();
       setMsg({ tipo: "ok", texto: "Imagem salva. A troca já vale para todos os usuários." });
       carregar();
     } catch (e) {
@@ -103,7 +109,6 @@ export default function Configuracoes() {
     if (!window.confirm("Remover esta imagem e voltar a usar a padrão?")) return;
     try {
       await salvarValor(chave, null);
-      limparCacheMarca();
       setMsg({ tipo: "ok", texto: "Imagem removida." });
       carregar();
     } catch (e) {

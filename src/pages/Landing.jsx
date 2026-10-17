@@ -29,9 +29,7 @@ export default function Landing() {
   const [tema, definirTema] = useTema();
   const claro = tema === "light";
   const marca = useMarca();
-  const logoLanding = claro
-    ? (marca.logo_landing_claro || marca.logo_claro || marca.logo_landing || marca.logo_header || logo)
-    : (marca.logo_landing || marca.logo_header || logo);
+  const logoLanding = claro ? (marca.logo_landing_claro || logo) : (marca.logo_landing || logo);
   const logoPadraoLanding = logoLanding === logo;
   const destino = sessao ? "/dashboard" : "/login";
   const rotulo = sessao ? "Acessar o sistema" : "Entrar";
