@@ -1,7 +1,8 @@
+import IconeTexto from "../components/IconeTexto";
 import { useRascunho } from "../lib/rascunho";
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, BarChart3, Grid3x3, Table2 } from "lucide-react";
+import { Download, BarChart3, Grid3x3, Table2, Ruler, TrendingDown, Lightbulb, Coins, TrendingUp, CalendarDays, CreditCard, Check, CheckCircle2, XCircle } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
@@ -105,7 +106,7 @@ export default function Financiamento() {
           <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
             {["Price", "SAC"].map((s) => (
               <motion.button key={s} whileTap={{ scale: 0.97 }} onClick={() => { setSistema(s); reset(); }} style={sysBtn(s)}>
-                {s === "Price" ? "📏 Sistema Price" : "📉 Sistema SAC"}
+                {s === "Price" ? <IconeTexto icon={Ruler}>Sistema Price</IconeTexto> : <IconeTexto icon={TrendingDown}>Sistema SAC</IconeTexto>}
                 <div style={{ fontSize: 10, fontWeight: 400, marginTop: 3, opacity: 0.8 }}>
                   {s === "Price" ? "Parcelas fixas" : "Parcelas decrescentes"}
                 </div>
@@ -115,8 +116,8 @@ export default function Financiamento() {
 
           <div style={{ marginTop: 10, padding: "10px 14px", background: "var(--surface)", borderRadius: "var(--r-sm)", fontSize: 12, color: "var(--text-dim)", borderLeft: "3px solid var(--accent)" }}>
             {isSAC
-              ? "💡 SAC: amortização constante. A parcela começa maior e cai todo mês, pois os juros diminuem com o saldo devedor. Você paga menos juros no total."
-              : "💡 Price: parcela fixa do início ao fim. Nos primeiros meses você paga mais juros; a amortização cresce com o tempo."}
+              ? <IconeTexto icon={Lightbulb}>SAC: amortização constante. A parcela começa maior e cai todo mês, pois os juros diminuem com o saldo devedor. Você paga menos juros no total.</IconeTexto>
+              : <IconeTexto icon={Lightbulb}>Price: parcela fixa do início ao fim. Nos primeiros meses você paga mais juros; a amortização cresce com o tempo.</IconeTexto>}
           </div>
 
           <div style={{ ...card, padding: 22, marginTop: 14, boxShadow: "var(--shadow-md)" }}>
@@ -131,8 +132,8 @@ export default function Financiamento() {
             </div>
             {valid && (
               <div style={{ marginTop: 12, padding: "9px 13px", background: "var(--bg-elevated)", borderRadius: "var(--r-sm)", fontSize: 12, color: "var(--text-dim)", display: "flex", gap: 18, flexWrap: "wrap" }}>
-                <span>💰 Financiado: <b style={{ color: "var(--text)" }}>{fmt(pv)}</b></span>
-                <span>📈 Taxa anual eq.: <b style={{ color: "var(--accent-soft)" }}>{taxaAnual}% a.a.</b></span>
+                <span><IconeTexto icon={Coins}>Financiado:</IconeTexto> <b style={{ color: "var(--text)" }}>{fmt(pv)}</b></span>
+                <span><IconeTexto icon={TrendingUp}>Taxa anual eq.:</IconeTexto> <b style={{ color: "var(--accent-soft)" }}>{taxaAnual}% a.a.</b></span>
               </div>
             )}
             <PrimaryButton
@@ -140,7 +141,7 @@ export default function Financiamento() {
               disabled={!valid}
               style={{ marginTop: 16, width: "100%" }}
             >
-              {calculado ? `✓ Recalcular (${sistema})` : `Calcular – Sistema ${sistema}`}
+              {calculado ? <><Check size={15} /> Recalcular ({sistema})</> : <>Calcular – Sistema {sistema}</>}
             </PrimaryButton>
           </div>
 
@@ -150,10 +151,10 @@ export default function Financiamento() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 10, marginTop: 18 }}>
                   {[
-                    { label: isSAC ? "1ª Parcela" : "Parcela Mensal", val: parcela1, color: "var(--text)", icon: "📅" },
-                    ...(isSAC ? [{ label: "Última Parcela", val: parcelaUlt, color: "var(--accent-soft)", icon: "📉" }] : []),
-                    { label: "Total a Pagar", val: totalPago, color: "var(--text)", icon: "💳" },
-                    { label: "Total de Juros", val: totalJuros, color: "var(--text-dim)", icon: "📈" },
+                    { label: isSAC ? "1ª Parcela" : "Parcela Mensal", val: parcela1, color: "var(--text)", icon: <CalendarDays size={18} /> },
+                    ...(isSAC ? [{ label: "Última Parcela", val: parcelaUlt, color: "var(--accent-soft)", icon: <TrendingDown size={18} /> }] : []),
+                    { label: "Total a Pagar", val: totalPago, color: "var(--text)", icon: <CreditCard size={18} /> },
+                    { label: "Total de Juros", val: totalJuros, color: "var(--text-dim)", icon: <TrendingUp size={18} /> },
                   ].map((k, i) => (
                     <Kpi key={k.label} label={k.label} value={k.val} format={fmt} color={k.color} icon={k.icon} index={i} />
                   ))}
@@ -168,22 +169,22 @@ export default function Financiamento() {
                 <div style={{ ...card, padding: "16px 18px", marginTop: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                     <div style={{ flex: 1, minWidth: 140 }}>
-                      <div style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 700 }}>📊 Exportar tabela completa (.xlsx)</div>
+                      <div style={{ fontSize: 13, color: "var(--text-dim)", fontWeight: 700 }}><IconeTexto icon={BarChart3}>Exportar tabela completa (.xlsx)</IconeTexto></div>
                       <div style={{ fontSize: 11, color: "var(--text-mute)", marginTop: 3 }}>{n} linhas · Resumo + Evolução da Dívida</div>
                     </div>
                     <PrimaryButton onClick={handleXLSX} disabled={isLoading} style={{ display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" }}>
                       <Download size={16} />
-                      {isLoading ? "Gerando…" : isSuccess ? "✅ Salvo!" : "Baixar Excel (.xlsx)"}
+                      {isLoading ? "Gerando…" : isSuccess ? "Salvo!" : "Baixar Excel (.xlsx)"}
                     </PrimaryButton>
                   </div>
                   {isSuccess && (
                     <div style={{ marginTop: 12, padding: "10px 14px", background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", borderRadius: "var(--r-sm)", fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-                      ✅ Arquivo salvo com sucesso! — {rows.length} parcelas exportadas com Resumo e Evolução da Dívida.
+                      <IconeTexto icon={CheckCircle2}>Arquivo salvo com sucesso!</IconeTexto> — {rows.length} parcelas exportadas com Resumo e Evolução da Dívida.
                     </div>
                   )}
                   {isErr && (
                     <div style={{ marginTop: 12, padding: "10px 14px", background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", borderRadius: "var(--r-sm)", fontSize: 12, color: "var(--text)", fontWeight: 600 }}>
-                      ❌ Erro: {dlState.err}
+                      <IconeTexto icon={XCircle}>Erro: {dlState.err}</IconeTexto>
                     </div>
                   )}
                 </div>

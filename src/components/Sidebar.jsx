@@ -23,7 +23,7 @@ export default function Sidebar({ aberta = true }) {
       </div>
       <nav className="sidebar-nav">
         {itens.map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to} end={to === "/app"} className={({ isActive }) => `sidebar-link${isActive ? " ativo" : ""}`}>
+          <NavLink key={to} to={to} end={to === "/dashboard"} className={({ isActive }) => `sidebar-link${isActive ? " ativo" : ""}`}>
             <Icon size={17} /> {label}
           </NavLink>
         ))}

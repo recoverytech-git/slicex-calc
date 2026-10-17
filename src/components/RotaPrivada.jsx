@@ -23,6 +23,6 @@ export default function RotaPrivada({ children, papeis }) {
       </div>
     );
   }
-  if (papeis && !papeis.includes(perfil.papel)) return <Navigate to="/app" replace />;
+  if (papeis && !papeis.includes(perfil.papel)) return <Navigate to="/dashboard" replace />;
   return children;
 }

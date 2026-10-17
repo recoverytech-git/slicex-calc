@@ -1,7 +1,8 @@
+import IconeTexto from "../components/IconeTexto";
 import { useRascunho } from "../lib/rascunho";
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, TrendingDown, Trophy } from "lucide-react";
+import { Clock, TrendingDown, Trophy, Ruler, AlertTriangle, Check } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
@@ -124,7 +125,7 @@ export default function Amortizacao() {
           <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
             {["Price", "SAC"].map((s) => (
               <motion.button key={s} whileTap={{ scale: 0.97 }} onClick={() => { setSistema(s); reset(); }} style={sysBtn(s)}>
-                {s === "Price" ? "📏 Sistema Price" : "📉 Sistema SAC"}
+                {s === "Price" ? <IconeTexto icon={Ruler}>Sistema Price</IconeTexto> : <IconeTexto icon={TrendingDown}>Sistema SAC</IconeTexto>}
               </motion.button>
             ))}
           </div>
@@ -142,12 +143,12 @@ export default function Amortizacao() {
 
             {aporteNum >= saldoNum && aporteNum > 0 && (
               <div style={{ marginTop: 12, padding: "9px 13px", background: "var(--bg-elevated)", borderRadius: "var(--r-sm)", fontSize: 12, color: "var(--text-dim)" }}>
-                ⚠️ O aporte deve ser menor que o saldo devedor — se for igual ou maior, o financiamento é quitado por completo.
+                <IconeTexto icon={AlertTriangle}>O aporte deve ser menor que o saldo devedor — se for igual ou maior, o financiamento é quitado por completo.</IconeTexto>
               </div>
             )}
 
             <PrimaryButton onClick={() => valid && setCalc(true)} disabled={!valid} style={{ marginTop: 16, width: "100%" }}>
-              {calculado ? "✓ Recalcular" : "Comparar Estratégias"}
+              {calculado ? <><Check size={15} /> Recalcular</> : "Comparar Estratégias"}
             </PrimaryButton>
           </div>
 

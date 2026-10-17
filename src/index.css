@@ -160,3 +160,15 @@ button { font-family: inherit; }
   .grid-3 { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
 }
+
+/* Paleta oficial: azul #4493F8, preto, cinza #9198A1 e branco */
+:root {
+  --accent: #4493F8;
+  --accent-ink: #ffffff;
+  --accent-soft: #9198A1;
+  --accent-dim: #9198A1;
+  --border-focus: #4493F8;
+  --text-dim: #9198A1;
+  --text-mute: #9198A1;
+  --text-faint: #6b717b;
+}

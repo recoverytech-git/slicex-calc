@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Download, Share2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
@@ -24,6 +24,9 @@ const ROTULO = Object.fromEntries(STATUS);
 const TIPO = { capital_proprio: "Capital próprio", financiamento: "Financiamento" };
 const titulo = { margin: "0 0 12px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" };
 const moeda = (v) => (v == null ? "—" : formatarBRL(Number(v)));
+const botaoSec = { display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "1px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "6px 12px", color: "var(--text)", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease" };
+const botaoIcone = { width: 28, height: 28, borderRadius: 999, background: "rgba(0,0,0,0.7)", border: "1px solid var(--border-strong)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
+const navFoto = (lado) => ({ position: "absolute", top: "50%", [lado]: 8, transform: "translateY(-50%)", ...botaoIcone, width: 40, height: 40 });
 
 function Linha({ label, valor, destaque }) {
   return (
@@ -64,6 +67,82 @@ export default function VeiculoDetalhe() {
   const [form, setForm] = useRascunho("det.form", {});
   const [novoCusto, setNovoCusto] = useRascunho("det.novoCusto", { descricao: "", valor: 0 });
   const [confirmarExclusao, setConfirmarExclusao] = useState(false);
+  const [editandoCustos, setEditandoCustos] = useState(false);
+  const [editandoFotos, setEditandoFotos] = useState(false);
+  const [fotoAtiva, setFotoAtiva] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [msgFoto, setMsgFoto] = useState(null);
+
+  const excluirCusto = async (c) => {
+    if (!window.confirm(`Excluir o custo "${c.descricao}"?`)) return;
+    const { error } = await supabase.from("veiculo_custos").delete().eq("id", c.id);
+    if (error) setMsg({ tipo: "erro", texto: `Custo não excluído: ${error.message}` });
+    else { setMsg({ tipo: "ok", texto: "Custo excluído." }); carregar(); }
+  };
+
+  const nomeArquivo = (i) => `${(veiculo?.modelo || "veiculo").toLowerCase().replace(/\s+/g, "-")}-${i + 1}.jpg`;
+
+  const baixarUma = async (i) => {
+    const r = await fetch(fotos[i].url);
+    const b = await r.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(b);
+    a.download = nomeArquivo(i);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  };
+
+  const baixarTodas = async () => {
+    setBusy(true);
+    setMsgFoto(null);
+    try {
+      for (let i = 0; i < fotos.length; i++) {
+        await baixarUma(i);
+        await new Promise((r) => setTimeout(r, 300));
+      }
+    } catch (e) {
+      setMsgFoto({ tipo: "erro", texto: `Download interrompido: ${e.message}` });
+    } finally { setBusy(false); }
+  };
+
+  const compartilhar = async (indices, titulo) => {
+    setBusy(true);
+    setMsgFoto(null);
+    try {
+      const files = await Promise.all(indices.map(async (i) => {
+        const r = await fetch(fotos[i].url);
+        const b = await r.blob();
+        return new File([b], nomeArquivo(i), { type: b.type || "image/jpeg" });
+      }));
+      if (navigator.canShare && navigator.canShare({ files })) {
+        await navigator.share({ files, title: titulo });
+      } else {
+        setMsgFoto({ tipo: "erro", texto: "Este navegador não compartilha arquivos. As fotos serão baixadas." });
+        for (const i of indices) await baixarUma(i);
+      }
+    } catch (e) {
+      if (e?.name !== "AbortError") setMsgFoto({ tipo: "erro", texto: `Não foi possível compartilhar: ${e.message}` });
+    } finally { setBusy(false); }
+  };
+
+  const excluirFoto = async (f) => {
+    if (!window.confirm("Excluir esta foto? Esta ação não pode ser desfeita.")) return;
+    setBusy(true);
+    setMsgFoto(null);
+    try {
+      const { error: eStorage } = await supabase.storage.from(BUCKET_FOTOS).remove([f.caminho_storage]);
+      if (eStorage) throw eStorage;
+      const { error: eRow } = await supabase.from("veiculo_fotos").delete().eq("id", f.id);
+      if (eRow) throw eRow;
+      setFotoAtiva(null);
+      setMsgFoto({ tipo: "ok", texto: "Foto excluída." });
+      carregar();
+    } catch (e) {
+      setMsgFoto({ tipo: "erro", texto: `Foto não excluída: ${e.message}` });
+    } finally { setBusy(false); }
+  };
 
   const carregar = async () => {
     const tabela = papel === "vendedor" ? "v_veiculos_vendedor" : "veiculos";
@@ -280,11 +359,29 @@ export default function VeiculoDetalhe() {
                   </Secao>
 
                   {/* 4. Custos adicionais */}
-                  <Secao n={4} nome="Custos adicionais">
+                  <div style={card}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
+                      <p style={{ ...titulo, margin: 0 }}>4. Custos adicionais</p>
+                      {podeEditar && (
+                        <button onClick={() => setEditandoCustos((v) => !v)} style={botaoSec}>
+                          <Pencil size={13} /> {editandoCustos ? "Concluir" : "Editar"}
+                        </button>
+                      )}
+                    </div>
                     {custos.length === 0 && <p style={{ margin: "0 0 8px", fontSize: 13, color: "var(--text-mute)" }}>Nenhum custo adicional.</p>}
-                    {custos.map((c) => <Linha key={c.id} label={c.descricao} valor={moeda(c.valor)} />)}
+                    {custos.map((c) => (
+                      <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid var(--border)", padding: "8px 0", fontSize: 13 }}>
+                        <span style={{ flex: 1, color: "var(--text-mute)" }}>{c.descricao}</span>
+                        <span style={{ color: "var(--text)", fontWeight: 600 }}>{moeda(c.valor)}</span>
+                        {podeEditar && editandoCustos && (
+                          <button onClick={() => excluirCusto(c)} aria-label="Excluir custo" style={{ ...botaoIcone, color: "var(--text)" }}>
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
                     <Linha label="Total de custos adicionais" valor={formatarBRL(totalCustos)} />
-                    {podeEditar && (
+                    {podeEditar && editandoCustos && (
                       <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 12 }}>
                         <Field label="Descrição do custo" val={novoCusto.descricao} set={(v) => setNovoCusto({ ...novoCusto, descricao: v })} hint="Ex: Documentação, pneus…" />
                         <MoneyField label="Valor do custo" valor={novoCusto.valor} onChange={(n) => setNovoCusto({ ...novoCusto, valor: n })} />
@@ -293,7 +390,7 @@ export default function VeiculoDetalhe() {
                         </PrimaryButton>
                       </div>
                     )}
-                  </Secao>
+                  </div>
 
                   {/* 5. Resultado da operação */}
                   <Secao n={5} nome="Resultado da operação">
@@ -335,22 +432,39 @@ export default function VeiculoDetalhe() {
               </div>
 
               <div style={card}>
-                <p style={titulo}>Fotos</p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
+                  <p style={{ ...titulo, margin: 0 }}>Fotos ({fotos.length})</p>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {fotos.length > 0 && <button onClick={baixarTodas} disabled={busy} style={botaoSec}><Download size={13} /> Baixar todas</button>}
+                    {fotos.length > 0 && <button onClick={() => compartilhar(fotos.map((_, i) => i), `${veiculo.modelo} — fotos`)} disabled={busy} style={botaoSec}><Share2 size={13} /> Compartilhar todas</button>}
+                    {podeEditar && fotos.length > 0 && (
+                      <button onClick={() => setEditandoFotos((v) => !v)} style={botaoSec}><Pencil size={13} /> {editandoFotos ? "Concluir" : "Editar"}</button>
+                    )}
+                  </div>
+                </div>
+                {busy && <p style={{ fontSize: 12, color: "var(--text-mute)", margin: "0 0 10px" }}>Preparando…</p>}
+                {msgFoto && <div role="status" style={{ marginBottom: 10, padding: "8px 12px", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 600, background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", color: "var(--text)" }}>{msgFoto.texto}</div>}
                 {fotos.length === 0 && <p style={{ margin: "0 0 10px", fontSize: 13, color: "var(--text-mute)" }}>Nenhuma foto cadastrada.</p>}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))", gap: 10 }}>
-                  {fotos.map((f) => f.url && (
-                    <a key={f.id} href={f.url} target="_blank" rel="noreferrer">
-                      <img src={f.url} alt="Foto do veículo" style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: "var(--r-sm)", border: "1px solid var(--border)" }} />
-                    </a>
+                  {fotos.map((f, i) => f.url && (
+                    <div key={f.id} style={{ position: "relative" }}>
+                      <button onClick={() => setFotoAtiva(i)} aria-label={`Ver foto ${i + 1}`} style={{ padding: 0, border: "none", background: "none", cursor: "zoom-in", width: "100%", display: "block" }}>
+                        <img src={f.url} alt={`Foto ${i + 1}`} style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: "var(--r-sm)", border: "1px solid var(--border)", display: "block", transition: "transform 0.25s ease" }} />
+                      </button>
+                      {editandoFotos && (
+                        <button onClick={() => excluirFoto(f)} aria-label="Excluir foto" style={{ ...botaoIcone, position: "absolute", top: 6, right: 6 }}>
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
                 {podeEditar && <div style={{ marginTop: 14 }}><UploadFotos veiculoId={veiculo.id} jaExistentes={fotos.length} onEnviado={carregar} /></div>}
               </div>
 
-              {podeEditar && (
+              {gestao && (
                 <div style={card}>
-                  <p style={titulo}>Checklist do veículo</p>
-                  <ChecklistVeiculo veiculoId={veiculo.id} />
+                  <ChecklistVeiculo veiculoId={veiculo.id} podeEditar={podeEditar} onSalvo={carregar} />
                 </div>
               )}
 
@@ -369,6 +483,32 @@ export default function VeiculoDetalhe() {
                   <button onClick={() => setConfirmarExclusao(true)} style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "none", border: "1px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "9px 14px", color: "var(--text)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                     <Trash2 size={14} /> Excluir veículo
                   </button>
+                </div>
+              )}
+
+              {fotoAtiva !== null && fotos[fotoAtiva]?.url && (
+                <div role="dialog" aria-label="Visualizar foto" onClick={() => setFotoAtiva(null)}
+                  style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+                  <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 900, display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--text)", fontSize: 13 }}>
+                      <span>{fotoAtiva + 1} de {fotos.length}</span>
+                      <button onClick={() => setFotoAtiva(null)} aria-label="Fechar" style={botaoIcone}><X size={14} /></button>
+                    </div>
+                    <div style={{ position: "relative" }}>
+                      <img src={fotos[fotoAtiva].url} alt="" style={{ width: "100%", maxHeight: "70vh", objectFit: "contain", borderRadius: "var(--r-md)", background: "#000", display: "block" }} />
+                      {fotos.length > 1 && (
+                        <>
+                          <button onClick={() => setFotoAtiva((fotoAtiva - 1 + fotos.length) % fotos.length)} aria-label="Foto anterior" style={navFoto("left")}><ChevronLeft size={20} /></button>
+                          <button onClick={() => setFotoAtiva((fotoAtiva + 1) % fotos.length)} aria-label="Próxima foto" style={navFoto("right")}><ChevronRight size={20} /></button>
+                        </>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+                      <button onClick={() => baixarUma(fotoAtiva)} disabled={busy} style={botaoSec}><Download size={14} /> Baixar</button>
+                      <button onClick={() => compartilhar([fotoAtiva], veiculo.modelo)} disabled={busy} style={botaoSec}><Share2 size={14} /> Compartilhar</button>
+                      {podeEditar && <button onClick={() => excluirFoto(fotos[fotoAtiva])} disabled={busy} style={botaoSec}><Trash2 size={14} /> Excluir</button>}
+                    </div>
+                  </div>
                 </div>
               )}
 

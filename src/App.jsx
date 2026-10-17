@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Landing from "./pages/Landing";
-import Home from "./pages/Home";
 import Login from "./pages/Login";
 import RotaPrivada from "./components/RotaPrivada";
 import Sidebar from "./components/Sidebar";
@@ -18,7 +17,7 @@ const Estoque = lazy(() => import("./pages/Estoque"));
 const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
 const VeiculoDetalhe = lazy(() => import("./pages/VeiculoDetalhe"));
 const Vendas = lazy(() => import("./pages/Vendas"));
-const Painel = lazy(() => import("./pages/Painel"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 function RouteFallback() {
   return (
@@ -36,7 +35,9 @@ function AnimatedRoutes() {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/app" element={<RotaPrivada><Home /></RotaPrivada>} />
+          <Route path="/dashboard" element={<RotaPrivada><Dashboard /></RotaPrivada>} />
+          <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/painel" element={<Navigate to="/dashboard" replace />} />
           <Route path="/financiamento" element={<RotaPrivada><Financiamento /></RotaPrivada>} />
           <Route path="/percentual" element={<RotaPrivada><Percentual /></RotaPrivada>} />
           <Route path="/amortizacao" element={<RotaPrivada><Amortizacao /></RotaPrivada>} />
@@ -44,7 +45,6 @@ function AnimatedRoutes() {
           <Route path="/estoque" element={<RotaPrivada><Estoque /></RotaPrivada>} />
           <Route path="/estoque/:id" element={<RotaPrivada><VeiculoDetalhe /></RotaPrivada>} />
           <Route path="/vendas" element={<RotaPrivada papeis={["admin_master","proprietario","gerente"]}><Vendas /></RotaPrivada>} />
-          <Route path="/painel" element={<RotaPrivada papeis={["admin_master","proprietario"]}><Painel /></RotaPrivada>} />
           <Route path="/admin/usuarios" element={<RotaPrivada><AdminUsuarios /></RotaPrivada>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

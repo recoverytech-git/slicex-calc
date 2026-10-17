@@ -20,7 +20,7 @@ export default function Login() {
   const [msg, setMsg] = useState(null);
   const [carregando, setCarregando] = useState(false);
 
-  if (sessao) return <Navigate to="/app" replace />;
+  if (sessao) return <Navigate to="/dashboard" replace />;
 
   const enviar = async (e) => {
     e.preventDefault();
@@ -33,7 +33,7 @@ export default function Login() {
       } else {
         const { error } = await entrar(email, senha);
         if (error) setMsg({ tipo: "erro", texto: "E-mail ou senha incorretos." });
-        else navigate(local.state?.de || "/app", { replace: true });
+        else navigate(local.state?.de || "/dashboard", { replace: true });
       }
     } catch {
       setMsg({ tipo: "erro", texto: "Falha de conexão. Tente novamente." });

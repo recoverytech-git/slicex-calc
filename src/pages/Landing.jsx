@@ -22,7 +22,7 @@ const PASSOS = [
 
 export default function Landing() {
   const { sessao } = useAuth();
-  const destino = sessao ? "/app" : "/login";
+  const destino = sessao ? "/dashboard" : "/login";
   const rotulo = sessao ? "Acessar o sistema" : "Entrar";
 
   return (
