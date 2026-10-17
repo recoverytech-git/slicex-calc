@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import logo from "../assets/logo.png";
+import { useMarca } from "../lib/marca";
 
 export default function Header({ subtitle }) {
+  const marca = useMarca();
   return (
     <div
       style={{
@@ -16,7 +18,7 @@ export default function Header({ subtitle }) {
     >
       <Link to="/dashboard" style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <motion.img
-          src={logo}
+          src={marca.logo_header || logo}
           alt="SliceX.calc"
           style={{ height: 38, width: "auto", display: "block" }}
           whileHover={{ scale: 1.04 }}

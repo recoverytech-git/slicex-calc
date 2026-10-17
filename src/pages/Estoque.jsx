@@ -7,6 +7,7 @@ import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import Field from "../components/Field";
+import MoneyField from "../components/MoneyField";
 import PrimaryButton from "../components/PrimaryButton";
 import { listarVeiculos, normalizar } from "../lib/estoque";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
@@ -25,6 +26,7 @@ export default function Estoque() {
   const [capas, setCapas] = useState({});
   const [busca, setBusca] = useRascunho("est.busca", "");
   const [status, setStatus] = useRascunho("est.status", "");
+  const [filtros, setFiltros] = useRascunho("est.filtros", { marca: "", anoMin: "", anoMax: "", precoMin: 0, precoMax: 0 });
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
   const [exportando, setExportando] = useState(false);
@@ -57,14 +59,21 @@ export default function Estoque() {
     return () => { vivo = false; };
   }, [status, perfil]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const marcas = [...new Set(itens.map((v) => v.marca).filter(Boolean))].sort();
   const filtrados = useMemo(() => {
     const b = busca.trim();
-    if (!b) return itens;
     const nb = normalizar(b);
-    return itens.filter((v) =>
-      normalizar(v.placa).includes(nb) || normalizar(v.renavam).includes(nb) ||
-      normalizar(v.chassi).includes(nb) || (v.modelo || "").toLowerCase().includes(b.toLowerCase()));
-  }, [itens, busca]);
+    return itens.filter((v) => {
+      if (b && !(normalizar(v.placa).includes(nb) || normalizar(v.renavam).includes(nb) ||
+        normalizar(v.chassi).includes(nb) || (v.modelo || "").toLowerCase().includes(b.toLowerCase()))) return false;
+      if (filtros.marca && v.marca !== filtros.marca) return false;
+      if (filtros.anoMin && (v.ano_modelo ?? 0) < Number(filtros.anoMin)) return false;
+      if (filtros.anoMax && (v.ano_modelo ?? 9999) > Number(filtros.anoMax)) return false;
+      if (filtros.precoMin > 0 && Number(v.preco_venda_pretendido ?? 0) < filtros.precoMin) return false;
+      if (filtros.precoMax > 0 && Number(v.preco_venda_pretendido ?? 0) > filtros.precoMax) return false;
+      return true;
+    });
+  }, [itens, busca, filtros]);
 
   const exportarPDF = async () => {
     setExportando(true);
@@ -101,6 +110,29 @@ export default function Estoque() {
           )}
 
           <div style={{ ...card, padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6 }}>Marca</label>
+                <select value={filtros.marca} onChange={(e) => setFiltros({ ...filtros, marca: e.target.value })}
+                  style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 }}>
+                  <option value="">Todas</option>
+                  {marcas.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <Field label="Ano a partir de" val={filtros.anoMin} set={(v) => setFiltros({ ...filtros, anoMin: v })} hint="Ex: 2018" />
+              <Field label="Ano até" val={filtros.anoMax} set={(v) => setFiltros({ ...filtros, anoMax: v })} hint="Ex: 2024" />
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6 }}>Preço mínimo (R$)</label>
+                <MoneyField valor={filtros.precoMin} onChange={(n) => setFiltros({ ...filtros, precoMin: n })} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6 }}>Preço máximo (R$)</label>
+                <MoneyField valor={filtros.precoMax} onChange={(n) => setFiltros({ ...filtros, precoMax: n })} />
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button onClick={() => setFiltros({ marca: "", anoMin: "", anoMax: "", precoMin: 0, precoMax: 0 })} style={{ background: "none", border: "none", color: "var(--accent)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Limpar filtros</button>
+            </div>
             <Field label="Buscar" val={busca} set={setBusca} hint={vendedor ? "Modelo" : "Placa, RENAVAM, chassi ou modelo"} />
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {["", ...Object.keys(ROTULO)].map((s) => (
@@ -116,7 +148,7 @@ export default function Estoque() {
           </div>
 
           <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-            {carregando && <p style={{ color: "var(--text-mute)", fontSize: 13 }}>Carregando estoque…</p>}
+            {carregando && [0, 1, 2].map((k) => <div key={k} className="skeleton" style={{ height: 76 }} />)}
             {erro && <p style={{ color: "var(--text-dim)", fontSize: 13 }}>Não foi possível carregar: {erro}</p>}
             {!carregando && !erro && filtrados.length === 0 && (
               <p style={{ color: "var(--text-mute)", fontSize: 13 }}>Nenhum veículo encontrado.</p>

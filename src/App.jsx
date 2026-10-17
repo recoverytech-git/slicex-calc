@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -8,6 +8,7 @@ import RotaPrivada from "./components/RotaPrivada";
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { useMarca } from "./lib/marca";
 
 const Financiamento = lazy(() => import("./pages/Financiamento"));
 const Percentual = lazy(() => import("./pages/Percentual"));
@@ -17,6 +18,8 @@ const Estoque = lazy(() => import("./pages/Estoque"));
 const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
 const VeiculoDetalhe = lazy(() => import("./pages/VeiculoDetalhe"));
 const Vendas = lazy(() => import("./pages/Vendas"));
+const Configuracoes = lazy(() => import("./pages/Configuracoes"));
+const Logs = lazy(() => import("./pages/Logs"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 
 function RouteFallback() {
@@ -44,6 +47,8 @@ function AnimatedRoutes() {
           <Route path="/calcula-car" element={<RotaPrivada><CalculaCar /></RotaPrivada>} />
           <Route path="/estoque" element={<RotaPrivada><Estoque /></RotaPrivada>} />
           <Route path="/estoque/:id" element={<RotaPrivada><VeiculoDetalhe /></RotaPrivada>} />
+          <Route path="/configuracoes" element={<RotaPrivada papeis={["admin_master"]}><Configuracoes /></RotaPrivada>} />
+          <Route path="/logs" element={<RotaPrivada papeis={["admin_master"]}><Logs /></RotaPrivada>} />
           <Route path="/vendas" element={<RotaPrivada papeis={["admin_master","proprietario","gerente"]}><Vendas /></RotaPrivada>} />
           <Route path="/admin/usuarios" element={<RotaPrivada><AdminUsuarios /></RotaPrivada>} />
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -57,6 +62,13 @@ function Shell() {
   const { pathname } = useLocation();
   const { sessao } = useAuth();
   const [menuAberto, setMenuAberto] = useState(true);
+  const marca = useMarca();
+  useEffect(() => {
+    if (!marca.favicon) return;
+    let link = document.querySelector("link[rel='icon']");
+    if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
+    link.href = marca.favicon;
+  }, [marca.favicon]);
   const publico = pathname === "/" || pathname === "/login";
   const comNav = Boolean(sessao) && !publico;
   const classes = ["app-shell", comNav && "com-nav", comNav && !menuAberto && "menu-fechado"].filter(Boolean).join(" ");

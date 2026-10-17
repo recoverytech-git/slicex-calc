@@ -176,7 +176,7 @@ export default function VeiculoDetalhe() {
 
   const abrirEdicao = () => {
     setForm({
-      modelo: veiculo.modelo ?? "", placa: veiculo.placa ?? "", renavam: veiculo.renavam ?? "", chassi: veiculo.chassi ?? "",
+      marca: veiculo.marca ?? "", modelo: veiculo.modelo ?? "", placa: veiculo.placa ?? "", renavam: veiculo.renavam ?? "", chassi: veiculo.chassi ?? "",
       ano_fabricacao: veiculo.ano_fabricacao ?? "", ano_modelo: veiculo.ano_modelo ?? "", cor: veiculo.cor ?? "",
       quilometragem: veiculo.quilometragem ?? "", combustivel: veiculo.combustivel ?? "", cambio: veiculo.cambio ?? "",
       preco_compra: Number(veiculo.preco_compra ?? 0), valor_fipe: Number(veiculo.valor_fipe ?? 0),
@@ -189,6 +189,7 @@ export default function VeiculoDetalhe() {
     setMsg(null);
     if (!form.modelo?.trim()) { setMsg({ tipo: "erro", texto: "O modelo é obrigatório." }); return; }
     const payload = {
+      marca: form.marca?.trim() || null,
       modelo: form.modelo.trim(),
       placa: form.placa ? normalizar(form.placa) : null,
       renavam: form.renavam ? normalizar(form.renavam) : null,
@@ -292,6 +293,7 @@ export default function VeiculoDetalhe() {
                 {editando ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                     <div className="grid-4">
+                      {campo("Marca", "marca")}
                       {campo("Modelo", "modelo")}
                       {campo("Placa", "placa")}
                       {campo("RENAVAM", "renavam")}
@@ -322,6 +324,7 @@ export default function VeiculoDetalhe() {
                     {gestao && <Linha label="Placa" valor={veiculo.placa} />}
                     {gestao && <Linha label="RENAVAM" valor={veiculo.renavam} />}
                     {gestao && <Linha label="Chassi" valor={veiculo.chassi} />}
+                    <Linha label="Marca" valor={veiculo.marca} />
                     <Linha label="Ano de fabricação" valor={veiculo.ano_fabricacao} />
                     <Linha label="Ano do modelo" valor={veiculo.ano_modelo} />
                     <Linha label="Quilometragem" valor={veiculo.quilometragem != null ? `${Number(veiculo.quilometragem).toLocaleString("pt-BR")} km` : null} />

@@ -23,7 +23,7 @@ export default function SalvarNoEstoque({ dados, onConcluido }) {
     const f = dados.financiamento;
     return {
       p_dados: {
-        modelo: dados.modelo?.trim(), placa: dados.placa, renavam: dados.renavam, chassi: dados.chassi,
+        marca: dados.marca?.trim() || null, modelo: dados.modelo?.trim(), placa: dados.placa, renavam: dados.renavam, chassi: dados.chassi,
         ano_fabricacao: dados.anoFab || null, ano_modelo: dados.anoMod || null, cor: dados.cor,
         quilometragem: dados.km || null, combustivel: dados.combustivel, cambio: dados.cambio,
         preco_compra: dados.compra, valor_fipe: dados.fipe, preco_venda_pretendido: dados.valorVenda,

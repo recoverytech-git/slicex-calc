@@ -172,3 +172,18 @@ button { font-family: inherit; }
   --text-mute: #9198A1;
   --text-faint: #6b717b;
 }
+
+/* UI/UX: movimento, foco e feedback em todas as telas */
+button { transition: transform 0.15s ease, filter 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease; }
+button:not(:disabled):hover { filter: brightness(1.12); }
+button:not(:disabled):active { transform: scale(0.98); }
+button:disabled { cursor: not-allowed; opacity: 0.6; }
+input, select, textarea { transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease; }
+input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(68,147,248,0.28); outline: none; }
+.skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 37%, var(--surface) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: var(--r-lg); border: 1px solid var(--border); }
+@keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+.spin { animation: girar 0.9s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

@@ -27,7 +27,7 @@ export async function buscarDuplicado({ placa, renavam, chassi }) {
   if (renavam) filtros.push(`renavam.eq.${normalizar(renavam)}`);
   if (chassi) filtros.push(`chassi.eq.${normalizar(chassi)}`);
   if (!filtros.length) return { data: null };
-  return supabase.from("veiculos").select("id, modelo, placa").or(filtros.join(",")).limit(1).maybeSingle();
+  return supabase.from("veiculos").select("id, marca, modelo, placa").or(filtros.join(",")).limit(1).maybeSingle();
 }
 
 export async function salvarVeiculo(dados) {

@@ -1,5 +1,5 @@
 import { useRascunho } from "../lib/rascunho";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Scale, Minus } from "lucide-react";
 import Header from "../components/Header";

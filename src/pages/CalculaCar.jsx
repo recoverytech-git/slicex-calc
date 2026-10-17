@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRascunho, limparRascunho } from "../lib/rascunho";
 import { ClipboardCheck, Car, TrendingUp, Wallet, Landmark, Plus, Trash2, Pencil, PieChart, Download, FileText, BarChart3, Grid3x3, Table2, AlertTriangle, CheckCircle2, Coins, Target, Briefcase, TrendingDown, Ruler, CalendarDays, CreditCard } from "lucide-react";
@@ -63,15 +63,16 @@ export default function CalculaCar() {
 
   // Bloco 5 — custos adicionais
   const [custos, setCustos] = useRascunho("cc.custos", []);
+  const [marca, setMarca] = useRascunho("cc.marca", "");
   const [checklist, setChecklist] = useRascunho("cc.checklist", CHECKLIST_INICIAL);
   const resetarCalcula = () => {
     limparRascunho(["cc.modelo","cc.placa","cc.fipeStr","cc.compraStr","cc.renavam","cc.chassi","cc.anoFab","cc.anoMod",
       "cc.cor","cc.km","cc.combustivel","cc.cambio","cc.tipoCapital","cc.valorBemStr","cc.entradaStr","cc.taxaStr",
-      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist"]);
+      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist","cc.marca"]);
     setModelo(""); setPlaca(""); setFipeStr("75000"); setCompraStr("50000"); setRenavam(""); setChassi("");
     setAnoFab(""); setAnoMod(""); setCor(""); setKm(""); setCombustivel(""); setCambio("");
     setTipoCapital("Próprio"); setValorBemStr("50000"); setEntradaStr("0"); setTaxaStr("3.9"); setMesesStr("48");
-    setSistema("Price"); setCustos([]); setChecklist(CHECKLIST_INICIAL);
+    setSistema("Price"); setCustos([]); setChecklist(CHECKLIST_INICIAL); setMarca("");
   };
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -228,6 +229,7 @@ export default function CalculaCar() {
           <div style={{ ...card, padding: 22, marginTop: 16, boxShadow: "var(--shadow-md)" }}>
             <SectionTitle icon={Car} n={1}>Dados do Veículo</SectionTitle>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14 }}>
+              <Field label="Marca" val={marca} set={setMarca} hint="Ex: Volkswagen" />
               <Field label="Modelo do veículo" val={modelo} set={setModelo} hint="Ex: Toyota Corolla XEi 2.0" />
               <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" />
               <Field label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
@@ -527,7 +529,7 @@ export default function CalculaCar() {
             )}
           </AnimatePresence>
 
-          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda, tipoCapital, custos, financiamento, checklist }} onConcluido={resetarCalcula} />
+          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda, tipoCapital, custos, financiamento, checklist, marca }} onConcluido={resetarCalcula} />
           <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
             Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional
           </p>

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Landmark, Percent, Scissors, Car, Warehouse, BadgeDollarSign, Users } from "lucide-react";
+import { LayoutDashboard, Landmark, Percent, Scissors, Car, Warehouse, BadgeDollarSign, Users, Settings, ScrollText } from "lucide-react";
 
 export const NAV_PRINCIPAL = [
   { to: "/dashboard", label: "Dashboard", curto: "Dashboard", icon: LayoutDashboard },
@@ -17,6 +17,8 @@ export function itensNav(papel) {
   if (["admin_master", "proprietario"].includes(papel))
     extra.push(
       { to: "/admin/usuarios", label: "Usuários", curto: "Usuários", icon: Users },
+      { to: "/configuracoes", label: "Configurações", curto: "Config.", icon: Settings },
+      { to: "/logs", label: "Logs", curto: "Logs", icon: ScrollText },
     );
   return [...NAV_PRINCIPAL, ...extra];
 }

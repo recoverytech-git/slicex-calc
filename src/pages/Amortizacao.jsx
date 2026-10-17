@@ -1,6 +1,6 @@
 import IconeTexto from "../components/IconeTexto";
 import { useRascunho } from "../lib/rascunho";
-import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, TrendingDown, Trophy, Ruler, AlertTriangle, Check } from "lucide-react";
 import Header from "../components/Header";
