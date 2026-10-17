@@ -1,3 +1,4 @@
+// sem-rascunho: credenciais de acesso não são guardadas no navegador
 import { useState } from "react";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";

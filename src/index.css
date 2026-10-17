@@ -118,7 +118,7 @@ button { font-family: inherit; }
 .sidebar-link:hover { color: var(--text); background: var(--surface); }
 .sidebar-link.ativo { color: var(--text); background: var(--surface-3); border-color: var(--border-strong); }
 .bottomnav {
-  display: none; grid-template-columns: repeat(6, 1fr);
+  display: none; grid-auto-flow: column; grid-auto-columns: minmax(72px, 1fr); overflow-x: auto;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
   background: #000; border-top: 1px solid var(--border);
   padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
@@ -150,3 +150,13 @@ button { font-family: inherit; }
   transition: left 0.25s ease;
 }
 @media (max-width: 899px) { .menu-toggle { display: none; } }
+
+/* ── Grades de formulário (desktop e celular) ───────────────────────────── */
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media (max-width: 700px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}

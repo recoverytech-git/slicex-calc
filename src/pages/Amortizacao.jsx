@@ -1,3 +1,4 @@
+import { useRascunho } from "../lib/rascunho";
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, TrendingDown, Trophy } from "lucide-react";
@@ -66,12 +67,12 @@ function StrategyCard({ icon: Icon, title, subtitle, rows, winner, index }) {
 }
 
 export default function Amortizacao() {
-  const [saldo, setSaldo] = useState("120000");
-  const [taxa, setTaxa] = useState("3.9");
-  const [parcelas, setParcelas] = useState("48");
-  const [aporte, setAporte] = useState("10000");
-  const [sistema, setSistema] = useState("Price");
-  const [calculado, setCalc] = useState(false);
+  const [saldo, setSaldo] = useRascunho("amo.saldo", "120000");
+  const [taxa, setTaxa] = useRascunho("amo.taxa", "3.9");
+  const [parcelas, setParcelas] = useRascunho("amo.parcelas", "48");
+  const [aporte, setAporte] = useRascunho("amo.aporte", "10000");
+  const [sistema, setSistema] = useRascunho("amo.sistema", "Price");
+  const [calculado, setCalc] = useRascunho("amo.calculado", false);
 
   const saldoNum = toF(saldo);
   const taxaNum = toF(taxa);

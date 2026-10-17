@@ -5,9 +5,9 @@ import Modal from "./Modal";
 import UploadFotos from "./UploadFotos";
 import { useAuth } from "../lib/auth";
 import { supabase } from "../lib/supabase";
-import { buscarDuplicado, salvarVeiculo } from "../lib/estoque";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", padding: "16px 18px", marginTop: 14 };
+const PAPEIS_CADASTRO = ["admin_master", "proprietario", "gerente", "vendedor"];
 
 export default function SalvarNoEstoque({ dados, onConcluido }) {
   const { sessao, supabaseConfigurado, perfil } = useAuth();
@@ -16,88 +16,39 @@ export default function SalvarNoEstoque({ dados, onConcluido }) {
   const [veiculoId, setVeiculoId] = useState(null);
 
   if (!supabaseConfigurado || !sessao) return null;
-  if (!["proprietario", "admin_master"].includes(perfil?.papel)) {
-    return (
-      <div style={card}>
-        <p style={{ margin: 0, fontSize: 13, color: "var(--text-dim)" }}>Somente o lojista pode cadastrar veículos no estoque.</p>
-      </div>
-    );
-  }
+  if (!PAPEIS_CADASTRO.includes(perfil?.papel)) return null;
 
-  // Grava custos e financiamento ligados ao veículo recém-criado
-  const gravarFilhos = async (vid) => {
-    const uid = sessao.user.id;
-    if (dados.custos?.length) {
-      const { error } = await supabase.from("veiculo_custos").insert(
-        dados.custos.map((c) => ({ veiculo_id: vid, descricao: c.descricao, valor: c.valor, criado_por: uid })));
-      if (error) throw new Error(`custos: ${error.message}`);
-    }
+  // Monta o pacote enviado ao banco (uma única chamada, atômica)
+  const montarPacote = () => {
     const f = dados.financiamento;
-    if (f) {
-      const { data: fin, error } = await supabase.from("veiculo_financiamentos").insert({
-        veiculo_id: vid,
-        valor_financiado: f.pv,
-        taxa_juros_percentual: f.taxa,
-        periodicidade_taxa: "mensal",
-        quantidade_parcelas: f.n,
-        sistema_amortizacao: f.sistema === "SAC" ? "sac" : "price",
-        valor_parcela: f.rows[0]?.parcela ?? null,
-        total_juros: f.totalJuros,
+    return {
+      p_dados: {
+        modelo: dados.modelo?.trim(), placa: dados.placa, renavam: dados.renavam, chassi: dados.chassi,
+        ano_fabricacao: dados.anoFab || null, ano_modelo: dados.anoMod || null, cor: dados.cor,
+        quilometragem: dados.km || null, combustivel: dados.combustivel, cambio: dados.cambio,
+        preco_compra: dados.compra, valor_fipe: dados.fipe, preco_venda_pretendido: dados.valorVenda,
+        tipo_aquisicao: dados.tipoCapital === "Financiamento" ? "financiamento" : "capital_proprio",
+      },
+      p_custos: (dados.custos ?? []).map((c) => ({ descricao: c.descricao, valor: c.valor })),
+      p_financiamento: f ? {
+        valor_financiado: f.pv, taxa: f.taxa, prazo: f.n,
+        sistema: f.sistema === "SAC" ? "sac" : "price",
+        valor_parcela: f.rows[0]?.parcela ?? null, total_juros: f.totalJuros,
         dados_calculo: { total_pago: f.totalPago },
-        criado_por: uid,
-      }).select("id").single();
-      if (error) throw new Error(`financiamento: ${error.message}`);
-      const linhas = f.rows.map((r) => ({
-        financiamento_id: fin.id, parcela_numero: r.mes, valor_parcela: r.parcela,
-        amortizacao: r.amortizacao, juros: r.juros, saldo_devedor: r.saldo,
-      }));
-      for (let i = 0; i < linhas.length; i += 500) {
-        const { error: ep } = await supabase.from("veiculo_financiamento_parcelas").insert(linhas.slice(i, i + 500));
-        if (ep) throw new Error(`parcelas: ${ep.message}`);
-      }
-    }
+      } : null,
+      p_parcelas: f ? f.rows.map((r) => ({ mes: r.mes, parcela: r.parcela, amortizacao: r.amortizacao, juros: r.juros, saldo: r.saldo })) : [],
+      p_checklist: dados.checklist ?? null,
+    };
   };
 
   const salvar = async () => {
     setEstado(null);
     if (!dados.modelo?.trim()) { setEstado({ tipo: "erro", texto: "Informe o modelo do veículo antes de salvar." }); return; }
     setSalvando(true);
-    try {
-      const dup = await buscarDuplicado({ placa: dados.placa, renavam: dados.renavam, chassi: dados.chassi });
-      if (dup.error) { setEstado({ tipo: "erro", texto: `Não foi possível verificar duplicidade: ${dup.error.message}` }); return; }
-      if (dup.data) { setEstado({ tipo: "erro", texto: `Já existe no estoque: ${dup.data.modelo}${dup.data.placa ? ` (placa ${dup.data.placa})` : ""}.` }); return; }
-
-      const { data: criado, error } = await salvarVeiculo({
-        modelo: dados.modelo.trim(),
-        placa: dados.placa || null,
-        renavam: dados.renavam || null,
-        chassi: dados.chassi || null,
-        preco_compra: dados.compra,
-        valor_fipe: dados.fipe,
-        preco_venda_pretendido: dados.valorVenda,
-        tipo_aquisicao: dados.tipoCapital === "Financiamento" ? "financiamento" : "capital_proprio",
-        status: "em_preparacao",
-        ano_fabricacao: dados.anoFab ? parseInt(dados.anoFab, 10) : null,
-        ano_modelo: dados.anoMod ? parseInt(dados.anoMod, 10) : null,
-        cor: dados.cor || null,
-        quilometragem: dados.km ? parseInt(dados.km, 10) : null,
-        combustivel: dados.combustivel || null,
-        cambio: dados.cambio || null,
-      });
-      if (error) { setEstado({ tipo: "erro", texto: `Não foi salvo: ${error.message}` }); return; }
-
-      try {
-        await gravarFilhos(criado.id);
-      } catch (e) {
-        // Desfaz o veículo para não deixar cadastro incompleto
-        await supabase.rpc("excluir_veiculo", { p_id: criado.id });
-        setEstado({ tipo: "erro", texto: `Não foi salvo (${e.message}). Nada foi gravado.` });
-        return;
-      }
-      setVeiculoId(criado.id);
-    } finally {
-      setSalvando(false);
-    }
+    const { data: id, error } = await supabase.rpc("cadastrar_veiculo", montarPacote());
+    setSalvando(false);
+    if (error) { setEstado({ tipo: "erro", texto: error.message }); return; }
+    setVeiculoId(id);
   };
 
   const concluir = () => {

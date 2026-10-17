@@ -1,3 +1,4 @@
+import { useRascunho } from "../lib/rascunho";
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -22,8 +23,8 @@ export default function Estoque() {
   const vendedor = perfil?.papel === "vendedor";
   const [itens, setItens] = useState([]);
   const [capas, setCapas] = useState({});
-  const [busca, setBusca] = useState("");
-  const [status, setStatus] = useState("");
+  const [busca, setBusca] = useRascunho("est.busca", "");
+  const [status, setStatus] = useRascunho("est.status", "");
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(null);
   const [exportando, setExportando] = useState(false);

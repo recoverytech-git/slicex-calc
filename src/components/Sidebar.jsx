@@ -1,16 +1,13 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LogOut, Users } from "lucide-react";
-import { NAV_PRINCIPAL } from "./navItems";
+import { LogOut } from "lucide-react";
+import { itensNav } from "./navItems";
 import { useAuth } from "../lib/auth";
 import logo from "../assets/logo.png";
 
 export default function Sidebar({ aberta = true }) {
   const { sair, perfil } = useAuth();
   const navigate = useNavigate();
-  const podeGerirUsuarios = ["admin_master", "proprietario"].includes(perfil?.papel);
-  const itens = podeGerirUsuarios
-    ? [...NAV_PRINCIPAL, { to: "/admin/usuarios", label: "Usuários", icon: Users }]
-    : NAV_PRINCIPAL;
+  const itens = itensNav(perfil?.papel);
 
   // Navega para a landing ANTES de encerrar a sessão, para que a rota privada
   // atual não redirecione para /login durante o logout.

@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRascunho, limparRascunho } from "../lib/rascunho";
-import { Car, TrendingUp, Wallet, Landmark, Plus, Trash2, Pencil, PieChart, Download, FileText, BarChart3, Grid3x3, Table2, AlertTriangle, CheckCircle2, Coins, Target, Briefcase, TrendingDown, Ruler, CalendarDays, CreditCard } from "lucide-react";
+import { ClipboardCheck, Car, TrendingUp, Wallet, Landmark, Plus, Trash2, Pencil, PieChart, Download, FileText, BarChart3, Grid3x3, Table2, AlertTriangle, CheckCircle2, Coins, Target, Briefcase, TrendingDown, Ruler, CalendarDays, CreditCard } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
@@ -18,6 +18,7 @@ import { fmt, toF } from "../lib/format";
 import { calcPrice, calcSAC, downloadXLSX, MIME } from "../lib/financiamento";
 import { calcDiferenca, calcResultado, buildCalculaCarXLSX, buildCalculaCarPDF, MARGEM_REFERENCIA_PCT } from "../lib/calculaCar";
 import SalvarNoEstoque from "../components/SalvarNoEstoque";
+import ChecklistVeiculo, { CHECKLIST_INICIAL } from "../components/ChecklistVeiculo";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)" };
 
@@ -62,14 +63,15 @@ export default function CalculaCar() {
 
   // Bloco 5 — custos adicionais
   const [custos, setCustos] = useRascunho("cc.custos", []);
+  const [checklist, setChecklist] = useRascunho("cc.checklist", CHECKLIST_INICIAL);
   const resetarCalcula = () => {
     limparRascunho(["cc.modelo","cc.placa","cc.fipeStr","cc.compraStr","cc.renavam","cc.chassi","cc.anoFab","cc.anoMod",
       "cc.cor","cc.km","cc.combustivel","cc.cambio","cc.tipoCapital","cc.valorBemStr","cc.entradaStr","cc.taxaStr",
-      "cc.mesesStr","cc.sistema","cc.custos"]);
+      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist"]);
     setModelo(""); setPlaca(""); setFipeStr("75000"); setCompraStr("50000"); setRenavam(""); setChassi("");
     setAnoFab(""); setAnoMod(""); setCor(""); setKm(""); setCombustivel(""); setCambio("");
     setTipoCapital("Próprio"); setValorBemStr("50000"); setEntradaStr("0"); setTaxaStr("3.9"); setMesesStr("48");
-    setSistema("Price"); setCustos([]);
+    setSistema("Price"); setCustos([]); setChecklist(CHECKLIST_INICIAL);
   };
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -490,6 +492,17 @@ export default function CalculaCar() {
             )}
           </AnimatePresence>
 
+          {/* 7. Checklist do veículo */}
+          <AnimatePresence>
+            {veiculoValido && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+                style={{ ...card, padding: 22, marginTop: 14 }}>
+                <SectionTitle icon={ClipboardCheck} n={7}>Checklist do veículo</SectionTitle>
+                <ChecklistVeiculo valor={checklist} onMudar={setChecklist} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* 7. Exportação */}
           <AnimatePresence>
             {resultado && (
@@ -514,7 +527,7 @@ export default function CalculaCar() {
             )}
           </AnimatePresence>
 
-          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda, tipoCapital, custos, financiamento }} onConcluido={resetarCalcula} />
+          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda, tipoCapital, custos, financiamento, checklist }} onConcluido={resetarCalcula} />
           <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
             Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional
           </p>

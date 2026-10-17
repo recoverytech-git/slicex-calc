@@ -2,19 +2,29 @@ import { useEffect, useState } from "react";
 
 /**
  * Estado que sobrevive à navegação entre páginas (sessionStorage).
- * Evita perder o formulário ao abrir outra página e voltar.
+ * Use em TODO formulário. Campos em `ignorar` (ex.: senha) nunca são guardados.
  */
-export function useRascunho(chave, inicial) {
+export function useRascunho(chave, inicial, { ignorar = [] } = {}) {
   const [valor, setValor] = useState(() => {
     try {
       const r = sessionStorage.getItem(chave);
-      return r === null ? inicial : JSON.parse(r);
+      if (r === null) return inicial;
+      const lido = JSON.parse(r);
+      return lido && typeof lido === "object" && !Array.isArray(lido) ? { ...inicial, ...lido } : lido;
     } catch {
       return inicial;
     }
   });
   useEffect(() => {
-    try { sessionStorage.setItem(chave, JSON.stringify(valor)); } catch { /* armazenamento indisponível */ }
+    try {
+      let copia = valor;
+      if (valor && typeof valor === "object" && !Array.isArray(valor) && ignorar.length) {
+        copia = { ...valor };
+        ignorar.forEach((k) => delete copia[k]);
+      }
+      sessionStorage.setItem(chave, JSON.stringify(copia));
+    } catch { /* armazenamento indisponível */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chave, valor]);
   return [valor, setValor];
 }

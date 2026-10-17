@@ -1,3 +1,4 @@
+import { useRascunho } from "../lib/rascunho";
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, BarChart3, Grid3x3, Table2 } from "lucide-react";
@@ -17,12 +18,12 @@ import { calcPrice, calcSAC, buildXLSX, downloadXLSX, MIME } from "../lib/financ
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)" };
 
 export default function Financiamento() {
-  const [valor, setValor] = useState("150000");
-  const [taxa, setTaxa] = useState("3.9");
-  const [meses, setMeses] = useState("60");
-  const [entrada, setEntrada] = useState("0");
-  const [sistema, setSistema] = useState("Price");
-  const [calculado, setCalc] = useState(false);
+  const [valor, setValor] = useRascunho("fin.valor", "150000");
+  const [taxa, setTaxa] = useRascunho("fin.taxa", "3.9");
+  const [meses, setMeses] = useRascunho("fin.meses", "60");
+  const [entrada, setEntrada] = useRascunho("fin.entrada", "0");
+  const [sistema, setSistema] = useRascunho("fin.sistema", "Price");
+  const [calculado, setCalc] = useRascunho("fin.calculado", false);
   const [tab, setTab] = useState("grafico");
   const [dlState, setDlState] = useState(null);
 

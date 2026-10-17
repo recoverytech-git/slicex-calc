@@ -1,3 +1,4 @@
+import { useRascunho } from "../lib/rascunho";
 import { useEffect, useState, useCallback } from "react";
 import { Users, Ban, CheckCircle2, Trash2, Pencil } from "lucide-react";
 import Header from "../components/Header";
@@ -36,7 +37,7 @@ export default function AdminUsuarios() {
   const [lista, setLista] = useState([]);
   const [orgs, setOrgs] = useState([]);
   const [msg, setMsg] = useState(null);
-  const [form, setForm] = useState(FORM_VAZIO);
+  const [form, setForm] = useRascunho("usr.form", FORM_VAZIO, { ignorar: ["senha"] });
   const [salvando, setSalvando] = useState(false);
   const [editando, setEditando] = useState(null);
 

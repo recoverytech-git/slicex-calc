@@ -1,3 +1,4 @@
+import { useRascunho } from "../lib/rascunho";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Scale, Minus } from "lucide-react";
@@ -11,9 +12,9 @@ import { parseMoeda } from "../lib/moeda";
 import { calcPercentual } from "../lib/percentual";
 
 export default function Percentual() {
-  const [a, setA] = useState("100,00");
-  const [b, setB] = useState("120,00");
-  const [calculado, setCalculado] = useState(false);
+  const [a, setA] = useRascunho("per.a", "100,00");
+  const [b, setB] = useRascunho("per.b", "120,00");
+  const [calculado, setCalculado] = useRascunho("per.calculado", false);
 
   const va = parseMoeda(a);
   const vb = parseMoeda(b);

@@ -3,6 +3,10 @@
 
 begin;
 
+-- Remove versões com nomes de parâmetro diferentes antes de recriar
+drop function if exists public.excluir_veiculo(uuid);
+drop function if exists public.admin_atualizar_organizacao(uuid, text, text, text, text);
+
 alter table public.perfis add column if not exists cpf text;
 alter table public.perfis add column if not exists telefone text;
 alter table public.organizacoes add column if not exists cnpj text;
