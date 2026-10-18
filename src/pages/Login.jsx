@@ -1,35 +1,170 @@
 // sem-rascunho: credenciais de acesso não são guardadas no navegador
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation, Navigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, ShieldCheck, HelpCircle, Sun, Moon, Loader2 } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, HelpCircle, Sun, Moon, Loader2, TrendingUp, Gauge, ShieldCheck, BadgeCheck, BarChart3, Check } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import { useAuth } from "../lib/auth";
 import { useMarca } from "../lib/marca";
 import { useTema } from "../lib/tema";
-import { ENTRADA } from "../lib/motion";
-import logo from "../assets/logo.png";
 
 const SUPORTE_WHATSAPP = "https://wa.me/5561991432700?text=Preciso%20de%20ajuda%20para%20acessar%20a%20plataforma%20CALCULA.CAR%20";
 
-const rotuloStyle = { display: "block", fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" };
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-function Campo({ id, rotulo, acao, icone: Icone, tipo = "text", valor, onChange, placeholder, autoComplete, direita }) {
-  const [foco, setFoco] = useState(false);
+.lg-page{
+  --surface:#f8f9ff; --surface-lowest:#ffffff; --surface-low:#eff4ff; --surface-container:#e5eeff; --surface-high:#dce9ff;
+  --surface-variant:#d3e4fe; --on-surface:#0b1c30; --on-variant:#434655;
+  --primary:#004ac6; --primary-c:#2563eb; --secondary:#006c49; --secondary-c:#6cf8bb;
+  --secondary-fixed:#6ffbbe; --on-secondary-fixed:#002113; --primary-fixed:#dbe1ff;
+  --glass:rgba(248,249,255,0.82); --input-bg:rgba(229,238,255,0.7); --ring:rgba(37,99,235,0.18);
+  --card-shadow:0 24px 60px -12px rgba(0,74,198,0.15), 0 8px 24px rgba(11,28,48,0.05);
+  --glow:rgba(37,99,235,0.15); --live-bg:rgba(229,238,255,0.6);
+  font-family:'Plus Jakarta Sans',Inter,system-ui,sans-serif; background:var(--surface); color:var(--on-surface);
+  min-height:100vh; position:relative; overflow-x:hidden;
+}
+.lg-page[data-paleta="dark"]{
+  --surface:#000000; --surface-lowest:#141414; --surface-low:#0f0f0f; --surface-container:#1c1c1c; --surface-high:#242424;
+  --surface-variant:#2a2a2a; --on-surface:#f5f5f5; --on-variant:#9198A1;
+  --primary:#4493F8; --primary-c:#2F6FD6; --secondary:#10b981; --secondary-c:#10b981;
+  --secondary-fixed:rgba(16,185,129,0.25); --on-secondary-fixed:#a7f3d0; --primary-fixed:rgba(68,147,248,0.14);
+  --glass:rgba(0,0,0,0.8); --input-bg:rgba(28,28,28,0.7); --ring:rgba(68,147,248,0.25);
+  --card-shadow:0 24px 60px -12px rgba(0,0,0,0.6); --glow:rgba(68,147,248,0.12); --live-bg:rgba(28,28,28,0.6);
+}
+
+.lg-header{position:fixed;top:0;left:0;right:0;z-index:50;height:64px;background:var(--glass);backdrop-filter:blur(20px);box-shadow:0 1px 8px rgba(0,0,0,0.04)}
+.lg-header-in{height:64px;max-width:1280px;margin:0 auto;padding:0 clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.lg-brand{display:flex;align-items:center;text-decoration:none;color:var(--on-surface);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.02em;transition:transform .2s}
+.lg-brand:hover{transform:scale(1.02)}
+.lg-brand img{height:34px;width:auto;display:block}
+.lg-dot{color:var(--primary)}
+.lg-nav{display:flex;align-items:center;gap:24px}
+.lg-navlink{display:inline-flex;align-items:center;gap:6px;font-family:Inter,sans-serif;font-size:14px;font-weight:500;color:var(--on-variant);text-decoration:none;background:none;border:none;padding:0;cursor:pointer;transition:all .2s}
+.lg-navlink:hover{color:var(--on-surface);transform:translateY(-2px)}
+.lg-iconbtn{width:36px;height:36px;border-radius:12px;background:var(--surface-container);color:var(--on-variant);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.lg-iconbtn:hover{background:var(--surface-high);color:var(--on-surface);transform:rotate(12deg)}
+.lg-iconbtn:active{transform:scale(0.95)}
+@media (max-width:767px){.lg-navtext{display:none}.lg-nav{gap:16px}}
+
+.lg-main{position:relative;z-index:10;min-height:100vh;padding:64px 16px 0;display:flex;flex-direction:column}
+.lg-stage{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 0 56px}
+.lg-glow-a{pointer-events:none;position:absolute;top:-96px;left:50%;width:760px;max-width:150vw;height:500px;background:linear-gradient(to top right,rgba(37,99,235,0.15),rgba(37,99,235,0.2),rgba(108,248,187,0.15));filter:blur(64px);opacity:.75;border-radius:999px;animation:lgAmbient1 7s ease-in-out infinite alternate}
+.lg-glow-b{pointer-events:none;position:absolute;bottom:-64px;right:40px;width:420px;height:420px;background:var(--primary-fixed);opacity:.3;filter:blur(64px);border-radius:999px;animation:lgAmbient2 8s ease-in-out infinite alternate 1s}
+
+.lg-float{position:absolute;z-index:10;display:none;align-items:center;gap:12px;padding:16px;border-radius:16px;background:var(--surface-lowest);opacity:.95;backdrop-filter:blur(20px);border:1px solid var(--surface-container);box-shadow:0 16px 36px -8px rgba(0,74,198,0.14),0 2px 8px rgba(0,0,0,0.04);transition:transform .3s,box-shadow .3s;cursor:default}
+.lg-float:hover{transform:scale(1.05)}
+.lg-float-l{left:48px;top:112px;animation:lgFloat1 5.5s ease-in-out infinite}
+.lg-float-r{right:48px;bottom:80px;animation:lgFloat2 6s ease-in-out infinite .6s}
+@media (min-width:1280px){.lg-float{display:flex}}
+.lg-float-ic{width:40px;height:40px;border-radius:12px;background:var(--surface-low);display:flex;align-items:center;justify-content:center;color:var(--primary);box-shadow:inset 0 1px 2px rgba(0,0,0,0.05)}
+.lg-float-r .lg-float-ic{color:var(--secondary)}
+.lg-float-k{display:flex;align-items:center;gap:6px;font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--on-variant)}
+.lg-badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0;background:var(--secondary-fixed);color:var(--on-secondary-fixed)}
+.lg-float-v{margin:2px 0 0;font-size:14px;font-weight:700;color:var(--on-surface)}
+
+.lg-wrap{position:relative;width:100%;max-width:480px;z-index:20}
+.lg-enter{animation:lgFadeUp .75s cubic-bezier(.16,1,.3,1) both}
+.lg-card{position:relative;border-radius:24px;background:var(--surface-lowest);opacity:.97;box-shadow:var(--card-shadow),0 0 0 1px rgba(255,255,255,0.08);padding:32px;display:flex;flex-direction:column;transition:transform .25s ease-out,box-shadow .3s ease;will-change:transform}
+@media (min-width:640px){.lg-card{padding:40px}}
+.lg-card:hover{box-shadow:0 32px 70px -10px rgba(0,74,198,0.22),0 12px 28px rgba(11,28,48,0.06)}
+.lg-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:10px}
+.lg-pill{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border-radius:999px;background:var(--surface-low);color:var(--primary);font-family:Inter,sans-serif;font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,0.05);transition:transform .2s}
+.lg-pill:hover{transform:scale(1.02)}
+.lg-pill-dot{width:8px;height:8px;border-radius:999px;background:var(--primary);animation:lgBlink 2s ease-in-out infinite}
+.lg-restrito{display:inline-flex;align-items:center;gap:5px;font-family:Inter,sans-serif;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--on-variant)}
+.lg-restrito svg{color:var(--secondary)}
+.lg-h1{margin:0 0 8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;letter-spacing:-0.025em;line-height:1.15;color:var(--on-surface)}
+.lg-sub{margin:0 0 32px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;line-height:1.6;color:var(--on-variant)}
+.lg-form{display:flex;flex-direction:column;gap:20px}
+.lg-field{display:flex;flex-direction:column;gap:8px}
+.lg-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lg-label{font-family:Inter,sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--on-surface);transition:color .2s}
+.lg-field:focus-within .lg-label{color:var(--primary)}
+.lg-link{background:none;border:none;padding:0;font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:var(--primary);cursor:pointer;transition:color .2s}
+.lg-link:hover{color:var(--primary-c);text-decoration:underline}
+.lg-input-wrap{position:relative;display:flex;align-items:center}
+.lg-icon{position:absolute;left:14px;color:var(--on-variant);pointer-events:none;transition:color .2s}
+.lg-field:focus-within .lg-icon{color:var(--primary)}
+.lg-input{width:100%;box-sizing:border-box;padding:14px 14px 14px 44px;border-radius:12px;border:1px solid transparent;background:var(--input-bg);color:var(--on-surface);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:500;outline:none;transition:all .2s ease}
+.lg-input::placeholder{color:var(--on-variant);opacity:.6}
+.lg-input:hover{border-color:var(--surface-variant)}
+.lg-input:focus{background:var(--surface-lowest);border-color:var(--primary-c);box-shadow:0 0 0 4px var(--ring),0 4px 16px rgba(37,99,235,0.12);transform:translateY(-2px)}
+.lg-input-pr{padding-right:48px}
+.lg-eye{position:absolute;right:10px;padding:6px;border-radius:8px;border:none;background:transparent;color:var(--on-variant);cursor:pointer;display:flex;transition:all .2s}
+.lg-eye:hover{color:var(--on-surface);background:var(--surface-container)}
+.lg-check-row{display:flex;align-items:center;padding-top:4px}
+.lg-check{position:relative;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+.lg-check input{position:absolute;opacity:0;width:0;height:0;margin:0}
+.lg-check-box{width:20px;height:20px;border-radius:6px;background:var(--surface-low);display:flex;align-items:center;justify-content:center;color:#ffffff;transition:all .2s}
+.lg-check:hover .lg-check-box{background:var(--surface-container)}
+.lg-check input:checked + .lg-check-box{background:var(--primary)}
+.lg-check input:focus-visible + .lg-check-box{box-shadow:0 0 0 2px var(--ring)}
+.lg-check-box svg{opacity:0;transform:scale(0);transition:all .2s}
+.lg-check input:checked + .lg-check-box svg{opacity:1;transform:scale(1)}
+.lg-check-txt{font-family:Inter,sans-serif;font-size:12px;font-weight:500;color:var(--on-variant);transition:color .2s}
+.lg-check:hover .lg-check-txt{color:var(--on-surface)}
+.lg-cta{position:relative;width:100%;margin-top:8px;padding:15px 24px;border-radius:12px;border:none;overflow:hidden;color:#ffffff;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;background:linear-gradient(90deg,var(--primary),var(--primary-c));box-shadow:0 8px 24px -4px rgba(37,99,235,0.45);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .2s ease}
+.lg-cta:hover:not(:disabled){box-shadow:0 16px 32px -4px rgba(37,99,235,0.6);transform:translateY(-2px)}
+.lg-cta:active:not(:disabled){transform:translateY(0) scale(0.985)}
+.lg-cta:disabled{opacity:.6;cursor:not-allowed}
+.lg-shine{position:absolute;top:0;bottom:0;left:0;width:50%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);pointer-events:none;animation:lgShimmer 4s cubic-bezier(0.4,0,0.2,1) infinite}
+.lg-cta-txt{position:relative;z-index:1;display:flex;align-items:center;gap:8px}
+.lg-cta .lg-arrow{transition:transform .2s}
+.lg-cta:hover:not(:disabled) .lg-arrow{transform:translateX(6px)}
+.lg-msg{margin-top:16px;padding:10px 14px;border-radius:12px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;background:var(--surface-low);color:var(--on-surface);border:1px solid var(--surface-container)}
+.lg-msg-erro{border-color:#ef4444}
+.lg-voltar{margin-top:18px;background:none;border:none;padding:0;display:inline-flex;align-items:center;gap:6px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:var(--on-variant);cursor:pointer}
+.lg-voltar:hover{color:var(--on-surface)}
+
+.lg-foot{margin:32px -32px -32px;padding:24px 32px;border-radius:0 0 24px 24px;background:var(--surface-low);display:flex;flex-direction:column;gap:12px;text-align:center}
+@media (min-width:640px){.lg-foot{margin:32px -40px -40px;padding:24px 40px}}
+.lg-foot p{margin:0;font-family:Inter,sans-serif;font-size:12px;color:var(--on-variant)}
+.lg-foot strong{color:var(--primary);font-weight:700}
+.lg-foot-sec{display:flex;align-items:center;justify-content:center;gap:8px;font-family:Inter,sans-serif;font-size:11px;color:var(--on-variant);opacity:.85}
+.lg-foot-sec svg{color:var(--secondary)}
+
+.lg-live{margin-top:24px;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-radius:16px;background:var(--live-bg);backdrop-filter:blur(12px);border:1px solid var(--surface-container);box-shadow:0 1px 3px rgba(0,0,0,0.05);font-family:Inter,sans-serif;font-size:12px;font-weight:500;color:var(--on-variant)}
+.lg-live-l{display:flex;align-items:center;gap:10px}
+.lg-ping{position:relative;width:10px;height:10px;display:inline-block}
+.lg-ping::before{content:"";position:absolute;inset:0;border-radius:999px;background:var(--secondary-c);opacity:.75;animation:lgPing 1.6s cubic-bezier(0,0,0.2,1) infinite}
+.lg-ping::after{content:"";position:absolute;inset:0;border-radius:999px;background:var(--secondary);animation:lgGreen 2.2s infinite}
+.lg-live-r{color:var(--primary);display:flex}
+
+.lg-footer{position:relative;z-index:10;margin-top:auto;padding:18px clamp(16px,4vw,48px);background:var(--surface-low);border-top:1px solid var(--surface-container);display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;font-family:Inter,sans-serif;font-size:12px;color:var(--on-variant)}
+.lg-footer-l{display:flex;align-items:center;gap:8px}
+.lg-footer-l svg{color:var(--secondary)}
+.lg-footer-r{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.lg-footer-r span{transition:color .2s}
+.lg-footer-r span:hover{color:var(--on-surface)}
+
+@keyframes lgFloat1{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(0.4deg)}}
+@keyframes lgFloat2{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(10px) rotate(-0.5deg)}}
+@keyframes lgAmbient1{0%,100%{transform:translate(-50%,0) scale(1);opacity:.7}50%{transform:translate(-50%,-15px) scale(1.08);opacity:.9}}
+@keyframes lgAmbient2{0%,100%{transform:scale(1) translate(0,0);opacity:.25}50%{transform:scale(1.15) translate(-15px,-10px);opacity:.45}}
+@keyframes lgFadeUp{from{opacity:0;transform:translateY(22px) scale(0.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes lgShimmer{0%{transform:translateX(-150%) skewX(-20deg)}100%{transform:translateX(250%) skewX(-20deg)}}
+@keyframes lgPing{0%{transform:scale(1);opacity:.75}75%,100%{transform:scale(2.2);opacity:0}}
+@keyframes lgGreen{0%{box-shadow:0 0 0 0 rgba(0,108,73,0.5)}70%{box-shadow:0 0 0 7px rgba(0,108,73,0)}100%{box-shadow:0 0 0 0 rgba(0,108,73,0)}}
+@keyframes lgBlink{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes lgSpin{to{transform:rotate(360deg)}}
+.lg-spin{animation:lgSpin .9s linear infinite}
+@media (prefers-reduced-motion: reduce){
+  .lg-page *,.lg-page *::before,.lg-page *::after{animation:none !important;transition:none !important}
+  .lg-card{transform:none !important}
+}
+`;
+
+function Campo({ id, rotulo, acao, Icone, tipo = "text", valor, onChange, placeholder, autoComplete, direita }) {
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
-        <label htmlFor={id} style={rotuloStyle}>{rotulo}</label>
+    <div className="lg-field">
+      <div className="lg-label-row">
+        <label htmlFor={id} className="lg-label">{rotulo}</label>
         {acao}
       </div>
-      <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-        <Icone size={18} aria-hidden="true" style={{ position: "absolute", left: 14, pointerEvents: "none", color: foco ? "var(--accent)" : "var(--text-mute)", transition: "color .2s ease" }} />
-        <input id={id} type={tipo} value={valor} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} autoComplete={autoComplete}
-          onFocus={() => setFoco(true)} onBlur={() => setFoco(false)}
-          style={{ width: "100%", boxSizing: "border-box", padding: direita ? "14px 46px 14px 44px" : "14px 14px 14px 44px", borderRadius: 12,
-            border: `1.5px solid ${foco ? "var(--accent)" : "var(--border-strong)"}`, background: "var(--surface-2)", color: "var(--text)",
-            fontSize: 15, fontWeight: 500, outline: "none", boxShadow: foco ? "0 0 0 3px rgba(68,147,248,0.18)" : "none",
-            transition: "border-color .2s ease, box-shadow .2s ease" }} />
+      <div className="lg-input-wrap">
+        <Icone size={20} className="lg-icon" aria-hidden="true" />
+        <input id={id} type={tipo} value={valor} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+          autoComplete={autoComplete} required className={`lg-input${direita ? " lg-input-pr" : ""}`} />
         {direita}
       </div>
     </div>
@@ -42,18 +177,53 @@ export default function Login() {
   const local = useLocation();
   const marca = useMarca();
   const [tema, definirTema] = useTema();
-  const claro = tema === "light";
-  const logoLogin = claro ? (marca.logo_landing_claro || logo) : (marca.logo_landing || logo);
-  const logoPadrao = logoLogin === logo;
+  // A página abre na paleta clara do design. Quem já escolheu um tema mantém a escolha.
+  const [paleta, setPaleta] = useState(() => {
+    try { return localStorage.getItem("slicex-tema") ? tema : "light"; } catch { return "light"; }
+  });
+  const escuro = paleta === "dark";
+  const logoCustom = escuro ? (marca.logo_landing || null) : (marca.logo_landing_claro || null);
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [verSenha, setVerSenha] = useState(false);
+  const [lembrar, setLembrar] = useState(false);
   const [modo, setModo] = useState("entrar"); // entrar | recuperar
   const [msg, setMsg] = useState(null);
   const [carregando, setCarregando] = useState(false);
+  const wrapRef = useRef(null);
+  const cardRef = useRef(null);
+
+  // Inclinação suave do cartão com o mouse
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const wrap = wrapRef.current;
+    const card = cardRef.current;
+    if (!wrap || !card) return undefined;
+    const mover = (e) => {
+      const b = wrap.getBoundingClientRect();
+      const cx = e.clientX - b.left - b.width / 2;
+      const cy = e.clientY - b.top - b.height / 2;
+      const rx = (-cy / (b.height / 2)) * 4.5;
+      const ry = (cx / (b.width / 2)) * 4.5;
+      card.style.transform = `perspective(1000px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) translateZ(6px)`;
+    };
+    const sair = () => { card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)"; };
+    wrap.addEventListener("mousemove", mover);
+    wrap.addEventListener("mouseleave", sair);
+    return () => {
+      wrap.removeEventListener("mousemove", mover);
+      wrap.removeEventListener("mouseleave", sair);
+    };
+  }, []);
 
   if (sessao) return <Navigate to="/dashboard" replace />;
+
+  const alternarPaleta = () => {
+    const nova = escuro ? "light" : "dark";
+    setPaleta(nova);
+    definirTema(nova);
+  };
 
   const trocarModo = (novo) => { setModo(novo); setMsg(null); };
 
@@ -83,114 +253,138 @@ export default function Login() {
 
   return (
     <PageTransition>
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "var(--bg-top)" }}>
-        <header style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px clamp(16px, 4vw, 40px)", background: "var(--bg-header)", borderBottom: "1px solid var(--border)" }}>
-          <img src={logoLogin} alt="Logomarca" style={{ height: 34, width: "auto", filter: claro && logoPadrao ? "invert(1)" : "none" }} />
-          <nav style={{ display: "flex", alignItems: "center", gap: 22, marginLeft: "auto" }}>
-            <Link to="/" className="login-link"><ArrowLeft size={16} aria-hidden="true" /><span className="login-link-texto">Home page</span></Link>
-            <a href={SUPORTE_WHATSAPP} target="_blank" rel="noopener noreferrer" className="login-link">
-              <HelpCircle size={16} aria-hidden="true" /><span className="login-link-texto">Ajuda &amp; Suporte</span>
-            </a>
-          </nav>
-          <button type="button" onClick={() => definirTema(claro ? "dark" : "light")} aria-label={claro ? "Ativar tema escuro" : "Ativar tema claro"}
-            style={{ width: 36, height: 36, borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "var(--surface)", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-            {claro ? <Moon size={16} /> : <Sun size={16} />}
-          </button>
+      <div className="lg-page" data-paleta={paleta}>
+        <style>{CSS}</style>
+
+        <header className="lg-header">
+          <div className="lg-header-in">
+            <Link to="/" className="lg-brand" aria-label="Calcula.car, página inicial">
+              {logoCustom
+                ? <img src={logoCustom} alt="Logomarca" />
+                : <span>Calcula<span className="lg-dot">.car</span></span>}
+            </Link>
+            <nav className="lg-nav" aria-label="Acesso">
+              <Link to="/" className="lg-navlink"><ArrowLeft size={18} aria-hidden="true" /><span className="lg-navtext">HOME PAGE</span></Link>
+              <a href={SUPORTE_WHATSAPP} target="_blank" rel="noopener noreferrer" className="lg-navlink">
+                <HelpCircle size={18} aria-hidden="true" /><span className="lg-navtext">Ajuda &amp; Suporte</span>
+              </a>
+            </nav>
+            <button type="button" className="lg-iconbtn" onClick={alternarPaleta}
+              aria-label={escuro ? "Ativar tema claro" : "Ativar tema escuro"}>
+              {escuro ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+          </div>
         </header>
 
-        <main style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 16px",
-          background: "radial-gradient(ellipse 800px 520px at 50% 35%, rgba(68,147,248,0.14), transparent 70%)" }}>
-          <div style={{ width: "100%", maxWidth: 440 }}>
-            <motion.div {...ENTRADA} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 24, boxShadow: "var(--shadow-lg)", overflow: "hidden" }}>
-              <div style={{ padding: "28px 28px 24px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 12px", borderRadius: 999, background: "rgba(68,147,248,0.12)", color: "var(--accent-soft)", fontSize: 12, fontWeight: 700 }}>
-                    <span style={{ width: 7, height: 7, borderRadius: 999, background: "var(--accent)" }} aria-hidden="true" /> Login seguro
-                  </span>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: "var(--text-mute)" }}>
-                    <Lock size={13} aria-hidden="true" /> ACESSO RESTRITO
-                  </span>
-                </div>
+        <main className="lg-main">
+          <div className="lg-stage">
+            <div className="lg-glow-a" aria-hidden="true" />
+            <div className="lg-glow-b" aria-hidden="true" />
 
-                <h1 style={{ margin: "22px 0 6px", fontSize: 30, fontWeight: 800, letterSpacing: "-0.02em", color: "var(--text)" }}>
-                  {modo === "entrar" ? "Entrar" : "Recuperar senha"}
-                </h1>
-                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: "var(--text-dim)" }}>
-                  {modo === "entrar"
-                    ? "Use o e-mail e a senha cadastrados pela sua loja parceira para gerenciar margens e estoque."
-                    : "Informe seu e-mail corporativo e enviaremos o link para criar uma nova senha."}
-                </p>
+            <div className="lg-float lg-float-l" aria-hidden="true">
+              <div className="lg-float-ic"><TrendingUp size={22} /></div>
+              <div style={{ paddingRight: 8 }}>
+                <div className="lg-float-k">Margem líquida <span className="lg-badge">+4,8%</span></div>
+                <p className="lg-float-v">R$ 14.850 / veículo</p>
+              </div>
+            </div>
 
-                {!supabaseConfigurado && (
-                  <div role="status" style={{ marginTop: 16, padding: "10px 14px", borderRadius: "var(--r-sm)", background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", fontSize: 12, color: "var(--text-dim)" }}>
-                    Acesso indisponível: a conexão com o banco ainda não está configurada.
+            <div className="lg-float lg-float-r" aria-hidden="true">
+              <div className="lg-float-ic"><Gauge size={22} /></div>
+              <div style={{ paddingRight: 8 }}>
+                <span className="lg-float-k">Palio 1,0</span>
+                <p className="lg-float-v">18 dias em estoque</p>
+              </div>
+            </div>
+
+            <div className="lg-wrap" ref={wrapRef}>
+              <div className="lg-enter">
+                <div className="lg-card" ref={cardRef}>
+                  <div className="lg-topline">
+                    <span className="lg-pill"><span className="lg-pill-dot" aria-hidden="true" />Login seguro</span>
+                    <span className="lg-restrito"><Lock size={15} aria-hidden="true" />Acesso restrito</span>
                   </div>
-                )}
 
-                <form onSubmit={enviar} style={{ display: "flex", flexDirection: "column", gap: 18, marginTop: 24 }}>
-                  <Campo id="email" rotulo="E-mail corporativo" icone={Mail} tipo="email" valor={email} onChange={setEmail}
-                    placeholder="voce@loja.com.br" autoComplete="username" />
+                  <h1 className="lg-h1">{modo === "entrar" ? "Entrar" : "Recuperar senha"}</h1>
+                  <p className="lg-sub">
+                    {modo === "entrar"
+                      ? "Use o e-mail e a senha cadastrados pela sua loja parceira para gerenciar margens e estoque."
+                      : "Informe seu e-mail corporativo e enviaremos o link para criar uma nova senha."}
+                  </p>
 
-                  {modo === "entrar" && (
-                    <Campo id="senha" rotulo="Senha" icone={Lock} tipo={verSenha ? "text" : "password"} valor={senha} onChange={setSenha}
-                      placeholder="Sua senha" autoComplete="current-password"
-                      acao={
-                        <button type="button" onClick={() => trocarModo("recuperar")}
-                          style={{ background: "none", border: "none", padding: 0, color: "var(--accent-soft)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                          Esqueci minha senha
-                        </button>
-                      }
-                      direita={
-                        <button type="button" onClick={() => setVerSenha((v) => !v)} aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}
-                          style={{ position: "absolute", right: 10, padding: 6, borderRadius: 8, border: "none", background: "transparent", color: "var(--text-mute)", cursor: "pointer", display: "flex" }}>
-                          {verSenha ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      } />
+                  {!supabaseConfigurado && (
+                    <div role="status" className="lg-msg">Acesso indisponível: a conexão com o banco ainda não está configurada.</div>
                   )}
 
-                  <button type="submit" disabled={!podeEnviar} className="login-botao"
-                    style={{ width: "100%", padding: "15px 20px", borderRadius: 12, border: "none", color: "#ffffff", fontSize: 15, fontWeight: 700,
-                      background: "linear-gradient(90deg, #2F6FD6, #4493F8)", boxShadow: "0 10px 24px -8px rgba(68,147,248,0.55)",
-                      cursor: podeEnviar ? "pointer" : "not-allowed", opacity: podeEnviar ? 1 : 0.6,
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                    {carregando ? <><Loader2 size={18} className="spin" aria-hidden="true" /> Aguarde…</>
-                      : modo === "entrar" ? <>Entrar na plataforma <ArrowRight size={18} aria-hidden="true" /></>
-                      : <>Enviar link de recuperação <ArrowRight size={18} aria-hidden="true" /></>}
-                  </button>
-                </form>
+                  <form onSubmit={enviar} className="lg-form">
+                    <Campo id="email" rotulo="E-mail corporativo" Icone={Mail} tipo="email" valor={email} onChange={setEmail}
+                      placeholder="voce@loja.com.br" autoComplete="username" />
 
-                {msg && (
-                  <div role="status" style={{ marginTop: 16, padding: "10px 14px", borderRadius: "var(--r-sm)", fontSize: 13, fontWeight: 600,
-                    background: "var(--bg-elevated)", border: `1px solid ${msg.tipo === "erro" ? "#ef4444" : "var(--border-strong)"}`, color: "var(--text)" }}>
-                    {msg.texto}
+                    {modo === "entrar" && (
+                      <Campo id="senha" rotulo="Senha" Icone={Lock} tipo={verSenha ? "text" : "password"} valor={senha} onChange={setSenha}
+                        placeholder="••••••••••••" autoComplete="current-password"
+                        acao={<button type="button" className="lg-link" onClick={() => trocarModo("recuperar")}>Esqueci minha senha</button>}
+                        direita={
+                          <button type="button" className="lg-eye" onClick={() => setVerSenha((v) => !v)}
+                            aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}>
+                            {verSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+                          </button>
+                        } />
+                    )}
+
+                    {modo === "entrar" && (
+                      <div className="lg-check-row">
+                        <label className="lg-check">
+                          <input type="checkbox" checked={lembrar} onChange={(e) => setLembrar(e.target.checked)} />
+                          <span className="lg-check-box"><Check size={14} strokeWidth={3} aria-hidden="true" /></span>
+                          <span className="lg-check-txt">Lembrar deste dispositivo</span>
+                        </label>
+                      </div>
+                    )}
+
+                    <button type="submit" disabled={!podeEnviar} className="lg-cta">
+                      <span className="lg-shine" aria-hidden="true" />
+                      <span className="lg-cta-txt">
+                        {carregando ? <><Loader2 size={18} className="lg-spin" aria-hidden="true" /> Aguarde…</>
+                          : modo === "entrar" ? <>Entrar na plataforma <ArrowRight size={19} className="lg-arrow" aria-hidden="true" /></>
+                          : <>Enviar link de recuperação <ArrowRight size={19} className="lg-arrow" aria-hidden="true" /></>}
+                      </span>
+                    </button>
+                  </form>
+
+                  {msg && <div role="status" className={`lg-msg${msg.tipo === "erro" ? " lg-msg-erro" : ""}`}>{msg.texto}</div>}
+
+                  {modo === "recuperar" && (
+                    <button type="button" className="lg-voltar" onClick={() => trocarModo("entrar")}>
+                      <ArrowLeft size={14} aria-hidden="true" /> Voltar ao login
+                    </button>
+                  )}
+
+                  <div className="lg-foot">
+                    <p>Não possui credenciais? <strong>Solicite à diretoria da loja</strong></p>
+                    <p className="lg-foot-sec"><BadgeCheck size={15} aria-hidden="true" /> Criptografia ponta a ponta ativa • Padrão F&amp;I Bancário</p>
                   </div>
-                )}
+                </div>
 
-                {modo === "recuperar" && (
-                  <button type="button" onClick={() => trocarModo("entrar")}
-                    style={{ marginTop: 18, background: "none", border: "none", padding: 0, color: "var(--text-dim)", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    <ArrowLeft size={14} aria-hidden="true" /> Voltar ao login
-                  </button>
-                )}
+                <div className="lg-live">
+                  <div className="lg-live-l"><span className="lg-ping" aria-hidden="true" /><span>Servidores Financeiros Online</span></div>
+                  <div className="lg-live-r"><BarChart3 size={16} aria-hidden="true" /></div>
+                </div>
               </div>
-
-              <div style={{ background: "var(--surface-2)", borderTop: "1px solid var(--border)", padding: "18px 28px", textAlign: "center" }}>
-                <p style={{ margin: 0, fontSize: 13, color: "var(--text-dim)" }}>
-                  Não possui credenciais? <strong style={{ color: "var(--text)" }}>Solicite à diretoria da loja.</strong>
-                </p>
-                <p style={{ margin: "10px 0 0", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "var(--text-mute)" }}>
-                  <ShieldCheck size={14} aria-hidden="true" style={{ color: "var(--accent)" }} /> Conexão criptografada
-                </p>
-              </div>
-            </motion.div>
+            </div>
           </div>
         </main>
 
-        <footer style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, padding: "18px clamp(16px, 4vw, 40px)", borderTop: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 12, color: "var(--text-mute)" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-            <ShieldCheck size={14} aria-hidden="true" /> Ambiente seguro para acesso à plataforma
-          </span>
-          <span>© {new Date().getFullYear()} Todos os direitos reservados.</span>
+        <footer className="lg-footer">
+          <div className="lg-footer-l">
+            <ShieldCheck size={18} aria-hidden="true" />
+            <span>Ambiente Seguro com Criptografia de Ponta a Ponta (SSL 256-bit)</span>
+          </div>
+          <div className="lg-footer-r">
+            <span>© {new Date().getFullYear()} Calcula.car Soluções Automotivas. Todos os direitos reservados.</span>
+            <span>Termos</span>
+            <span>Privacidade</span>
+          </div>
         </footer>
       </div>
     </PageTransition>
