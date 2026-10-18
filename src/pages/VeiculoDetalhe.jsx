@@ -16,6 +16,7 @@ import { useAuth } from "../lib/auth";
 import { useRascunho } from "../lib/rascunho";
 import { formatarBRL } from "../lib/moeda";
 import { BUCKET_FOTOS } from "../lib/fotos";
+import { gerarPdfVeiculo } from "../lib/veiculoPdf";
 import { normalizar, excluirVeiculo } from "../lib/estoque";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", padding: 20, marginTop: 14 };
@@ -24,6 +25,14 @@ const ROTULO = Object.fromEntries(STATUS);
 const TIPO = { capital_proprio: "Capital próprio", financiamento: "Financiamento" };
 const titulo = { margin: "0 0 12px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" };
 const moeda = (v) => (v == null ? "—" : formatarBRL(Number(v)));
+const fmtData = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR") : null);
+async function urlParaDataUrl(url) {
+  try {
+    const r = await fetch(url);
+    const b = await r.blob();
+    return await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(b); });
+  } catch { return null; }
+}
 const botaoSec = { display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "1px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "6px 12px", color: "var(--text)", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease" };
 const botaoViewer = { ...botaoSec, color: "#ffffff", borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.08)" };
 const botaoIcone = { width: 28, height: 28, borderRadius: 999, background: "rgba(0,0,0,0.7)", border: "1px solid var(--border-strong)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
@@ -73,6 +82,23 @@ export default function VeiculoDetalhe() {
   const [fotoAtiva, setFotoAtiva] = useState(null);
   const [busy, setBusy] = useState(false);
   const [msgFoto, setMsgFoto] = useState(null);
+
+  const exportarPdfVeiculo = async () => {
+    setBusy(true);
+    setMsgFoto(null);
+    try {
+      const [{ default: jsPDF }, { default: autoTable }, ck, chk] = await Promise.all([
+        import("jspdf"), import("jspdf-autotable"), import("../components/ChecklistVeiculo"),
+        supabase.from("veiculo_checklists").select("*").eq("veiculo_id", id).maybeSingle(),
+      ]);
+      const imgs = (await Promise.all(fotos.filter((f) => f.url).map((f) => urlParaDataUrl(f.url)))).filter(Boolean);
+      const doc = gerarPdfVeiculo({ veiculo, financiamento, custos, vendas, checklist: chk.data, fotos: imgs,
+        jsPDF, autoTable, ITENS: ck.ITENS, DOCUMENTACAO: ck.DOCUMENTACAO });
+      doc.save(`veiculo-${(veiculo.modelo || "veiculo").toLowerCase().replace(/\s+/g, "-")}.pdf`);
+    } catch (e) {
+      setMsgFoto({ tipo: "erro", texto: `PDF não gerado: ${e.message}` });
+    } finally { setBusy(false); }
+  };
 
   const excluirCusto = async (c) => {
     if (!window.confirm(`Excluir o custo "${c.descricao}"?`)) return;
@@ -177,7 +203,7 @@ export default function VeiculoDetalhe() {
 
   const abrirEdicao = () => {
     setForm({
-      marca: veiculo.marca ?? "", modelo: veiculo.modelo ?? "", placa: veiculo.placa ?? "", renavam: veiculo.renavam ?? "", chassi: veiculo.chassi ?? "",
+      marca: veiculo.marca ?? "", data_aquisicao: veiculo.data_aquisicao ?? "", modelo: veiculo.modelo ?? "", placa: veiculo.placa ?? "", renavam: veiculo.renavam ?? "", chassi: veiculo.chassi ?? "",
       ano_fabricacao: veiculo.ano_fabricacao ?? "", ano_modelo: veiculo.ano_modelo ?? "", cor: veiculo.cor ?? "",
       quilometragem: veiculo.quilometragem ?? "", combustivel: veiculo.combustivel ?? "", cambio: veiculo.cambio ?? "",
       preco_compra: Number(veiculo.preco_compra ?? 0), valor_fipe: Number(veiculo.valor_fipe ?? 0),
@@ -191,6 +217,7 @@ export default function VeiculoDetalhe() {
     if (!form.modelo?.trim()) { setMsg({ tipo: "erro", texto: "O modelo é obrigatório." }); return; }
     const payload = {
       marca: form.marca?.trim() || null,
+      data_aquisicao: form.data_aquisicao || null,
       modelo: form.modelo.trim(),
       placa: form.placa ? normalizar(form.placa) : null,
       renavam: form.renavam ? normalizar(form.renavam) : null,
@@ -280,6 +307,10 @@ export default function VeiculoDetalhe() {
               </p>
               {msg && <div role="status" style={{ ...card, marginTop: 12, padding: "10px 14px", fontSize: 12, fontWeight: 600, color: "var(--text)" }}>{msg.texto}</div>}
 
+              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
+                <button onClick={exportarPdfVeiculo} disabled={busy} style={botaoSec}><Download size={13} /> Exportar PDF</button>
+              </div>
+
               {/* 1. Identificação e características */}
               <div style={card}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -295,6 +326,11 @@ export default function VeiculoDetalhe() {
                   <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                     <div className="grid-4">
                       {campo("Marca", "marca")}
+                      <div>
+                        <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Data de aquisição</label>
+                        <input type="date" value={form.data_aquisicao ?? ""} onChange={(e) => setForm({ ...form, data_aquisicao: e.target.value })}
+                          style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14 }} />
+                      </div>
                       {campo("Modelo", "modelo")}
                       {campo("Placa", "placa")}
                       {campo("RENAVAM", "renavam")}
@@ -326,6 +362,7 @@ export default function VeiculoDetalhe() {
                     {gestao && <Linha label="RENAVAM" valor={veiculo.renavam} />}
                     {gestao && <Linha label="Chassi" valor={veiculo.chassi} />}
                     <Linha label="Marca" valor={veiculo.marca} />
+                    <Linha label="Data de aquisição" valor={fmtData(veiculo.data_aquisicao)} />
                     <Linha label="Ano de fabricação" valor={veiculo.ano_fabricacao} />
                     <Linha label="Ano do modelo" valor={veiculo.ano_modelo} />
                     <Linha label="Quilometragem" valor={veiculo.quilometragem != null ? `${Number(veiculo.quilometragem).toLocaleString("pt-BR")} km` : null} />

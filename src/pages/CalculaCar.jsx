@@ -65,15 +65,16 @@ export default function CalculaCar() {
   // Bloco 5 — custos adicionais
   const [custos, setCustos] = useRascunho("cc.custos", []);
   const [marca, setMarca] = useRascunho("cc.marca", "");
+  const [dataAquisicao, setDataAquisicao] = useRascunho("cc.dataAquisicao", "");
   const [checklist, setChecklist] = useRascunho("cc.checklist", CHECKLIST_INICIAL);
   const resetarCalcula = () => {
     limparRascunho(["cc.modelo","cc.placa","cc.fipeStr","cc.compraStr","cc.renavam","cc.chassi","cc.anoFab","cc.anoMod",
       "cc.cor","cc.km","cc.combustivel","cc.cambio","cc.tipoCapital","cc.valorBemStr","cc.entradaStr","cc.taxaStr",
-      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist","cc.marca"]);
+      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist","cc.marca","cc.dataAquisicao"]);
     setModelo(""); setPlaca(""); setFipeStr("75000"); setCompraStr("50000"); setRenavam(""); setChassi("");
     setAnoFab(""); setAnoMod(""); setCor(""); setKm(""); setCombustivel(""); setCambio("");
     setTipoCapital("Próprio"); setValorBemStr("50000"); setEntradaStr("0"); setTaxaStr("3.9"); setMesesStr("48");
-    setSistema("Price"); setCustos([]); setChecklist(CHECKLIST_INICIAL); setMarca("");
+    setSistema("Price"); setCustos([]); setChecklist(CHECKLIST_INICIAL); setMarca(""); setDataAquisicao("");
   };
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -145,7 +146,7 @@ export default function CalculaCar() {
   const removeCusto = (id) => setCustos((c) => c.filter((x) => x.id !== id));
 
   const exportData = resultado ? {
-    modelo, placa, fipe, compra, valorVenda,
+    modelo, placa, fipe, compra, valorVenda, dataAquisicao: dataAquisicao ? new Date(dataAquisicao + "T12:00:00").toLocaleDateString("pt-BR") : "",
     ...diferenca,
     tipoCapital: tipoCapital === "Financiamento" ? "Financiamento" : "Capital Próprio",
     financiamento,
@@ -231,6 +232,11 @@ export default function CalculaCar() {
             <SectionTitle icon={Car} n={1}>Dados do Veículo</SectionTitle>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14 }}>
               <Field label="Marca" val={marca} set={setMarca} hint="Ex: Volkswagen" />
+
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Data de aquisição *</label>
+                <input type="date" value={dataAquisicao} onChange={(e) => setDataAquisicao(e.target.value)} style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 }} />
+              </div>
               <Field label="Modelo do veículo" val={modelo} set={setModelo} hint="Ex: Toyota Corolla XEi 2.0" />
               <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" />
               <Field label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
@@ -530,7 +536,7 @@ export default function CalculaCar() {
             )}
           </AnimatePresence>
 
-          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda, tipoCapital, custos, financiamento, checklist, marca }} onConcluido={resetarCalcula} />
+          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda, tipoCapital, custos, financiamento, checklist, marca, dataAquisicao }} onConcluido={resetarCalcula} />
           <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
             Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional
           </p>

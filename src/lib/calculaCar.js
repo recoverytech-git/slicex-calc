@@ -72,6 +72,7 @@ export function buildCalculaCarXLSX(XLSX, data) {
     ["DADOS DO VEÍCULO"],
     ["Modelo", modelo || "—"],
     ["Placa", placa || "—"],
+    ["Data de aquisição", data.dataAquisicao || "—"],
     ["Valor FIPE (R$)", fmtN(fipe)],
     ["Valor de compra (R$)", fmtN(compra)],
     [],
@@ -191,6 +192,7 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data }) {
     body: [
       ["Modelo", modelo || "—", "Placa", placa || "—"],
       ["Valor FIPE", fmt(fipe), "Valor de compra", fmt(compra)],
+      ["Data de aquisição", data.dataAquisicao || "—", "", ""],
     ],
     columnStyles: { 0: { fontStyle: "bold", textColor: [90, 90, 90] }, 2: { fontStyle: "bold", textColor: [90, 90, 90] } },
   });

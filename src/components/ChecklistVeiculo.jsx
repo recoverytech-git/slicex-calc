@@ -4,7 +4,15 @@ import PrimaryButton from "./PrimaryButton";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 
-const ITENS = [
+export const ITENS = [
+  ["direcao_eletrica", "Direção hidráulica/elétrica"],
+  ["vidros_eletricos", "Vidros elétricos"],
+  ["travas_eletricas", "Travas elétricas"],
+  ["ar_condicionado", "Ar condicionado"],
+  ["rodas_liga_leve", "Rodas de liga leve"],
+  ["multimidia", "Multimídia"],
+  ["bancos_couro", "Bancos em couro"],
+  ["airbag", "Airbag"],
   ["ipva_pago", "IPVA pago"],
   ["licenciamento_em_dia", "Licenciamento em dia"],
   ["multas_verificadas", "Multas verificadas"],
@@ -13,7 +21,7 @@ const ITENS = [
   ["chave_reserva_disponivel", "Chave reserva"],
   ["historico_manutencao_disponivel", "Histórico de manutenção"],
 ];
-const DOCUMENTACAO = [["conferida", "Conferida"], ["pendente", "Pendente"], ["nao_informado", "Não informado"]];
+export const DOCUMENTACAO = [["conferida", "Conferida"], ["pendente", "Pendente"], ["nao_informado", "Não informado"]];
 export const CHECKLIST_INICIAL = Object.fromEntries([
   ...ITENS.map(([k]) => [k, null]), ["documentacao_status", "nao_informado"], ["observacoes", ""],
 ]);

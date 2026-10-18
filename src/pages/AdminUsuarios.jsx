@@ -221,7 +221,7 @@ export default function AdminUsuarios() {
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <select value={u.papel} onChange={(e) => mudarPapel(u, e.target.value)}
                     style={{ ...sel, width: "auto", padding: "7px 10px", fontSize: 12 }} disabled={u.id === sessao?.user?.id}>
-                    {papeis.map((p) => <option key={p} value={p}>{ROTULO[p]}</option>)}
+                    {[...new Set([...papeis, u.papel])].map((p) => <option key={p} value={p} disabled={!papeis.includes(p)}>{ROTULO[p]}</option>)}
                   </select>
                   <button style={btn} onClick={() => abrirEdicao(u)}><Pencil size={13} /> Editar</button>
                   {u.id !== sessao?.user?.id && (

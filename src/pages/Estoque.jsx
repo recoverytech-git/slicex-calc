@@ -111,15 +111,8 @@ export default function Estoque() {
           )}
 
           <div style={{ ...card, padding: 18, display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>
-              <div>
-                <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6 }}>Marca</label>
-                <select value={filtros.marca} onChange={(e) => setFiltros({ ...filtros, marca: e.target.value })}
-                  style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 }}>
-                  <option value="">Todas</option>
-                  {marcas.map((m) => <option key={m} value={m}>{m}</option>)}
-                </select>
-              </div>
+            <div className="grid-4">
+              
               <Field label="Ano a partir de" val={filtros.anoMin} set={(v) => setFiltros({ ...filtros, anoMin: v })} hint="Ex: 2018" />
               <Field label="Ano até" val={filtros.anoMax} set={(v) => setFiltros({ ...filtros, anoMax: v })} hint="Ex: 2024" />
               <div>
