@@ -164,6 +164,7 @@ ${CC_BASE_CSS}
 .ld-footer a{display:inline-flex;align-items:center;gap:6px;font-family:Inter,sans-serif;font-size:13px;font-weight:600;color:var(--primary);text-decoration:none;transition:color .2s}
 .ld-footer a:hover{color:var(--primary-c)}
 
+.cc-pill-ativo{color:var(--primary);border-color:rgba(37,99,235,0.35);background:var(--surface-container)}
 .ld-navlink{background:none;border:none;padding:4px 0;font-family:Inter,sans-serif;font-size:14px;font-weight:500;color:var(--on-variant);cursor:pointer;transition:color .2s;text-decoration:none}
 .ld-navlink:hover{color:var(--on-surface)}
 .ld-navlink.ativo{color:var(--primary);font-weight:700}
@@ -407,10 +408,10 @@ export default function Landing() {
                 : <span>CALCULA.car</span>}
             </Link>
 
-            <nav className="ld-navmain" style={{ display: "flex", alignItems: "center", gap: 26 }} aria-label="Seções">
-              <a href="#solucoes" onClick={irPara("solucoes")} className={`ld-navlink${ativo === "solucoes" ? " ativo" : ""}`}>Soluções</a>
-              <a href="#modulos" onClick={irPara("modulos")} className={`ld-navlink${ativo === "modulos" ? " ativo" : ""}`}>Módulos</a>
-              <a href="#como-funciona" onClick={irPara("como-funciona")} className={`ld-navlink${ativo === "como-funciona" ? " ativo" : ""}`}>Como Funciona</a>
+            <nav className="ld-navmain" style={{ display: "flex", alignItems: "center", gap: 10 }} aria-label="Seções">
+              <a href="#solucoes" onClick={irPara("solucoes")} className={`cc-pill${ativo === "solucoes" ? " cc-pill-ativo" : ""}`}>Soluções</a>
+              <a href="#modulos" onClick={irPara("modulos")} className={`cc-pill${ativo === "modulos" ? " cc-pill-ativo" : ""}`}>Módulos</a>
+              <a href="#como-funciona" onClick={irPara("como-funciona")} className={`cc-pill${ativo === "como-funciona" ? " cc-pill-ativo" : ""}`}>Como Funciona</a>
             </nav>
 
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
