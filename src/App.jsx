@@ -20,6 +20,7 @@ const VeiculoDetalhe = lazy(() => import("./pages/VeiculoDetalhe"));
 const Vendas = lazy(() => import("./pages/Vendas"));
 const Ficha = lazy(() => import("./pages/Ficha"));
 const Leads = lazy(() => import("./pages/Leads"));
+const PreencherFicha = lazy(() => import("./pages/PreencherFicha"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 const Logs = lazy(() => import("./pages/Logs"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -56,6 +57,7 @@ function AnimatedRoutes() {
           <Route path="/leads/:id" element={<RotaPrivada><Ficha /></RotaPrivada>} />
           <Route path="/vendas" element={<RotaPrivada papeis={["admin_master","proprietario","gerente"]}><Vendas /></RotaPrivada>} />
           <Route path="/admin/usuarios" element={<RotaPrivada><AdminUsuarios /></RotaPrivada>} />
+          <Route path="/preencher/:token" element={<PreencherFicha />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
@@ -74,7 +76,7 @@ function Shell() {
     if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
     link.href = marca.favicon;
   }, [marca.favicon]);
-  const publico = pathname === "/" || pathname === "/login";
+  const publico = pathname === "/" || pathname === "/login" || pathname.startsWith("/preencher/");
   const comNav = Boolean(sessao) && !publico;
   const classes = ["app-shell", comNav && "com-nav", comNav && !menuAberto && "menu-fechado"].filter(Boolean).join(" ");
 

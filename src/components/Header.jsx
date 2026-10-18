@@ -4,6 +4,7 @@ import logo from "../assets/logo.png";
 import { useMarca } from "../lib/marca";
 import { useTema } from "../lib/tema";
 import { Sun, Moon } from "lucide-react";
+import Sino from "./Sino";
 
 export default function Header({ subtitle }) {
   const marca = useMarca();
@@ -41,8 +42,9 @@ export default function Header({ subtitle }) {
           </div>
         </div>
       </Link>
+      <Sino />
       <button type="button" onClick={() => definirTema(claro ? "dark" : "light")} aria-label={claro ? "Ativar tema escuro" : "Ativar tema claro"}
-        style={{ marginLeft: "auto", width: 36, height: 36, borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "var(--surface)", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+        style={{ marginLeft: 0, width: 36, height: 36, borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "var(--surface)", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
         {claro ? <Moon size={16} /> : <Sun size={16} />}
       </button>
     </div>

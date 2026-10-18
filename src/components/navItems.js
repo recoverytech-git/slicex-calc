@@ -1,10 +1,11 @@
-import { LayoutDashboard, Landmark, Percent, Scissors, Car, Warehouse, BadgeDollarSign, Users, Settings, ScrollText, FileText, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Landmark, Percent, Scissors, Car, Warehouse, BadgeDollarSign, Users, Settings, ScrollText, FileText, ClipboardList, Calculator } from "lucide-react";
 
 export const NAV_PRINCIPAL = [
   { to: "/dashboard", label: "Dashboard", curto: "Dashboard", icon: LayoutDashboard },
-  { to: "/financiamento", label: "Financiamento", curto: "Financ.", icon: Landmark },
-  { to: "/percentual", label: "Diferença %", curto: "Dif. %", icon: Percent },
-  { to: "/amortizacao", label: "Amortização", curto: "Amortiz.", icon: Scissors },
+  { id: "calculadoras", to: "#calculadoras", label: "Calculadoras", curto: "Calc.", icon: Calculator, tipo: "grupo" },
+  { to: "/financiamento", label: "Financiamento", curto: "Financ.", icon: Landmark, grupo: "calculadoras" },
+  { to: "/percentual", label: "Diferença %", curto: "Dif. %", icon: Percent, grupo: "calculadoras" },
+  { to: "/amortizacao", label: "Amortização", curto: "Amortiz.", icon: Scissors, grupo: "calculadoras" },
   { to: "/calcula-car", label: "Calcula-Car", curto: "Carro", icon: Car },
   { to: "/estoque", label: "Estoque", curto: "Estoque", icon: Warehouse },
   { to: "/ficha", label: "Ficha bancária", curto: "Ficha", icon: FileText },
