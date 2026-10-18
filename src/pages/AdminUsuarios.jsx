@@ -70,7 +70,7 @@ export default function AdminUsuarios() {
   const precisaLoja = souAdmin && !["admin_master", "proprietario"].includes(form.papel);
 
   const validarCadastro = () => {
-    if (form.cpf && !cpfValido(form.cpf)) return "CPF incompleto.";
+    if (form.cpf && !cpfValido(form.cpf)) return "CPF inválido. Confira os dígitos verificadores.";
     if (form.telefone && !telefoneValido(form.telefone)) return "Telefone incompleto.";
     if (ehLojista && souAdmin && !form.organizacao_id) {
       if (!form.nome_loja.trim()) return "Informe o nome da loja.";
@@ -115,7 +115,7 @@ export default function AdminUsuarios() {
 
   const salvarEdicao = async () => {
     setMsg(null);
-    if (editando.cpf && !cpfValido(editando.cpf)) { setMsg({ tipo: "erro", texto: "CPF incompleto." }); return; }
+    if (editando.cpf && !cpfValido(editando.cpf)) { setMsg({ tipo: "erro", texto: "CPF inválido. Confira os dígitos verificadores." }); return; }
     if (editando.telefone && !telefoneValido(editando.telefone)) { setMsg({ tipo: "erro", texto: "Telefone incompleto." }); return; }
     const { erro: erroUsuario } = await rpc("admin_atualizar_usuario", {
       p_id: editando.id, p_nome: editando.nome, p_papel: editando.papel,

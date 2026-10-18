@@ -25,6 +25,7 @@ const TIPO = { capital_proprio: "Capital próprio", financiamento: "Financiament
 const titulo = { margin: "0 0 12px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" };
 const moeda = (v) => (v == null ? "—" : formatarBRL(Number(v)));
 const botaoSec = { display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "1px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "6px 12px", color: "var(--text)", fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all 0.2s ease" };
+const botaoViewer = { ...botaoSec, color: "#ffffff", borderColor: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.08)" };
 const botaoIcone = { width: 28, height: 28, borderRadius: 999, background: "rgba(0,0,0,0.7)", border: "1px solid var(--border-strong)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" };
 const navFoto = (lado) => ({ position: "absolute", top: "50%", [lado]: 8, transform: "translateY(-50%)", ...botaoIcone, width: 40, height: 40 });
 
@@ -493,7 +494,7 @@ export default function VeiculoDetalhe() {
                 <div role="dialog" aria-label="Visualizar foto" onClick={() => setFotoAtiva(null)}
                   style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
                   <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 900, display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--text)", fontSize: 13 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", color: "#ffffff", fontSize: 13 }}>
                       <span>{fotoAtiva + 1} de {fotos.length}</span>
                       <button onClick={() => setFotoAtiva(null)} aria-label="Fechar" style={botaoIcone}><X size={14} /></button>
                     </div>
@@ -507,9 +508,9 @@ export default function VeiculoDetalhe() {
                       )}
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-                      <button onClick={() => baixarUma(fotoAtiva)} disabled={busy} style={botaoSec}><Download size={14} /> Baixar</button>
-                      <button onClick={() => compartilhar([fotoAtiva], veiculo.modelo)} disabled={busy} style={botaoSec}><Share2 size={14} /> Compartilhar</button>
-                      {podeEditar && <button onClick={() => excluirFoto(fotos[fotoAtiva])} disabled={busy} style={botaoSec}><Trash2 size={14} /> Excluir</button>}
+                      <button onClick={() => baixarUma(fotoAtiva)} disabled={busy} style={botaoViewer}><Download size={14} /> Baixar</button>
+                      <button onClick={() => compartilhar([fotoAtiva], veiculo.modelo)} disabled={busy} style={botaoViewer}><Share2 size={14} /> Compartilhar</button>
+                      {podeEditar && <button onClick={() => excluirFoto(fotos[fotoAtiva])} disabled={busy} style={botaoViewer}><Trash2 size={14} /> Excluir</button>}
                     </div>
                   </div>
                 </div>

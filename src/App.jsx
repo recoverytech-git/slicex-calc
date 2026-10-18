@@ -18,6 +18,8 @@ const Estoque = lazy(() => import("./pages/Estoque"));
 const AdminUsuarios = lazy(() => import("./pages/AdminUsuarios"));
 const VeiculoDetalhe = lazy(() => import("./pages/VeiculoDetalhe"));
 const Vendas = lazy(() => import("./pages/Vendas"));
+const Ficha = lazy(() => import("./pages/Ficha"));
+const Leads = lazy(() => import("./pages/Leads"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 const Logs = lazy(() => import("./pages/Logs"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -49,6 +51,9 @@ function AnimatedRoutes() {
           <Route path="/estoque/:id" element={<RotaPrivada><VeiculoDetalhe /></RotaPrivada>} />
           <Route path="/configuracoes" element={<RotaPrivada papeis={["admin_master"]}><Configuracoes /></RotaPrivada>} />
           <Route path="/logs" element={<RotaPrivada papeis={["admin_master"]}><Logs /></RotaPrivada>} />
+          <Route path="/ficha" element={<RotaPrivada><Ficha /></RotaPrivada>} />
+          <Route path="/leads" element={<RotaPrivada><Leads /></RotaPrivada>} />
+          <Route path="/leads/:id" element={<RotaPrivada><Ficha /></RotaPrivada>} />
           <Route path="/vendas" element={<RotaPrivada papeis={["admin_master","proprietario","gerente"]}><Vendas /></RotaPrivada>} />
           <Route path="/admin/usuarios" element={<RotaPrivada><AdminUsuarios /></RotaPrivada>} />
           <Route path="*" element={<Navigate to="/" replace />} />

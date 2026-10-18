@@ -146,7 +146,7 @@ export default function Dashboard() {
                 <Kpi i={0} rotulo="Vendas realizadas" valor={vendas.length} />
                 <Kpi i={1} rotulo="Faturamento" valor={formatarBRL(faturamento)} />
                 <Kpi i={2} rotulo="Resultado final" valor={formatarBRL(resultado)} />
-                <Kpi i={3} rotulo="Margem sobre investido" valor={formatarBRL(margemValor)} />
+                <Kpi i={3} rotulo="Lucro atual" valor={formatarBRL(margemValor)} />
               </div>
 
               <div className="grid-2" style={{ marginBottom: 14 }}>

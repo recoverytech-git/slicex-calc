@@ -50,6 +50,6 @@ export async function excluirVeiculo(id) {
     const { error: erroStorage } = await supabase.storage.from("veiculos-fotos").remove(caminhos);
     if (erroStorage) return { error: erroStorage };
   }
-  return supabase.rpc("excluir_veiculo", { p_veiculo: id });
+  return supabase.rpc("excluir_veiculo", { p_id: id });
 }
 
