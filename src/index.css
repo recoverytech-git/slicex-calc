@@ -219,3 +219,11 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(68,147,24
 .sidebar-link.ativo { color: var(--nav-text-active); background: var(--nav-active-bg); border-color: rgba(68,147,248,0.45); }
 .bottomnav-link { color: var(--nav-text); }
 .bottomnav-link.ativo { color: var(--nav-text-active); }
+
+/* Login: links do cabeçalho e botão principal */
+.login-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-dim); text-decoration: none; font-size: 14px; font-weight: 600; transition: color .2s ease, transform .2s ease; }
+.login-link:hover { color: var(--text); transform: translateY(-1px); }
+.login-link-texto { display: none; }
+@media (min-width: 640px) { .login-link-texto { display: inline; } }
+.login-botao { transition: transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+.login-botao:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
