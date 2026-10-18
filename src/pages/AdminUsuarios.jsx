@@ -173,7 +173,7 @@ export default function AdminUsuarios() {
               <Field label="Telefone / WhatsApp" val={form.telefone} set={(v) => setForm({ ...form, telefone: formatarTelefone(v) })} hint="(00) 00000-0000" />
               <Campo label="Papel">
                 <select value={form.papel} onChange={(e) => setForm({ ...form, papel: e.target.value })} style={sel}>
-                  {papeis.map((p) => <option key={p} value={p}>{ROTULO[p]}</option>)}
+                  {["admin_master", "proprietario", "gerente", "vendedor"].map((p) => <option key={p} value={p} disabled={!papeis.includes(p)}>{ROTULO[p]}</option>)}
                 </select>
               </Campo>
               {precisaLoja && (
@@ -249,7 +249,7 @@ export default function AdminUsuarios() {
             <Campo label="Papel">
               <select value={editando.papel} onChange={(e) => setEditando({ ...editando, papel: e.target.value })} style={sel}
                 disabled={!souAdmin && editando.papel === "proprietario"}>
-                {papeis.map((p) => <option key={p} value={p}>{ROTULO[p]}</option>)}
+                {["admin_master", "proprietario", "gerente", "vendedor"].map((p) => <option key={p} value={p} disabled={!papeis.includes(p)}>{ROTULO[p]}</option>)}
               </select>
             </Campo>
             {editando.papel === "proprietario" && editando.organizacao_id && (

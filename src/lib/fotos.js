@@ -1,7 +1,7 @@
 import { supabase, supabaseConfigurado } from "./supabase";
 
 export const BUCKET_FOTOS = "veiculos-fotos";
-export const MAX_FOTOS = 10;
+export const MAX_FOTOS = 15;
 export const MAX_BYTES = 8 * 1024 * 1024;
 const TIPOS = ["image/jpeg", "image/png", "image/webp"];
 

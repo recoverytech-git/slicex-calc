@@ -25,6 +25,7 @@ export default function Ficha() {
   const [lead, setLead] = useState(null);
   const [msg, setMsg] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [linkGerado, setLinkGerado] = useState(null);
   const somenteLeitura = Boolean(id) && !EDITAM.includes(papel);
 
   useEffect(() => {
@@ -37,6 +38,13 @@ export default function Ficha() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  const gerarLink = async () => {
+    setMsg(null);
+    const { data, error } = await supabase.rpc("gerar_link_ficha", { p_dias: 7 });
+    if (error) { setMsg({ tipo: "erro", texto: `Link não gerado: ${error.message}` }); return; }
+    setLinkGerado(`${window.location.origin}/preencher/${data}`);
+  };
+
   const registro = () => ({ nome: form.nome, cpf: soDigitos(form.cpf), telefone: soDigitos(form.telefone), dados: form });
 
   const salvar = async () => {
@@ -46,12 +54,12 @@ export default function Ficha() {
     const dados = { nome: form.nome.trim(), cpf: soDigitos(form.cpf) || null, telefone: soDigitos(form.telefone) || null, dados: form };
     setSalvando(true);
     if (lead) {
-      const { error } = await supabase.from("leads").update({ ...dados, atualizado_em: new Date().toISOString(), atualizado_por: sessao?.user?.id }).eq("id", lead.id);
+      const { error } = await supabase.from("leads").update({ ...dados, status: "completa", atualizado_em: new Date().toISOString(), atualizado_por: sessao?.user?.id }).eq("id", lead.id);
       setSalvando(false);
       if (error) { setMsg({ tipo: "erro", texto: `Não foi salvo: ${error.message}` }); return; }
       setMsg({ tipo: "ok", texto: "Ficha atualizada." });
     } else {
-      const { error } = await supabase.from("leads").insert({ ...dados, organizacao_id: perfil?.organizacao_id ?? null, criado_por: sessao?.user?.id });
+      const { error } = await supabase.from("leads").insert({ ...dados, status: "completa", organizacao_id: perfil?.organizacao_id ?? null, criado_por: sessao?.user?.id });
       setSalvando(false);
       if (error) { setMsg({ tipo: "erro", texto: `Não foi salvo: ${error.message}` }); return; }
       setForm(FICHA_VAZIA);
@@ -109,6 +117,21 @@ export default function Ficha() {
           </p>
           {msg && <div role="status" style={{ marginBottom: 14, padding: "10px 14px", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 600, background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", color: "var(--text)" }}>{msg.texto}</div>}
 
+          {linkGerado && (
+            <div style={{ ...card, display: "flex", flexDirection: "column", gap: 10 }}>
+              <p style={titulo}>Link para o cliente</p>
+              <p style={{ margin: 0, fontSize: 13, color: "var(--text-dim)" }}>
+                O cliente preenche os dados pessoais e financeiros de qualquer lugar. O link vale por 7 dias e é usado uma vez.
+              </p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <input readOnly value={linkGerado} onFocus={(e) => e.target.select()}
+                  style={{ flex: 1, minWidth: 240, background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 13 }} />
+                <button onClick={() => navigator.clipboard?.writeText(linkGerado)} style={opcao(false)}>Copiar</button>
+                <button onClick={() => navigator.share?.({ title: "Ficha financeira", url: linkGerado })} style={opcao(false)}>Compartilhar</button>
+              </div>
+            </div>
+          )}
+
           <div style={{ pointerEvents: somenteLeitura ? "none" : "auto", opacity: somenteLeitura ? 0.85 : 1 }}>
             {SECOES.map((s) => (
               <div key={s.titulo} style={card}>
@@ -120,6 +143,7 @@ export default function Ficha() {
 
           <div style={{ ...card, display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
             <button onClick={exportarPdf} style={opcao(false)}><FileDown size={15} /> Exportar PDF</button>
+            {!id && <button onClick={gerarLink} style={opcao(false)}>Gerar link para o cliente</button>}
             <button onClick={exportarPng} style={opcao(false)}><ImageIcon size={15} /> Exportar PNG</button>
             {!somenteLeitura && (
               <PrimaryButton onClick={salvar} disabled={salvando} style={{ display: "flex", alignItems: "center", gap: 8 }}>

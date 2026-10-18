@@ -13,6 +13,7 @@ import { gerarPdf, gerarPngBlob, linhaExcel, nomeArquivo, baixar } from "../lib/
 import { formatarCPF, formatarTelefone, soDigitos } from "../lib/mascaras";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" };
+const STATUS_LEAD = { preenchida: "Preenchida pelo cliente", completa: "Completa" };
 const botao = { display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "transparent", color: "var(--text)", fontSize: 13, fontWeight: 600, cursor: "pointer" };
 
 export default function Leads() {
@@ -142,6 +143,7 @@ export default function Leads() {
                   <th style={{ padding: "10px 12px" }}>Nome</th>
                   <th style={{ padding: "10px 12px" }}>CPF</th>
                   <th style={{ padding: "10px 12px" }}>Telefone</th>
+                  <th style={{ padding: "10px 12px" }}>Status</th>
                   <th style={{ padding: "10px 12px" }}>Data</th>
                   <th style={{ padding: "10px 12px", textAlign: "right" }}>Ficha</th>
                 </tr>
@@ -155,6 +157,11 @@ export default function Leads() {
                     <td style={{ padding: "10px 12px", color: "var(--text)", fontWeight: 600 }}>{l.nome}</td>
                     <td style={{ padding: "10px 12px", color: "var(--text-dim)" }}>{l.cpf ? formatarCPF(l.cpf) : "—"}</td>
                     <td style={{ padding: "10px 12px", color: "var(--text-dim)" }}>{l.telefone ? formatarTelefone(l.telefone) : "—"}</td>
+                    <td style={{ padding: "10px 12px" }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 999, border: `1px solid ${l.status === "preenchida" ? "#4493F8" : "var(--border-strong)"}`, color: l.status === "preenchida" ? "#4493F8" : "var(--text-dim)" }}>
+                        {STATUS_LEAD[l.status] ?? "Completa"}
+                      </span>
+                    </td>
                     <td style={{ padding: "10px 12px", color: "var(--text-mute)" }}>{new Date(l.criado_em).toLocaleDateString("pt-BR")}</td>
                     <td style={{ padding: "10px 12px", textAlign: "right" }}>
                       <button onClick={() => navigate(`/leads/${l.id}`)} style={botao}><Eye size={14} /> Ver ficha</button>

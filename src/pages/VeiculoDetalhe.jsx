@@ -325,24 +325,24 @@ export default function VeiculoDetalhe() {
                 {editando ? (
                   <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                     <div className="grid-4">
-                      {campo("Marca", "marca")}
                       <div>
                         <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Data de aquisição</label>
                         <input type="date" value={form.data_aquisicao ?? ""} onChange={(e) => setForm({ ...form, data_aquisicao: e.target.value })}
                           style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14 }} />
                       </div>
-                      {campo("Modelo", "modelo")}
                       {campo("Placa", "placa")}
-                      {campo("RENAVAM", "renavam")}
                       {campo("Chassi", "chassi")}
+                      {campo("RENAVAM", "renavam")}
                     </div>
                     <div className="grid-4">
+                      {campo("Marca", "marca")}
+                      {campo("Modelo", "modelo")}
                       {campo("Ano de fabricação", "ano_fabricacao")}
                       {campo("Ano do modelo", "ano_modelo")}
+                    </div>
+                    <div className="grid-4">
                       {campo("Cor", "cor")}
                       {campo("Quilometragem (km)", "quilometragem")}
-                    </div>
-                    <div className="grid-2">
                       {campo("Combustível", "combustivel")}
                       {campo("Câmbio", "cambio")}
                     </div>
@@ -356,13 +356,12 @@ export default function VeiculoDetalhe() {
                       <PrimaryButton onClick={salvarEdicao}>Salvar alterações</PrimaryButton>
                     </div>
                   </div>
-                ) : (
-                  <>
+                ) : (                  <>
+                    <Linha label="Data de aquisição" valor={fmtData(veiculo.data_aquisicao)} />
                     {gestao && <Linha label="Placa" valor={veiculo.placa} />}
                     {gestao && <Linha label="RENAVAM" valor={veiculo.renavam} />}
                     {gestao && <Linha label="Chassi" valor={veiculo.chassi} />}
                     <Linha label="Marca" valor={veiculo.marca} />
-                    <Linha label="Data de aquisição" valor={fmtData(veiculo.data_aquisicao)} />
                     <Linha label="Ano de fabricação" valor={veiculo.ano_fabricacao} />
                     <Linha label="Ano do modelo" valor={veiculo.ano_modelo} />
                     <Linha label="Quilometragem" valor={veiculo.quilometragem != null ? `${Number(veiculo.quilometragem).toLocaleString("pt-BR")} km` : null} />
