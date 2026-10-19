@@ -1,7 +1,7 @@
 // sem-rascunho: página pública sem formulário
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Landmark, Car, Warehouse, ShieldCheck, TrendingUp, Banknote, ArrowRight, LogIn, Zap, Calculator, WalletCards, PauseCircle, PlayCircle, ExternalLink, Users, Headset, ChevronRight, Sun, Moon } from "lucide-react";
+import { Landmark, Car, Warehouse, ShieldCheck, TrendingUp, Banknote, ArrowRight, LogIn, Zap, Calculator, WalletCards, PauseCircle, PlayCircle, ExternalLink, Users, Headset, ChevronRight, Sun, Moon, Lightbulb, LayoutGrid, ListOrdered } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import WhatsAppIcon from "../components/WhatsAppIcon";
 import { CC_BASE_CSS } from "../components/ccPaleta";
@@ -168,7 +168,16 @@ ${CC_BASE_CSS}
 .ld-navlink{background:none;border:none;padding:4px 0;font-family:Inter,sans-serif;font-size:14px;font-weight:500;color:var(--on-variant);cursor:pointer;transition:color .2s;text-decoration:none}
 .ld-navlink:hover{color:var(--on-surface)}
 .ld-navlink.ativo{color:var(--primary);font-weight:700}
-@media (max-width:1023px){.ld-navmain{display:none}}
+.ld-navmain{display:flex;align-items:center;gap:10px}
+.ld-logo-img{height:32px;width:auto;display:block}
+.ld-entrar-txt{display:inline}
+@media (max-width:640px){
+  .ld-navmain{gap:6px}
+  .ld-logo-img{height:26px}
+  .ld-entrar{width:38px;height:38px;padding:0;justify-content:center;border-radius:12px}
+  .ld-entrar-txt{display:none}
+}
+.cc-header-in{gap:8px}
 .ld-brand{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.02em;color:var(--on-surface);text-decoration:none;display:flex;align-items:center}
 .ld-entrar{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:12px;background:var(--primary-c);color:#ffffff;font-family:Inter,sans-serif;font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 8px 16px -4px rgba(37,99,235,0.35);transition:all .2s}
 .ld-entrar:hover{background:var(--primary);transform:translateY(-1px)}
@@ -404,21 +413,28 @@ export default function Landing() {
           <div className="cc-header-in">
             <Link to="/" className="ld-brand" aria-label="Calcula.car, página inicial">
               {logoCustom
-                ? <img src={logoCustom} alt="Logomarca" style={{ height: 32, width: "auto", display: "block" }} />
+                ? <img className="ld-logo-img" src={logoCustom} alt="Logomarca" />
                 : <span>CALCULA.car</span>}
             </Link>
 
-            <nav className="ld-navmain" style={{ display: "flex", alignItems: "center", gap: 10 }} aria-label="Seções">
-              <a href="#solucoes" onClick={irPara("solucoes")} className={`cc-pill${ativo === "solucoes" ? " cc-pill-ativo" : ""}`}>Soluções</a>
-              <a href="#modulos" onClick={irPara("modulos")} className={`cc-pill${ativo === "modulos" ? " cc-pill-ativo" : ""}`}>Módulos</a>
-              <a href="#como-funciona" onClick={irPara("como-funciona")} className={`cc-pill${ativo === "como-funciona" ? " cc-pill-ativo" : ""}`}>Como Funciona</a>
+            <nav className="ld-navmain" aria-label="Seções">
+              {[
+                { id: "solucoes", texto: "SOLUÇÕES", Icone: Lightbulb },
+                { id: "modulos", texto: "MÓDULOS", Icone: LayoutGrid },
+                { id: "como-funciona", texto: "COMO FUNCIONA", Icone: ListOrdered },
+              ].map(({ id, texto, Icone }) => (
+                <a key={id} href={`#${id}`} onClick={irPara(id)} aria-label={texto}
+                  className={`cc-pill${ativo === id ? " cc-pill-ativo" : ""}`}>
+                  <Icone size={16} aria-hidden="true" /><span className="cc-pill-txt">{texto}</span>
+                </a>
+              ))}
             </nav>
 
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <button type="button" className="cc-iconbtn" onClick={alternarPaleta} aria-label={escuro ? "Ativar tema claro" : "Ativar tema escuro"}>
                 {escuro ? <Sun size={17} /> : <Moon size={17} />}
               </button>
-              <Link to="/login" className="ld-entrar"><LogIn size={15} aria-hidden="true" /> Entrar</Link>
+              <Link to="/login" className="ld-entrar" aria-label="Entrar"><LogIn size={15} aria-hidden="true" /><span className="ld-entrar-txt">Entrar</span></Link>
             </div>
           </div>
         </header>
