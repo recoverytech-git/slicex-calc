@@ -1,72 +1,52 @@
-import { ENTRADA } from "../lib/motion";
-import { useRascunho } from "../lib/rascunho";
-import { useMemo } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, ArrowLeft, Scale, Minus } from "lucide-react";
-import Header from "../components/Header";
-import BackLink from "../components/BackLink";
+// sem-rascunho: formulario e resultados ficam no documento do design (iframe); o calculo usa calcPercentual
+import { useCallback, useEffect, useRef, useState } from "react";
 import PageTransition from "../components/PageTransition";
-import NumeroField from "../components/NumeroField";
-import PrimaryButton from "../components/PrimaryButton";
-import Kpi from "../components/Kpi";
-import { parseMoeda } from "../lib/moeda";
-import { calcPercentual } from "../lib/percentual";
+import Sino from "../components/Sino";
+import { useMarca } from "../lib/marca";
 
 export default function Percentual() {
-  const [a, setA] = useRascunho("per.a", "100,00");
-  const [b, setB] = useRascunho("per.b", "120,00");
-  const [calculado, setCalculado] = useRascunho("per.calculado", false);
+  const frame = useRef(null);
+  const marca = useMarca();
+  const marcaRef = useRef(marca);
+  marcaRef.current = marca;
+  const [slot, setSlot] = useState(null);
 
-  const va = parseMoeda(a);
-  const vb = parseMoeda(b);
-  const valido = Number.isFinite(va) && Number.isFinite(vb);
+  const enviarMarca = useCallback(() => {
+    const m = marcaRef.current;
+    frame.current?.contentWindow?.postMessage({
+      type: "marca",
+      logoClaro: m.logo_claro || m.logo_landing_claro || null,
+    }, window.location.origin);
+  }, []);
 
-  const resultado = useMemo(() => {
-    if (!calculado || !valido) return null;
-    return calcPercentual(va, vb);
-  }, [calculado, valido, va, vb]);
+  useEffect(() => {
+    const ouvir = (e) => {
+      if (e.source !== frame.current?.contentWindow) return;
+      const d = e.data || {};
+      if (d.type === "bell-rect") setSlot(d.rect);
+      if (d.type === "pronto") enviarMarca();
+    };
+    window.addEventListener("message", ouvir);
+    return () => window.removeEventListener("message", ouvir);
+  }, [enviarMarca]);
+
+  useEffect(() => { enviarMarca(); }, [marca, enviarMarca]);
 
   return (
     <PageTransition>
-      <div className="page-bg">
-        <Header subtitle="Comparação entre dois valores" />
-        <div className="container" style={{ paddingTop: 8 }}>
-          <BackLink />
-          <div style={{ marginTop: 22 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 6px", color: "var(--text)" }}>Diferença Percentual</h1>
-            <p style={{ fontSize: 13, color: "var(--text-dim)", margin: 0 }}>Compare dois valores e veja a variação entre eles, em qualquer direção.</p>
+      <div style={{ position: "relative", height: "100vh" }}>
+        <iframe
+          ref={frame}
+          src="/calculadora-percentual.html"
+          title="Calculadora de Diferença Percentual"
+          onLoad={enviarMarca}
+          style={{ display: "block", width: "100%", height: "100%", border: 0 }}
+        />
+        {slot && (
+          <div style={{ position: "absolute", left: slot.x, top: slot.y, width: slot.w, height: slot.h, zIndex: 20 }}>
+            <Sino />
           </div>
-
-          <div style={{ background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", padding: 22, marginTop: 16 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 14, alignItems: "end" }}>
-              <NumeroField label="Valor A (R$)" valor={a} onChange={(v) => { setA(v); setCalculado(false); }} hint="Ex: 10.000,00" />
-              <Scale size={18} color="var(--text-mute)" style={{ marginBottom: 14 }} />
-              <NumeroField label="Valor B (R$)" valor={b} onChange={(v) => { setB(v); setCalculado(false); }} hint="Ex: 12.000,00" />
-            </div>
-            <PrimaryButton onClick={() => valido && setCalculado(true)} disabled={!valido}
-              style={{ marginTop: 18, width: "100%" }}>
-              Calcular diferença
-            </PrimaryButton>
-          </div>
-
-          {resultado && (
-            <motion.div {...ENTRADA}
-              style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 12, marginTop: 14 }}>
-              <Kpi label="Variação de A para B" value={resultado.variacaoAB ?? 0}
-                format={(v) => (resultado.variacaoAB === null ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`)}
-                icon={<ArrowRight size={18} />} index={0} />
-              <Kpi label="Variação de B para A" value={resultado.variacaoBA ?? 0}
-                format={(v) => (resultado.variacaoBA === null ? "—" : `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`)}
-                icon={<ArrowLeft size={18} />} index={1} />
-              <Kpi label="Diferença simétrica" value={resultado.diferencaSimetrica ?? 0}
-                format={(v) => (resultado.diferencaSimetrica === null ? "—" : `${v.toFixed(2)}%`)}
-                icon={<Scale size={18} />} index={2} />
-              <Kpi label="Diferença absoluta" value={resultado.diferencaAbsoluta}
-                format={(v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                icon={<Minus size={18} />} index={3} />
-            </motion.div>
-          )}
-        </div>
+        )}
       </div>
     </PageTransition>
   );

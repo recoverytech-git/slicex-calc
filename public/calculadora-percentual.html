@@ -1,0 +1,562 @@
+<!DOCTYPE html><html class="light" lang="pt-BR" style="width: 1280px; min-height: 100%; position: relative;"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><title>Calcula.car - Inteligência Financeira Automotiva</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>
+@layer base {
+  html, body { margin: 0; padding: 0; }
+  body { overscroll-behavior: none; }
+  main > :first-child { margin-top: 0 !important; }
+  main > :last-child { margin-bottom: 0 !important; }
+}
+::-webkit-scrollbar { display: none; }
+
+/* Ambient Orbs Floating Animations */
+@keyframes float-slow {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(35px, -28px) scale(1.08); }
+  66% { transform: translate(-25px, 20px) scale(0.95); }
+}
+@keyframes float-medium {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  40% { transform: translate(-30px, -35px) scale(1.12); }
+  75% { transform: translate(25px, 25px) scale(0.92); }
+}
+@keyframes float-gentle {
+  0%, 100% { transform: translate(0px, 0px) scale(0.98); }
+  50% { transform: translate(20px, -20px) scale(1.06); }
+}
+
+.animate-orb-1 {
+  animation: float-slow 12s ease-in-out infinite;
+}
+.animate-orb-2 {
+  animation: float-medium 10s ease-in-out infinite;
+}
+.animate-orb-3 {
+  animation: float-gentle 9s ease-in-out infinite;
+}
+
+/* Button Shimmer Sweep Effect */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  45%, 100% { transform: translateX(250%) skewX(-20deg); }
+}
+.shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+  animation: shimmer-sweep 3.6s infinite ease-in-out;
+  pointer-events: none;
+}
+
+/* Staggered Entrance Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-anim {
+  opacity: 0;
+  animation: fadeInUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.15s; }
+.delay-3 { animation-delay: 0.28s; }
+.delay-4 { animation-delay: 0.40s; }
+.delay-5 { animation-delay: 0.52s; }
+
+/* Interactive Hover Lift & Smooth Transitions */
+.card-elevation {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  will-change: transform, box-shadow;
+}
+.card-elevation:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 38px -10px rgba(0, 74, 198, 0.11), 0 10px 18px -6px rgba(11, 28, 48, 0.06);
+}
+
+/* Swap Icon Interactive Elastic Spring */
+.swap-interactive {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.swap-interactive:hover {
+  transform: rotate(180deg) scale(1.08);
+}
+.swap-interactive:active {
+  transform: rotate(360deg) scale(0.92);
+}
+
+/* Progress bar glowing tip */
+.glow-tip {
+  position: relative;
+}
+.glow-tip::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.85);
+}
+
+/* Pulse Dot Animation for Header Status */
+@keyframes status-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 108, 73, 0.65); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(0, 108, 73, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 108, 73, 0); }
+}
+.pulsing-indicator {
+  animation: status-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-lowest": "#ffffff", "on-error-container": "#93000a", "background": "#f8f9ff", "on-surface": "#0b1c30", "error": "#ba1a1a", "secondary-container": "#6cf8bb", "on-primary-container": "#eeefff", "on-surface-variant": "#434655", "inverse-primary": "#b4c5ff", "on-primary": "#ffffff", "on-tertiary-fixed": "#131b2e", "outline-variant": "#c3c6d7", "surface": "#f8f9ff", "outline": "#737686", "inverse-on-surface": "#eaf1ff", "tertiary-fixed-dim": "#bec6e0", "on-primary-fixed-variant": "#003ea8", "secondary": "#006c49", "tertiary-container": "#656d84", "on-secondary-fixed-variant": "#005236", "surface-container-high": "#dce9ff", "on-tertiary-fixed-variant": "#3f465c", "tertiary": "#4d556b", "on-tertiary-container": "#eef0ff", "tertiary-fixed": "#dae2fd", "surface-container-highest": "#d3e4fe", "surface-dim": "#cbdbf5", "on-secondary-container": "#00714d", "primary": "#004ac6", "on-background": "#0b1c30", "secondary-fixed": "#6ffbbe", "surface-bright": "#f8f9ff", "surface-variant": "#d3e4fe", "on-secondary-fixed": "#002113", "surface-container-low": "#eff4ff", "inverse-surface": "#213145", "primary-fixed": "#dbe1ff", "on-tertiary": "#ffffff", "primary-fixed-dim": "#b4c5ff", "secondary-fixed-dim": "#4edea3", "primary-container": "#2563eb", "surface-tint": "#0053db", "on-primary-fixed": "#00174b", "on-secondary": "#ffffff", "on-error": "#ffffff", "error-container": "#ffdad6", "surface-container": "#e5eeff" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": {}, "fontFamily": { "headline": [ "Plus Jakarta Sans" ], "display": [ "Plus Jakarta Sans" ], "body": [ "Plus Jakarta Sans" ], "label": [ "Inter" ] }, "fontSize": {} } } }</script></head><body class="bg-surface font-body text-on-surface min-h-screen flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed relative overflow-x-hidden"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-surface-container-high/60 shadow-[0_1px_12px_rgba(11,28,48,0.04)] transition-all duration-300"><div class="h-16 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between gap-4"><div class="flex items-center gap-6"><div class="flex items-center gap-3 group cursor-pointer"><span class="font-headline font-extrabold text-xl tracking-tight text-on-surface transition-transform duration-300 group-hover:scale-[1.02]">Calcula<span class="text-primary group-hover:text-primary-container transition-colors">.car</span></span></div><div class="h-4 w-px bg-outline-variant/60 hidden sm:block"></div><nav class="hidden sm:flex items-center" data-active-classes="text-primary font-semibold"></nav></div><div class="flex items-center gap-3 sm:gap-4"><div class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container-low/90 border border-outline-variant/40 text-xs font-label shadow-sm transition-all hover:bg-surface-container"><span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary pulsing-indicator"></span></span><span class="font-semibold text-secondary">Operador F&amp;I Online</span><span class="text-outline-variant font-light">•</span><span class="text-on-surface-variant font-medium">Conectado</span></div><div class="flex items-center gap-2 pl-1"></div></div></div></header><main class="w-full pt-16 flex-1 bg-surface relative"><div class="flex flex-col w-full relative">
+<div class="relative w-full overflow-hidden">
+<!-- Dynamic Ambient Glowing Orbs -->
+<div class="absolute -top-36 left-1/2 -translate-x-1/2 w-[760px] h-[380px] bg-gradient-to-r from-primary/15 via-primary-container/10 to-transparent rounded-full blur-3xl pointer-events-none animate-orb-1"></div>
+<div class="absolute top-44 -right-28 w-96 h-96 bg-secondary-container/25 rounded-full blur-[90px] pointer-events-none animate-orb-2"></div>
+<div class="absolute top-80 -left-28 w-80 h-80 bg-surface-container-high/60 rounded-full blur-3xl pointer-events-none animate-orb-3"></div>
+<div class="mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-8 relative z-10 w-full">
+<!-- Breadcrumb & Header Title -->
+<div class="flex flex-col gap-3 reveal-anim delay-1">
+<a class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold font-label text-on-surface-variant hover:text-primary bg-surface-container-lowest/90 hover:bg-surface-container-lowest backdrop-blur-md border border-outline-variant/40 hover:border-primary/30 shadow-xs hover:shadow-sm transition-all duration-200 group w-fit cursor-pointer" data-path="calculadoras-hub" href="/dashboard" target="_top"><span class="material-symbols-outlined text-[16px] text-primary transition-transform duration-200 group-hover:-translate-x-1">arrow_back</span><span class="">Voltar para todas as calculadoras</span></a>
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+<div>
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high/70 border border-outline-variant/30 text-tertiary text-xs font-label font-semibold mb-2 shadow-xs">
+<span class="material-symbols-outlined text-[15px] text-primary">percent</span>
+<span class="">Análise Financeira F&amp;I</span>
+</div>
+<h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-headline text-on-surface tracking-tight">
+              Diferença Percentual
+            </h1>
+<p class="text-sm sm:text-base text-on-surface-variant font-body mt-1 max-w-2xl leading-relaxed">
+              Compare dois valores e veja a variação exata entre eles, em qualquer direção e com precisão decimal para fechamentos comerciais.
+            </p>
+</div>
+<div class="hidden lg:flex items-center gap-2 text-xs font-label text-on-surface-variant bg-surface-container-lowest/90 backdrop-blur-md border border-outline-variant/40 shadow-sm rounded-xl px-4 py-2.5 self-start sm:self-auto hover:border-secondary/40 transition-colors">
+<span class="material-symbols-outlined text-secondary text-[18px]">verified</span>
+<span class="font-medium">Algoritmo de Paridade Dupla BACEN</span>
+</div>
+</div>
+</div>
+<!-- Main Inputs Calculation Card -->
+<div class="bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl border border-white/80 shadow-[0_16px_36px_-8px_rgba(0,74,198,0.06),0_4px_16px_rgba(11,28,48,0.03)] p-6 sm:p-8 flex flex-col gap-6 card-elevation reveal-anim delay-2">
+<div class="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] items-center gap-4 sm:gap-6">
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="text-xs font-bold font-label uppercase tracking-wider text-on-surface-variant" for="input-a">
+                Valor A (R$)
+              </label>
+<span class="text-[11px] font-label text-tertiary">Preço Base / FIPE</span>
+</div>
+<div class="relative flex items-center bg-surface rounded-xl shadow-inner shadow-black/[0.02] border border-outline-variant/30 focus-within:border-primary/40 focus-within:bg-white transition-all duration-200 group">
+<span class="pl-4 pr-1 text-sm font-semibold text-outline group-focus-within:text-primary transition-colors font-label select-none">R$</span>
+<input class="w-full py-3.5 pl-2 pr-4 bg-transparent font-headline font-bold text-lg sm:text-xl text-on-surface outline-none tabular-nums placeholder-outline border-none focus:outline-none focus:ring-0 shadow-none" id="input-a" inputmode="decimal" placeholder="25.000,00" type="text" value="0,00">
+</div>
+</div>
+<div class="flex items-center justify-center pt-2 md:pt-6">
+<div class="w-12 h-12 rounded-2xl bg-surface-container-low border border-outline-variant/40 flex items-center justify-center text-primary shadow-sm swap-interactive cursor-pointer hover:bg-surface-container active:bg-surface-container-high" id="swap-values-btn" title="Inverter Valores A e B">
+<span class="material-symbols-outlined text-[24px]">balance</span>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="text-xs font-bold font-label uppercase tracking-wider text-on-surface-variant" for="input-b">
+                Valor B (R$)
+              </label>
+<span class="text-[11px] font-label text-tertiary">Proposta / Venda</span>
+</div>
+<div class="relative flex items-center bg-surface rounded-xl shadow-inner shadow-black/[0.02] border border-outline-variant/30 focus-within:border-primary/40 focus-within:bg-white transition-all duration-200 group">
+<span class="pl-4 pr-1 text-sm font-semibold text-outline group-focus-within:text-primary transition-colors font-label select-none">R$</span>
+<input class="w-full py-3.5 pl-2 pr-4 bg-transparent font-headline font-bold text-lg sm:text-xl text-on-surface outline-none tabular-nums placeholder-outline border-none focus:outline-none focus:ring-0 shadow-none" id="input-b" inputmode="decimal" placeholder="20.000,00" type="text" value="0,00">
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-center gap-3">
+<button class="w-full sm:flex-1 py-4 px-6 rounded-xl bg-gradient-to-r from-primary to-primary-container hover:from-primary-container hover:to-primary active:scale-[0.985] text-on-primary font-headline font-bold text-base shadow-[0_8px_20px_rgba(0,74,198,0.25)] hover:shadow-[0_12px_24px_rgba(0,74,198,0.32)] transition-all duration-300 flex items-center justify-center gap-2 group relative overflow-hidden shimmer-effect" id="calculate-btn" type="button">
+<span class="relative z-10">Calcular diferença</span>
+<span class="material-symbols-outlined text-[20px] transition-transform duration-300 group-hover:translate-x-1.5 relative z-10">arrow_forward</span>
+</button>
+<button class="w-full sm:w-auto py-4 px-5 rounded-xl bg-surface-container-low hover:bg-surface-container border border-outline-variant/30 active:scale-95 text-on-surface-variant font-label text-sm font-semibold transition-all flex items-center justify-center gap-1.5 hover:text-on-surface" id="reset-btn" title="Limpar campos" type="button">
+<span class="material-symbols-outlined text-[18px] transition-transform hover:-rotate-45 duration-300">restart_alt</span>
+<span class="sm:hidden">Resetar</span>
+</button>
+</div>
+</div>
+<!-- 4 Comparison KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 reveal-anim delay-3">
+<div class="bg-surface-container-lowest/90 backdrop-blur-sm rounded-2xl p-5 border border-white shadow-[0_8px_20px_rgba(11,28,48,0.03)] flex flex-col justify-between card-elevation group">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-label font-bold text-on-surface-variant tracking-wider uppercase">Variação de A para B</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low border border-outline-variant/30 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[18px]">east</span>
+</div>
+</div>
+<div class="relative flex items-center bg-surface rounded-xl shadow-inner shadow-black/[0.02] border border-outline-variant/30 focus-within:border-primary/40 focus-within:bg-white transition-all duration-200 group">
+<span class="font-headline font-extrabold text-2xl lg:text-3xl tracking-tight text-error tabular-nums transition-all duration-300" id="metric-a-to-b" style="transform: scale(1);">-50,00%</span>
+</div>
+<span class="text-[11px] font-label text-tertiary mt-2">Impacto partindo do Valor A</span>
+</div>
+<div class="bg-surface-container-lowest/90 backdrop-blur-sm rounded-2xl p-5 border border-white shadow-[0_8px_20px_rgba(11,28,48,0.03)] flex flex-col justify-between card-elevation group">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-label font-bold text-on-surface-variant tracking-wider uppercase">Variação de B para A</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low border border-outline-variant/30 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[18px]">west</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline font-extrabold text-2xl lg:text-3xl tracking-tight text-secondary tabular-nums transition-all duration-300" id="metric-b-to-a" style="transform: scale(1);">+100,00%</span>
+</div>
+<span class="text-[11px] font-label text-tertiary mt-2">Acréscimo necessário sobre B</span>
+</div>
+<div class="bg-surface-container-lowest/90 backdrop-blur-sm rounded-2xl p-5 border border-white shadow-[0_8px_20px_rgba(11,28,48,0.03)] flex flex-col justify-between card-elevation group">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-label font-bold text-on-surface-variant tracking-wider uppercase">Diferença Simétrica</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low border border-outline-variant/30 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[18px]">scale</span>
+</div>
+</div>
+<div class="relative flex items-center bg-surface rounded-xl shadow-inner shadow-black/[0.02] border border-outline-variant/30 focus-within:border-primary/40 focus-within:bg-white transition-all duration-200 group">
+<span class="font-headline font-extrabold text-2xl lg:text-3xl tracking-tight text-on-surface tabular-nums transition-all duration-300" id="metric-symmetric" style="transform: scale(1);">66,67%</span>
+</div>
+<span class="text-[11px] font-label text-tertiary mt-2">Diferença relativa à média</span>
+</div>
+<div class="bg-surface-container-lowest/90 backdrop-blur-sm rounded-2xl p-5 border border-white shadow-[0_8px_20px_rgba(11,28,48,0.03)] flex flex-col justify-between card-elevation group">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-label font-bold text-on-surface-variant tracking-wider uppercase">Diferença Absoluta</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-low border border-outline-variant/30 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[18px]">horizontal_rule</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline font-extrabold text-2xl lg:text-3xl tracking-tight text-on-surface tabular-nums transition-all duration-300" id="metric-absolute" style="transform: scale(1);">R$ 5.000,00</span>
+</div>
+<span class="text-[11px] font-label text-tertiary mt-2">Delta financeiro nominal bruto</span>
+</div>
+</div>
+<!-- Bottom Analytical Modules -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch reveal-anim delay-4">
+<!-- Negotiation Interpretation Module -->
+<div class="lg:col-span-8 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/80 shadow-[0_12px_30px_rgba(11,28,48,0.04)] flex flex-col justify-between gap-6 card-elevation"><div class="flex flex-col gap-5 flex-1 justify-between"><div class="flex flex-col gap-4"><div class="flex items-center justify-between flex-wrap gap-2"><div class="flex items-center gap-2.5"><div class="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[20px]">insights</span></div><h2 class="text-lg sm:text-xl font-headline font-bold text-on-surface">Interpretação Comercial &amp; Negociação</h2></div><span class="text-xs font-label px-3 py-1 rounded-full bg-secondary-container/30 border border-secondary/20 text-on-secondary-container font-semibold">Margem de Negociação Aberta</span></div><p class="text-sm sm:text-[15px] font-body text-on-surface-variant leading-relaxed transition-all duration-300 bg-surface/60 p-4 rounded-2xl border border-outline-variant/20" id="analysis-text">
+        O <strong class="text-on-surface font-semibold">Valor B (R$ 5.000,00)</strong> representa uma 
+        redução nominal de <strong class="text-error font-semibold">-50,00%</strong> em relação ao 
+        <strong class="text-on-surface font-semibold">Valor A (R$ 10.000,00)</strong>. 
+        A diferença líquida apurada entre os dois montantes é de <strong class="text-secondary font-semibold">R$ 5.000,00</strong> 
+        (diferença simétrica ponderada de <strong>66,67%</strong>).
+      </p></div><div class="p-4 rounded-2xl bg-surface-container-low/90 border border-outline-variant/30 flex items-start gap-3.5 transition-colors hover:bg-surface-container-low"><span class="material-symbols-outlined text-primary text-[22px] mt-0.5">lightbulb</span><div class="text-xs sm:text-sm font-body text-on-surface flex flex-col gap-1.5 leading-relaxed"><span class="font-bold font-headline text-on-surface">Regra de Fechamento F&amp;I:</span><span class="text-on-surface-variant">Para restaurar o valor original a partir de uma proposta reduzida em 50%, o markup percentual exigido é exatamente o dobro (+100%). Mantenha essa proporção visível na mesa de aprovação de crédito.</span></div></div></div><div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-outline-variant/30 text-xs font-label"><div class="flex items-center gap-2 text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-secondary pulsing-indicator"></span><span class="">Cálculo instantâneo atualizado em tempo real</span></div><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-primary hover:text-primary-container font-medium border border-outline-variant/30 transition-all cursor-pointer" id="copy-summary-btn" type="button"><span class="material-symbols-outlined text-[16px]">content_copy</span><span id="copy-text-feedback" class="">Copiar dados da análise</span></button></div></div>
+<!-- Graphic Proportion Card with Glowing Dynamic Bars -->
+<div class="lg:col-span-4 bg-gradient-to-br from-primary via-primary to-primary-container text-on-primary rounded-3xl p-6 sm:p-8 shadow-[0_20px_40px_-10px_rgba(0,74,198,0.4)] flex flex-col justify-between gap-6 relative overflow-hidden card-elevation border border-white/20">
+<div class="absolute -right-8 -bottom-8 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none animate-orb-2"></div>
+<div class="absolute -left-12 -top-12 w-36 h-36 bg-secondary-fixed/20 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex flex-col gap-3 relative z-10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-fixed text-[20px]">equalizer</span>
+<span class="text-xs uppercase font-label tracking-widest text-on-primary-container font-bold">Proporção Gráfica</span>
+</div>
+<h3 class="text-xl font-headline font-bold">Comparativo Direto</h3>
+<p class="text-xs text-on-primary/80 leading-relaxed font-body">
+              Representação visual da proporção de volume financeiro entre os valores informados.
+            </p>
+</div>
+<div class="flex flex-col gap-4 relative z-10">
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-label font-semibold">
+<span class="">Valor A</span>
+<span class="transition-all duration-300" id="bar-a-label">100% (R$ 10.000,00)</span>
+</div>
+<div class="w-full h-3 rounded-full bg-black/25 overflow-hidden p-0.5 backdrop-blur-sm">
+<div class="h-full bg-gradient-to-r from-secondary-fixed-dim to-secondary-fixed rounded-full transition-all duration-700 ease-out glow-tip" id="bar-a" style="width: 100%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-xs font-label font-semibold">
+<span class="">Valor B</span>
+<span class="transition-all duration-300" id="bar-b-label">50% (R$ 5.000,00)</span>
+</div>
+<div class="w-full h-3 rounded-full bg-black/25 overflow-hidden p-0.5 backdrop-blur-sm">
+<div class="h-full bg-gradient-to-r from-white/80 to-white rounded-full transition-all duration-700 ease-out glow-tip" id="bar-b" style="width: 50%;"></div>
+</div>
+</div>
+</div>
+<div class="pt-2 flex items-center justify-between text-[11px] font-label text-on-primary/75 relative z-10 border-t border-white/10">
+<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>Precisão: 2 casas decimais</span>
+<span class="">Módulo F&amp;I 2025</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+    /* ===== Design original + motor validado do sistema (calcPercentual) ===== */
+    let resultadoAtivo = false;
+    let marcaCfg = { logoClaro: null };
+    let cabecalhoOriginal = null;
+    const CHAVE_ESTADO = 'per-estado';
+
+    /**
+ * Calcula as relações percentuais entre dois valores A e B.
+ *
+ * - variacaoAB: variação percentual ao ir de A para B (assimétrica, com sinal)
+ * - variacaoBA: variação percentual ao ir de B para A (assimétrica, com sinal)
+ * - diferencaSimetrica: diferença percentual simétrica, útil quando não há
+ *   uma ordem natural "antes/depois" entre os valores (usa a média como base)
+ * - diferencaAbsoluta: |A - B|
+ */
+function calcPercentual(a, b) {
+  const diferencaAbsoluta = Math.abs(a - b);
+  const media = (a + b) / 2;
+
+  const variacaoAB = a !== 0 ? ((b - a) / Math.abs(a)) * 100 : null;
+  const variacaoBA = b !== 0 ? ((a - b) / Math.abs(b)) * 100 : null;
+  const diferencaSimetrica = media !== 0 ? (diferencaAbsoluta / Math.abs(media)) * 100 : null;
+
+  return { diferencaAbsoluta, variacaoAB, variacaoBA, diferencaSimetrica };
+}
+
+
+    function $(id) { return document.getElementById(id); }
+    function setT(id, t) { const el = $(id); if (el) el.textContent = t; }
+
+    function parseCurrency(str) {
+      if (!str && str !== 0) return 0;
+      const clean = str.toString().replace(/[^0-9,\.-]/g, '').replace(/\./g, '').replace(',', '.');
+      const val = parseFloat(clean);
+      return isNaN(val) ? 0 : val;
+    }
+    function formatCurrencySimple(num) {
+      return Number(num || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function formatPercent(num, withSign) {
+      if (num === null || !isFinite(num)) return 'N/A';
+      const sign = withSign && num > 0 ? '+' : '';
+      return `${sign}${num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+    }
+    function mascaraMoeda(el) {
+      let d = el.value.replace(/\D/g, '');
+      if (!d) d = '0';
+      el.value = formatCurrencySimple(parseInt(d, 10) / 100);
+    }
+
+    const CLASSE_BASE = 'font-headline font-extrabold text-2xl lg:text-3xl tracking-tight tabular-nums transition-all duration-300';
+    function corMetrica(el, v) {
+      if (!el || v === null || !isFinite(v)) { if (el) el.className = CLASSE_BASE + ' text-on-surface'; return; }
+      const cor = v < 0 ? 'text-error' : (v > 0 ? 'text-secondary' : 'text-on-surface');
+      el.className = CLASSE_BASE + ' ' + cor;
+    }
+    function flashValue(el) {
+      if (!el) return;
+      el.style.transform = 'scale(1.05)';
+      setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+    }
+
+    function setAviso(texto) {
+      let msg = $('per-aviso');
+      const botao = $('calculate-btn');
+      if (!msg && botao) {
+        msg = document.createElement('div');
+        msg.id = 'per-aviso';
+        msg.style.cssText = 'margin-top:10px;padding:10px 12px;border-radius:12px;font-size:12px;font-weight:600;background:#fff;border:1px solid #fca5a5;color:#b91c1c;display:none';
+        botao.parentElement.appendChild(msg);
+      }
+      if (msg) { msg.textContent = texto || ''; msg.style.display = texto ? 'block' : 'none'; }
+    }
+
+    /* Cartoes de resultado ficam no lugar; sem calculo mostram tracos */
+    function setPlaceholders() {
+      ['metric-a-to-b', 'metric-b-to-a', 'metric-symmetric', 'metric-absolute', 'bar-a-label', 'bar-b-label'].forEach(id => setT(id, '—'));
+      corMetrica($('metric-a-to-b'), null);
+      corMetrica($('metric-b-to-a'), null);
+      const ba = $('bar-a'), bb = $('bar-b');
+      if (ba) ba.style.width = '0%';
+      if (bb) bb.style.width = '0%';
+      setT('analysis-text', 'Informe os dois valores e clique em Calcular para ver a análise.');
+    }
+
+    function salvarEstado() {
+      try {
+        sessionStorage.setItem(CHAVE_ESTADO, JSON.stringify({
+          a: $('input-a').value, b: $('input-b').value, calculado: resultadoAtivo
+        }));
+      } catch (e) { /* armazenamento indisponivel */ }
+    }
+    function restaurarEstado() {
+      try {
+        const s = JSON.parse(sessionStorage.getItem(CHAVE_ESTADO) || 'null');
+        if (!s) return false;
+        $('input-a').value = s.a;
+        $('input-b').value = s.b;
+        if (s.calculado) calcularPercentual();
+        return true;
+      } catch (e) { return false; }
+    }
+
+    /* Qualquer alteracao invalida o resultado anterior: e preciso calcular de novo */
+    function onInputChanged() {
+      resultadoAtivo = false;
+      setPlaceholders();
+      setAviso('');
+      salvarEstado();
+    }
+
+    /* Calculo: usa exatamente calcPercentual do sistema */
+    function calcularPercentual() {
+      const a = parseCurrency($('input-a').value);
+      const b = parseCurrency($('input-b').value);
+      if (!(a > 0 && b > 0)) {
+        resultadoAtivo = false;
+        setPlaceholders();
+        setAviso('Informe dois valores maiores que zero.');
+        salvarEstado();
+        return false;
+      }
+      setAviso('');
+      const r = calcPercentual(a, b);
+
+      const metricAtoB = $('metric-a-to-b');
+      const metricBtoA = $('metric-b-to-a');
+      setT('metric-a-to-b', formatPercent(r.variacaoAB, true));
+      corMetrica(metricAtoB, r.variacaoAB);
+      setT('metric-b-to-a', formatPercent(r.variacaoBA, true));
+      corMetrica(metricBtoA, r.variacaoBA);
+      setT('metric-symmetric', formatPercent(r.diferencaSimetrica, false));
+      setT('metric-absolute', `R$ ${formatCurrencySimple(r.diferencaAbsoluta)}`);
+      [metricAtoB, metricBtoA, $('metric-symmetric'), $('metric-absolute')].forEach(flashValue);
+
+      const maxVal = Math.max(Math.abs(a), Math.abs(b), 1);
+      const pctA = Math.min(100, Math.max(6, Math.round((Math.abs(a) / maxVal) * 100)));
+      const pctB = Math.min(100, Math.max(6, Math.round((Math.abs(b) / maxVal) * 100)));
+      const barA = $('bar-a'), barB = $('bar-b');
+      if (barA) barA.style.width = `${pctA}%`;
+      if (barB) barB.style.width = `${pctB}%`;
+      setT('bar-a-label', `${pctA}% (R$ ${formatCurrencySimple(a)})`);
+      setT('bar-b-label', `${pctB}% (R$ ${formatCurrencySimple(b)})`);
+
+      const direcao = r.variacaoAB < 0 ? 'redução nominal de' : 'acréscimo nominal de';
+      const destaque = r.variacaoAB < 0 ? 'text-error' : 'text-secondary';
+      const an = $('analysis-text');
+      if (an) an.innerHTML = `
+        O <strong class="text-on-surface font-semibold">Valor B (R$ ${formatCurrencySimple(b)})</strong> representa uma
+        ${direcao} <strong class="${destaque} font-semibold">${formatPercent(r.variacaoAB, true)}</strong> em relação ao
+        <strong class="text-on-surface font-semibold">Valor A (R$ ${formatCurrencySimple(a)})</strong>.
+        A diferença líquida apurada entre os dois montantes é de <strong class="text-secondary font-semibold">R$ ${formatCurrencySimple(r.diferencaAbsoluta)}</strong>
+        (diferença simétrica ponderada de <strong>${formatPercent(r.diferencaSimetrica, false)}</strong>).
+      `;
+
+      resultadoAtivo = true;
+      salvarEstado();
+      return true;
+    }
+
+    /* Cabecalho: sino de notificacoes no lugar do perfil */
+    function montarCabecalho() {
+      const header = document.querySelector('header');
+      if (!header) return;
+      const op = Array.from(header.querySelectorAll('*')).find(e => e.children.length === 0 && e.textContent.includes('Operador'));
+      const perfil = op ? op.closest('header > div > div > div') : null;
+      const grupo = perfil ? perfil.parentElement : (header.firstElementChild ? header.firstElementChild.lastElementChild : null);
+      if (perfil) perfil.remove();
+      const sino = document.createElement('button');
+      sino.id = 'bell-slot';
+      sino.type = 'button';
+      sino.setAttribute('aria-label', 'Notificações');
+      sino.style.cssText = 'display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:12px;border:1px solid #d3e4fe;background:#fff;color:#0b1c30;cursor:pointer';
+      sino.innerHTML = '<span class="material-symbols-outlined text-[18px]">notifications</span>';
+      if (grupo) grupo.appendChild(sino);
+    }
+
+    /* Logomarca vinda das configuracoes, no lugar da marca do design */
+    function aplicarLogo() {
+      const header = document.querySelector('header');
+      if (!header) return;
+      const brandSpan = Array.from(header.querySelectorAll('span')).find(s => s.firstElementChild && s.firstElementChild.textContent.trim() === '.car');
+      const brandBox = brandSpan ? brandSpan.parentElement : null;
+      if (!brandBox) return;
+      if (cabecalhoOriginal === null) cabecalhoOriginal = brandBox.innerHTML;
+      brandBox.innerHTML = marcaCfg.logoClaro
+        ? `<img src="${marcaCfg.logoClaro}" alt="SliceX.calc" style="height:34px;width:auto;display:block">`
+        : cabecalhoOriginal;
+    }
+
+    function postParent(msg) { if (window.parent && window.parent !== window) window.parent.postMessage(msg, window.location.origin); }
+    function enviarRetangulo() {
+      const el = $('bell-slot');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      postParent({ type: 'bell-rect', rect: { x: r.left, y: r.top, w: r.width, h: r.height } });
+    }
+    window.addEventListener('resize', enviarRetangulo);
+    window.addEventListener('message', (e) => {
+      if (e.source !== window.parent) return;
+      const d = e.data || {};
+      if (d.type === 'marca') { marcaCfg = { logoClaro: d.logoClaro }; aplicarLogo(); }
+    });
+
+    function init() {
+      montarCabecalho();
+      aplicarLogo();
+      const a = $('input-a'), b = $('input-b');
+      [a, b].forEach(el => {
+        if (!el) return;
+        el.addEventListener('input', () => { mascaraMoeda(el); onInputChanged(); });
+        el.addEventListener('blur', () => { el.value = formatCurrencySimple(parseCurrency(el.value)); });
+        el.addEventListener('keydown', (e) => { if (e.key === 'Enter') calcularPercentual(); });
+      });
+      const calc = $('calculate-btn');
+      if (calc) calc.addEventListener('click', calcularPercentual);
+      const swap = $('swap-values-btn');
+      if (swap) swap.addEventListener('click', () => {
+        const t = a.value; a.value = b.value; b.value = t;
+        if (resultadoAtivo) calcularPercentual(); else onInputChanged();
+      });
+      const reset = $('reset-btn');
+      if (reset) reset.addEventListener('click', () => {
+        a.value = '0,00';
+        b.value = '0,00';
+        onInputChanged();
+      });
+      const copy = $('copy-summary-btn');
+      if (copy) copy.addEventListener('click', () => {
+        const txt = `Calcula.car - Análise de Diferença Percentual:\nValor A: R$ ${a.value}\nValor B: R$ ${b.value}\nVariação A -> B: ${$('metric-a-to-b').textContent.trim()}\nVariação B -> A: ${$('metric-b-to-a').textContent.trim()}\nDiferença Simétrica: ${$('metric-symmetric').textContent.trim()}\nDiferença Absoluta: ${$('metric-absolute').textContent.trim()}`;
+        if (!navigator.clipboard) return;
+        navigator.clipboard.writeText(txt).then(() => {
+          const fb = $('copy-text-feedback');
+          if (!fb) return;
+          fb.textContent = 'Copiado para a área de transferência!';
+          setTimeout(() => { fb.textContent = 'Copiar dados da análise'; }, 2200);
+        });
+      });
+      setPlaceholders();
+      setAviso('');
+      const restaurou = restaurarEstado();
+      if (!restaurou) setPlaceholders();
+      postParent({ type: 'pronto' });
+      enviarRetangulo();
+    }
+    init();
+</script></main><footer class="w-full bg-surface-container-lowest/90 backdrop-blur-md mt-auto border-t border-outline-variant/30 shadow-[0_-1px_6px_rgba(11,28,48,0.03)]"><div class="max-w-7xl mx-auto px-6 lg:px-12 py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-label text-on-surface-variant"><div class="flex items-center gap-3"><div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container/80 text-on-surface font-medium border border-outline-variant/40"><span class="material-symbols-outlined text-secondary text-[16px]">lock</span><span class="">SSL 256-Bit Encrypted</span></div><span class="text-on-surface-variant">© 2025 Calcula.car Brasil Tecnologia Automotiva S.A. Todos os direitos reservados.</span></div><div class="flex items-center gap-6"><span class="text-on-surface-variant">Conformidade LGPD &amp; BACEN F&amp;I</span><a class="hover:text-primary transition-colors font-medium" data-path="suporte" href="#">Suporte Operacional</a></div></div></footer>
+
+
+
+
+
+
+</body></html>
