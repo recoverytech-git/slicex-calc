@@ -12,16 +12,6 @@ export const CC_PALETA_CSS = `
   font-family:'Plus Jakarta Sans',Inter,system-ui,sans-serif; background:var(--surface); color:var(--on-surface);
   min-height:100vh; position:relative; overflow-x:clip;
 }
-.cc-page[data-paleta="dark"]{
-  --surface:#000000; --surface-lowest:#141414; --surface-low:#0f0f0f; --surface-container:#1c1c1c; --surface-high:#242424;
-  --surface-highest:#2a2a2a; --surface-variant:#2a2a2a; --surface-3:#1c1c1c;
-  --on-surface:#f5f5f5; --on-variant:#9198A1; --outline-variant:#2a2a2a; --tertiary:#9198A1;
-  --primary:#4493F8; --primary-c:#2F6FD6; --secondary:#10b981; --secondary-c:#10b981;
-  --secondary-fixed:rgba(16,185,129,0.25); --on-secondary-fixed:#a7f3d0; --primary-fixed:rgba(68,147,248,0.14);
-  --glass:rgba(0,0,0,0.8); --glass-card:rgba(20,20,20,0.9); --input-bg:rgba(28,28,28,0.7);
-  --ring:rgba(68,147,248,0.25); --card-shadow:0 24px 60px -12px rgba(0,0,0,0.6);
-  --glow:rgba(68,147,248,0.12); --live-bg:rgba(28,28,28,0.6);
-}
 `;
 
 export const CC_BASE_CSS = `

@@ -4,7 +4,6 @@ import { LogOut, Lock, ChevronDown } from "lucide-react";
 import { itensNav } from "./navItems";
 import { useAuth } from "../lib/auth";
 import { useMarca } from "../lib/marca";
-import { useTema } from "../lib/tema";
 import logo from "../assets/logo.png";
 
 const ROTAS_CALCULADORAS = ["/financiamento", "/percentual", "/amortizacao"];
@@ -14,9 +13,8 @@ export default function Sidebar({ aberta = true }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const marca = useMarca();
-  const [tema] = useTema();
   const [calcAberto, setCalcAberto] = useState(() => ROTAS_CALCULADORAS.some((r) => pathname.startsWith(r)));
-  const logoSidebar = tema === "light" ? (marca.logo_sidebar_claro || logo) : (marca.logo_sidebar || logo);
+  const logoSidebar = marca.logo_sidebar || logo;
   const itens = itensNav(perfil?.papel);
 
   // Vai para a landing antes de encerrar a sessão, para não cair no login

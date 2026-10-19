@@ -1,12 +1,11 @@
 // sem-rascunho: página pública sem formulário
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Landmark, Car, Warehouse, ShieldCheck, TrendingUp, Banknote, ArrowRight, LogIn, Zap, Calculator, WalletCards, PauseCircle, PlayCircle, ExternalLink, Users, Headset, ChevronRight, Sun, Moon, Lightbulb, LayoutGrid, ListOrdered } from "lucide-react";
+import { Landmark, Car, Warehouse, ShieldCheck, TrendingUp, Banknote, ArrowRight, LogIn, Zap, Calculator, WalletCards, PauseCircle, PlayCircle, ExternalLink, Users, Headset, ChevronRight, Lightbulb, LayoutGrid, ListOrdered } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import WhatsAppIcon from "../components/WhatsAppIcon";
 import { CC_BASE_CSS } from "../components/ccPaleta";
 import { useMarca } from "../lib/marca";
-import { useTema } from "../lib/tema";
 import { CADASTRO_WHATSAPP, SUPORTE_WHATSAPP } from "../lib/contato";
 
 const IMAGEM_HERO = "https://lh3.googleusercontent.com/aida/AEtjO1VaaOMujZEwacci69jAP5lLN-iMfA-m60WA28agPRbcLCMLpU2RcYdjicwUSiDVzlmazbaxQLZLGVNdEvfykZcUJE_rN2zalYw4gvHs6aSzohfntvwljlLaWjEEbpVm6l4MxIDKtn2t1jcS653fiSlwInWB8XATYf1F-Adw5xj3zen5Y_VqYViUagrjbbXhUOSh1Ygv5i3EgK7TlrVJyWb_03jyB2HLdI7oOGFZ2xlwXlwpIY1IPFZzHBvk";
@@ -343,14 +342,8 @@ function CalculadoraIlustrativa() {
 }
 
 export default function Landing() {
-  const [tema, definirTema] = useTema();
-  const marca = useMarca();
-  // Abre na paleta clara do design. Quem já escolheu um tema mantém a escolha.
-  const [paleta, setPaleta] = useState(() => {
-    try { return localStorage.getItem("slicex-tema") ? tema : "light"; } catch { return "light"; }
-  });
-  const escuro = paleta === "dark";
-  const logoCustom = escuro ? (marca.logo_landing || null) : (marca.logo_landing_claro || null);
+  const paleta = "light";
+  const logoCustom = marca.logo_landing_claro || null;
   const [digitado, setDigitado] = useState("");
   const [imgOk, setImgOk] = useState(true);
   const [ativo, setAtivo] = useState("solucoes");
@@ -396,12 +389,6 @@ export default function Landing() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const alternarPaleta = () => {
-    const nova = escuro ? "light" : "dark";
-    setPaleta(nova);
-    definirTema(nova);
-  };
-
   const digitando = digitado.length < TEXTO_HERO.length;
 
   return (
@@ -431,9 +418,6 @@ export default function Landing() {
             </nav>
 
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <button type="button" className="cc-iconbtn" onClick={alternarPaleta} aria-label={escuro ? "Ativar tema claro" : "Ativar tema escuro"}>
-                {escuro ? <Sun size={17} /> : <Moon size={17} />}
-              </button>
               <Link to="/login" className="ld-entrar" aria-label="Entrar"><LogIn size={15} aria-hidden="true" /><span className="ld-entrar-txt">Entrar</span></Link>
             </div>
           </div>

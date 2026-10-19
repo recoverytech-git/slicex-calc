@@ -15,34 +15,31 @@ const MAX_BYTES = 2 * 1024 * 1024;
 
 const GRUPOS = [
   {
-    titulo: "Sidebar (menu lateral)",
+    titulo: "Menu lateral (sidebar)",
     onde: "Menu à esquerda, em todas as telas do sistema.",
     slots: [
-      { chave: "logo_sidebar", modo: "Escuro", titulo: "Sidebar · modo escuro", dica: "Logo clara ou branca, fundo transparente.", fundo: "#000000" },
-      { chave: "logo_sidebar_claro", modo: "Claro", titulo: "Sidebar · modo claro", dica: "Logo clara ou branca, fundo transparente (o menu continua escuro no tema claro).", fundo: "#0E1A2E" },
+      { chave: "logo_sidebar", titulo: "Logomarca da sidebar", dica: "Logo clara ou branca, fundo transparente (o menu é escuro).", fundo: "#0E1A2E" },
     ],
   },
   {
     titulo: "Cabeçalho interno",
     onde: "Topo das páginas depois do login.",
     slots: [
-      { chave: "logo_header", modo: "Escuro", titulo: "Cabeçalho · modo escuro", dica: "Logo clara ou branca, fundo transparente.", fundo: "#000000" },
-      { chave: "logo_claro", modo: "Claro", titulo: "Cabeçalho · modo claro", dica: "Logo escura ou colorida, fundo transparente.", fundo: "#FFFFFF" },
+      { chave: "logo_claro", titulo: "Logomarca do cabeçalho", dica: "Logo escura ou colorida, fundo transparente.", fundo: "#FFFFFF" },
     ],
   },
   {
     titulo: "Landing page",
     onde: "Página inicial pública, antes do login.",
     slots: [
-      { chave: "logo_landing", modo: "Escuro", titulo: "Landing · modo escuro", dica: "Logo clara ou branca, fundo transparente.", fundo: "#000000" },
-      { chave: "logo_landing_claro", modo: "Claro", titulo: "Landing · modo claro", dica: "Logo escura ou colorida, fundo transparente.", fundo: "#FFFFFF" },
+      { chave: "logo_landing_claro", titulo: "Logomarca da landing", dica: "Logo escura ou colorida, fundo transparente.", fundo: "#FFFFFF" },
     ],
   },
   {
     titulo: "Favicon",
     onde: "Ícone da aba do navegador.",
     slots: [
-      { chave: "favicon", modo: null, titulo: "Favicon", dica: "PNG quadrado, 64 × 64 px ou maior.", fundo: "#141414" },
+      { chave: "favicon", titulo: "Favicon", dica: "PNG quadrado, 64 × 64 px ou maior.", fundo: "#141414" },
     ],
   },
 ];

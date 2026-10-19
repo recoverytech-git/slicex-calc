@@ -188,14 +188,6 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(68,147,24
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
-/* ── Tema escuro (padrão): paleta azul #4493F8, cinza #9198A1, preto e branco ── */
-:root {
-  --bg-top: #000000; --bg-bottom: #0a0a0a; --glow: rgba(68,147,248,0.07);
-  --bg-nav: #000000; --bg-header: #000000;
-  --nav-text: #9198A1; --nav-text-active: #ffffff; --nav-active-bg: rgba(68,147,248,0.16);
-  --shadow-glow: 0 0 0 1px rgba(68,147,248,0.14), 0 14px 40px rgba(0,0,0,0.6);
-}
-
 /* ── Tema claro: cores de referência (fundo azulado, cards brancos, navy na lateral) ── */
 :root[data-theme="light"] {
   color-scheme: light;

@@ -1141,7 +1141,7 @@ function calcSAC(pv, taxa, n) {
     function mascaraTaxa(el) {
       let v = el.value.replace(/[^0-9.,]/g, '').replace(',', '.');
       const partes = v.split('.');
-      const inteiro = partes[0];
+      const inteiro = partes[0].slice(0, 2);
       const dec = partes.length > 1 ? partes.slice(1).join('').slice(0, 2) : null;
       el.value = dec !== null ? `${inteiro}.${dec}` : inteiro;
     }
@@ -1623,9 +1623,10 @@ function calcSAC(pv, taxa, n) {
     function montarCabecalho() {
       const btnTema = Array.from(document.querySelectorAll('header button')).find(b => /light_mode|dark_mode/.test(b.textContent));
       if (!btnTema) return;
-      btnTema.onclick = () => aplicarTema(!document.documentElement.classList.contains('dark'));
+      const grupoCab = btnTema.parentElement;
       let el = btnTema.nextElementSibling;
       while (el) { const nx = el.nextElementSibling; el.remove(); el = nx; }
+      btnTema.remove();
       const sino = document.createElement('button');
       sino.id = 'bell-slot';
       sino.type = 'button';
@@ -1633,7 +1634,7 @@ function calcSAC(pv, taxa, n) {
       sino.className = btnTema.className;
       sino.style.cssText = 'display:flex;align-items:center;justify-content:center;width:36px;height:36px';
       sino.innerHTML = '<span class="material-symbols-outlined text-[18px]">notifications</span>';
-      btnTema.parentElement.appendChild(sino);
+      grupoCab.appendChild(sino);
     }
 
     function aplicarLogo() {
@@ -1643,41 +1644,6 @@ function calcSAC(pv, taxa, n) {
       const escuro = document.documentElement.classList.contains('dark');
       const url = escuro ? marcaCfg.logoEscuro : marcaCfg.logoClaro;
       img.src = url || img.dataset.original;
-    }
-
-    function aplicarTema(escuro) {
-      document.documentElement.classList.toggle('dark', escuro);
-      const btn = Array.from(document.querySelectorAll('header button')).find(b => /light_mode|dark_mode/.test(b.textContent));
-      if (btn) {
-        const icone = btn.querySelector('.material-symbols-outlined');
-        if (icone) icone.textContent = escuro ? 'light_mode' : 'dark_mode';
-      }
-      try { sessionStorage.setItem('fi-tema', escuro ? 'dark' : 'light'); } catch (e) { /* ignore */ }
-      aplicarLogo();
-    }
-
-    function injetarTemaEscuro() {
-      const estilo = document.createElement('style');
-      estilo.textContent = `
-        html.dark body { background:#0b1220 !important; color:#e6edf8 !important; }
-        html.dark [class*="bg-surface-container"] { background-color:#172339 !important; }
-        html.dark [class*="bg-surface-container-low"] { background-color:#0f1a2d !important; }
-        html.dark [class*="bg-surface-container-lowest"], html.dark [class*="bg-white"] { background-color:#121c30 !important; }
-        html.dark [class*="bg-surface"], html.dark [class*="bg-background"] { background-color:#0b1220 !important; }
-        html.dark [class*="text-on-surface"] { color:#e6edf8 !important; }
-        html.dark [class*="text-on-surface-variant"] { color:#9aa6bd !important; }
-        html.dark [class*="border-surface"], html.dark [class*="border-outline"], html.dark [class*="border-slate"] { border-color:#23314d !important; }
-        html.dark [class*="shadow"] { box-shadow:0 10px 30px rgba(0,0,0,0.35) !important; }
-        #tab-content-table table { table-layout:fixed; width:100%; border-collapse:separate; border-spacing:0; }
-        #tab-content-table th, #tab-content-table td { padding:12px 16px !important; text-align:left !important; white-space:nowrap; vertical-align:middle; }
-        #tab-content-table th:nth-child(1), #tab-content-table td:nth-child(1) { width:12%; }
-        #tab-content-table th:nth-child(2), #tab-content-table td:nth-child(2) { width:26%; }
-        #tab-content-table th:nth-child(3), #tab-content-table td:nth-child(3) { width:20%; }
-        #tab-content-table th:nth-child(4), #tab-content-table td:nth-child(4) { width:20%; }
-        #tab-content-table th:nth-child(5), #tab-content-table td:nth-child(5) { width:22%; }
-        #tab-content-table td { font-variant-numeric: tabular-nums; }
-      `;
-      document.head.appendChild(estilo);
     }
 
     function postParent(msg) { if (window.parent && window.parent !== window) window.parent.postMessage(msg, window.location.origin); }
@@ -1698,16 +1664,19 @@ function calcSAC(pv, taxa, n) {
 
     /* Estado inicial: Price selecionado; valores mantidos durante a sessao */
     function init() {
-      injetarTemaEscuro();
       montarCabecalho();
       montarExportacao();
       const tx = $('input-taxa');
       if (tx) {
         tx.type = 'text';
         tx.inputMode = 'decimal';
+        tx.addEventListener('beforeinput', (e) => {
+          if (e.data && !/^[0-9.,]$/.test(e.data)) e.preventDefault();
+          if (e.data && /[.,]/.test(e.data) && /[.,]/.test(tx.value)) e.preventDefault();
+        });
         tx.addEventListener('input', () => { mascaraTaxa(tx); onInputChanged(); });
+        tx.addEventListener('blur', () => { tx.value = tx.value.replace(/\.$/, ''); });
       }
-      try { aplicarTema(sessionStorage.getItem('fi-tema') === 'dark'); } catch (e) { aplicarTema(false); }
       setT('summary-financiado', fmtBRL(0));
       setT('badge-taxa-anual', '~0.00% a.a.');
       currentSystem = 'PRICE';

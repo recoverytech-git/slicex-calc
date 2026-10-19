@@ -1,13 +1,12 @@
 // sem-rascunho: credenciais de acesso não são guardadas no navegador
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useLocation, Navigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Home, Sun, Moon, Loader2, TrendingUp, Gauge, ShieldCheck, BadgeCheck, BarChart3, Check } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Home, Loader2, TrendingUp, Gauge, ShieldCheck, BadgeCheck, BarChart3, Check } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import WhatsAppIcon from "../components/WhatsAppIcon";
 import { CC_BASE_CSS } from "../components/ccPaleta";
 import { useAuth } from "../lib/auth";
 import { useMarca } from "../lib/marca";
-import { useTema } from "../lib/tema";
 import { SUPORTE_WHATSAPP } from "../lib/contato";
 
 const CSS = `
@@ -128,13 +127,8 @@ export default function Login() {
   const navigate = useNavigate();
   const local = useLocation();
   const marca = useMarca();
-  const [tema, definirTema] = useTema();
-  // Abre na paleta clara do design. Quem já escolheu um tema mantém a escolha.
-  const [paleta, setPaleta] = useState(() => {
-    try { return localStorage.getItem("slicex-tema") ? tema : "light"; } catch { return "light"; }
-  });
-  const escuro = paleta === "dark";
-  const logoCustom = escuro ? (marca.logo_landing || null) : (marca.logo_landing_claro || null);
+  const paleta = "light";
+  const logoCustom = marca.logo_landing_claro || null;
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -169,12 +163,6 @@ export default function Login() {
   }, []);
 
   if (sessao) return <Navigate to="/dashboard" replace />;
-
-  const alternarPaleta = () => {
-    const nova = escuro ? "light" : "dark";
-    setPaleta(nova);
-    definirTema(nova);
-  };
 
   const trocarModo = (novo) => { setModo(novo); setMsg(null); };
 
@@ -222,10 +210,7 @@ export default function Login() {
                 <WhatsAppIcon size={16} /><span className="cc-pill-txt">AJUDA &amp; SUPORTE</span>
               </a>
             </nav>
-            <button type="button" className="cc-iconbtn" onClick={alternarPaleta} aria-label={escuro ? "Ativar tema claro" : "Ativar tema escuro"}>
-              {escuro ? <Sun size={17} /> : <Moon size={17} />}
-            </button>
-          </div>
+            </div>
         </header>
 
         <main className="lg-main">
