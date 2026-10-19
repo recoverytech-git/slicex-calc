@@ -1,0 +1,856 @@
+<!DOCTYPE html><html class="light" lang="pt-BR" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><title>Calcula.car - Inteligência Financeira Automotiva</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+/* 3D Depth, Floating Orbs & Keyframes */
+@keyframes float-slow-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(45px, -35px) scale(1.08); }
+}
+@keyframes float-slow-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-40px, 30px) scale(1.12); }
+}
+@keyframes float-slow-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, 40px) scale(0.95); }
+}
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-150%) skewX(-20deg); }
+  50%, 100% { transform: translateX(250%) skewX(-20deg); }
+}
+@keyframes gentle-pulse-glow {
+  0%, 100% { box-shadow: 0 12px 36px -10px rgba(0, 74, 198, 0.12), 0 0 0 1px rgba(0, 74, 198, 0.08); }
+  50% { box-shadow: 0 16px 42px -6px rgba(0, 74, 198, 0.22), 0 0 24px 2px rgba(37, 99, 235, 0.18), 0 0 0 1.5px rgba(0, 74, 198, 0.25); }
+}
+@keyframes badge-glow {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 4px 6px rgba(0,74,198,0.25)); }
+  50% { transform: scale(1.02); filter: drop-shadow(0 6px 12px rgba(37,99,235,0.45)); }
+}
+@keyframes number-pop {
+  0% { transform: scale(0.96); opacity: 0.8; }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.orb-float-1 { animation: float-slow-1 9s ease-in-out infinite; }
+.orb-float-2 { animation: float-slow-2 11s ease-in-out infinite; }
+.orb-float-3 { animation: float-slow-3 8.5s ease-in-out infinite; }
+.shimmer-element::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  animation: shimmer-sweep 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+.pulse-champion-card { animation: gentle-pulse-glow 4s ease-in-out infinite; }
+.badge-trophy-pulse { animation: badge-glow 3s ease-in-out infinite; }
+
+/* Tactile Elastic Spring Buttons */
+.spring-tap {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.spring-tap:active {
+  transform: scale(0.94) !important;
+}
+
+/* Glassmorphism Card Style */
+.glass-depth-card {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 30px -10px rgba(11, 28, 48, 0.07), 0 2px 6px -2px rgba(11, 28, 48, 0.03);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+.glass-depth-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px -10px rgba(11, 28, 48, 0.12), 0 4px 12px -2px rgba(11, 28, 48, 0.05);
+  border-color: rgba(37, 99, 235, 0.25);
+}
+
+.num-update-pop {
+  animation: number-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-float-1, .orb-float-2, .orb-float-3,
+  .shimmer-element::after,
+  .pulse-champion-card,
+  .badge-trophy-pulse {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container-lowest": "#ffffff", "on-error-container": "#93000a", "background": "#f8f9ff", "on-surface": "#0b1c30", "error": "#ba1a1a", "secondary-container": "#6cf8bb", "on-primary-container": "#eeefff", "on-surface-variant": "#434655", "inverse-primary": "#b4c5ff", "on-primary": "#ffffff", "on-tertiary-fixed": "#131b2e", "outline-variant": "#c3c6d7", "surface": "#f8f9ff", "outline": "#737686", "inverse-on-surface": "#eaf1ff", "tertiary-fixed-dim": "#bec6e0", "on-primary-fixed-variant": "#003ea8", "secondary": "#006c49", "tertiary-container": "#656d84", "on-secondary-fixed-variant": "#005236", "surface-container-high": "#dce9ff", "on-tertiary-fixed-variant": "#3f465c", "tertiary": "#4d556b", "on-tertiary-container": "#eef0ff", "tertiary-fixed": "dae2fd", "surface-container-highest": "#d3e4fe", "surface-dim": "#cbdbf5", "on-secondary-container": "#00714d", "primary": "#004ac6", "on-background": "#0b1c30", "secondary-fixed": "#6ffbbe", "surface-bright": "#f8f9ff", "surface-variant": "#d3e4fe", "on-secondary-fixed": "#002113", "surface-container-low": "#eff4ff", "inverse-surface": "#213145", "primary-fixed": "#dbe1ff", "on-tertiary": "#ffffff", "primary-fixed-dim": "#b4c5ff", "secondary-fixed-dim": "#4edea3", "primary-container": "#2563eb", "surface-tint": "#0053db", "on-primary-fixed": "#00174b", "on-secondary": "#ffffff", "on-error": "#ffffff", "error-container": "#ffdad6", "surface-container": "#e5eeff" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": {}, "fontFamily": { "headline": [ "Plus Jakarta Sans" ], "display": [ "Plus Jakarta Sans" ], "body": [ "Plus Jakarta Sans" ], "label": [ "Inter" ] }, "fontSize": {} } } }</script></head><body class="bg-surface font-body text-on-surface min-h-screen flex flex-col relative overflow-x-hidden"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(11,28,48,0.04)] border-b border-surface-container/60 transition-all duration-300"><div class="h-16 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between gap-4"><div class="flex items-center gap-6"><div class="flex items-center gap-3"><span class="font-headline font-extrabold text-xl tracking-tight text-on-surface hover:opacity-90 transition-opacity cursor-pointer">Calcula<span class="text-primary">.car</span></span></div><div class="h-4 w-px bg-outline-variant hidden sm:block"></div><nav class="hidden sm:flex items-center" data-active-classes="text-primary font-semibold"></nav></div><div class="flex items-center gap-3 sm:gap-4"><div class="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container-low text-xs font-label border border-secondary/20 shadow-xs backdrop-blur-sm"><span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary shadow-[0_0_8px_rgba(0,108,73,0.6)]"></span></span><span class="font-semibold text-secondary">Operador F&amp;I Online</span><span class="text-outline-variant font-light">•</span><span class="text-on-surface-variant font-medium">Conectado</span></div><div class="flex items-center gap-2 pl-1"></div></div></div></header><main class="w-full pt-16 flex-1 bg-surface relative"><div class="flex flex-col w-full relative">
+<!-- Dynamic Glowing Orbs -->
+<div class="pointer-events-none absolute inset-0 overflow-hidden -z-10 select-none">
+<div class="absolute -top-16 left-1/4 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-primary/18 via-primary-container/10 to-transparent blur-3xl opacity-75 orb-float-1"></div>
+<div class="absolute top-[380px] -right-24 w-[460px] h-[460px] rounded-full bg-gradient-to-tr from-secondary/15 via-[#10b981]/12 to-transparent blur-3xl opacity-65 orb-float-2"></div>
+<div class="absolute bottom-12 -left-20 w-[420px] h-[420px] rounded-full bg-gradient-to-br from-[#06b6d4]/12 via-primary-fixed/20 to-transparent blur-3xl opacity-60 orb-float-3"></div>
+</div>
+<div class="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 max-w-7xl lg:px-12">
+<!-- 1. Header Navigation & Title -->
+<div class="mb-8">
+<a class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container-lowest/90 hover:bg-surface-container-lowest text-xs font-label font-semibold text-on-surface hover:text-primary border border-surface-container-high/60 hover:border-primary/20 shadow-xs hover:shadow-md transition-all duration-200 mb-4 group w-fit backdrop-blur-md spring-tap" data-path="calculadoras-hub" href="/dashboard" target="_top"><span class="material-symbols-outlined text-[18px] text-on-surface-variant group-hover:text-primary group-hover:-translate-x-1 transition-all duration-200">arrow_back</span><span class="">Voltar para todas as calculadoras</span></a>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+<div>
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container text-primary text-[11px] font-label font-bold tracking-wider uppercase mb-2.5 border border-primary/15 shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+            Simulador de Amortização Extraordinária
+          </div>
+<h1 class="text-3xl sm:text-4xl font-headline font-extrabold text-on-surface tracking-tight">
+            Amortização Extra
+          </h1>
+<p class="mt-2 text-sm sm:text-base font-body text-on-surface-variant max-w-2xl leading-relaxed">
+            Informe os dados do seu financiamento atual e o valor do aporte extra. Comparamos <strong class="text-on-surface font-semibold">reduzir o prazo</strong> contra <strong class="text-on-surface font-semibold">reduzir a parcela</strong>.
+          </p>
+</div>
+<!-- Pill Status Indicator -->
+<div class="hidden sm:flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-surface-container-lowest/90 backdrop-blur-md border border-white shadow-sm self-start hover:shadow-md transition-shadow">
+<div class="w-8 h-8 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+</div>
+<div class="text-left">
+<p class="text-[10px] font-label uppercase tracking-wider text-outline font-semibold">Metodologia</p>
+<p class="text-xs font-headline font-bold text-on-surface" id="status-metodologia">Padrão Bacen / CDC (SAC)</p>
+</div>
+</div>
+</div>
+</div>
+<!-- 2. Financing System Selector (Price vs SAC) -->
+<div class="mb-6">
+<div class="relative grid grid-cols-2 gap-2 p-1.5 bg-surface-container/80 backdrop-blur-md rounded-2xl shadow-inner border border-surface-container-high/60">
+<button class="relative z-10 flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-headline font-medium text-sm text-on-surface-variant hover:text-on-surface transition-all duration-300 spring-tap" id="btn-price" onclick="selectSystem('price')" type="button">
+<span class="material-symbols-outlined text-[18px]">sell</span>
+<span class="">Sistema Price</span>
+<span class="hidden md:inline-flex text-[11px] font-label font-medium px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed transition-colors">Parcelas fixas</span>
+</button>
+<button class="relative z-10 flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-headline font-bold text-sm transition-all duration-300 bg-surface-container-lowest text-primary shadow-[0_2px_10px_rgba(0,74,198,0.12)] border border-primary/10 spring-tap" id="btn-sac" onclick="selectSystem('sac')" type="button">
+<span class="material-symbols-outlined text-[18px]">trending_down</span>
+<span class="">Sistema SAC</span>
+<span class="hidden md:inline-flex text-[11px] font-label font-medium px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant transition-colors">Parcelas decrescentes</span>
+</button>
+</div>
+</div>
+<!-- 3. Form Card: Financing Current Data -->
+<div class="glass-depth-card rounded-3xl p-6 sm:p-8 mb-8 relative overflow-hidden">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-xl bg-primary-fixed/60 flex items-center justify-center text-primary shadow-xs">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<h2 class="text-xs font-label font-bold uppercase tracking-widest text-outline">
+            Dados Atuais do Financiamento
+          </h2>
+</div>
+
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+<!-- Input: Saldo devedor -->
+<div class="flex flex-col gap-1.5 group">
+<label class="text-xs font-label font-semibold text-on-surface group-focus-within:text-primary transition-colors" for="input-balance">
+            Saldo devedor atual (R$)
+          </label>
+<div class="relative flex items-center">
+<span class="absolute left-3.5 text-xs font-headline font-bold text-outline">R$</span>
+<input class="w-full pl-10 pr-3.5 py-3 rounded-xl bg-surface/90 text-on-surface font-headline font-bold text-base focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary/25 border border-transparent focus:border-primary/30 transition-all shadow-inner" id="input-balance" placeholder="100.000,00" type="text" value="0,00">
+</div>
+<span class="text-[11px] font-label text-on-surface-variant">Sem juros futuros</span>
+</div>
+<!-- Input: Taxa de juros mensal -->
+<div class="flex flex-col gap-1.5 group">
+<label class="text-xs font-label font-semibold text-on-surface group-focus-within:text-primary transition-colors" for="input-rate">
+            Taxa de juros mensal (%)
+          </label>
+<div class="relative flex items-center">
+<input class="w-full pl-3.5 pr-10 py-3 rounded-xl bg-surface/90 text-on-surface font-headline font-bold text-base focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary/25 border border-transparent focus:border-primary/30 transition-all shadow-inner" id="input-rate" type="text" inputmode="decimal" value="0">
+<span class="absolute right-3.5 text-xs font-headline font-bold text-outline">% a.m.</span>
+</div>
+<span class="text-[11px] font-label text-on-surface-variant">Ex.: 3.90% nominal</span>
+</div>
+<!-- Input: Parcelas restantes -->
+<div class="flex flex-col gap-1.5 group">
+<label class="text-xs font-label font-semibold text-on-surface group-focus-within:text-primary transition-colors" for="input-months">
+            Parcelas restantes
+          </label>
+<div class="relative flex items-center">
+<input class="w-full pl-3.5 pr-12 py-3 rounded-xl bg-surface/90 text-on-surface font-headline font-bold text-base focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary/25 border border-transparent focus:border-primary/30 transition-all shadow-inner" id="input-months" max="360" min="1" placeholder="48" type="number" value="0">
+<span class="absolute right-3.5 text-xs font-label font-medium text-outline">meses</span>
+</div>
+<span class="text-[11px] font-label text-on-surface-variant">Tempo contratual ativo</span>
+</div>
+<!-- Input: Valor do aporte extra -->
+<div class="flex flex-col gap-1.5 group">
+<label class="text-xs font-label font-semibold text-on-surface group-focus-within:text-primary transition-colors" for="input-extra">
+            Valor do aporte extra (R$)
+          </label>
+<div class="relative flex items-center">
+<span class="absolute left-3.5 text-xs font-headline font-bold text-outline">R$</span>
+<input class="w-full pl-10 pr-3.5 py-3 rounded-xl bg-surface/90 text-on-surface font-headline font-bold text-base focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary/25 border border-transparent focus:border-primary/30 transition-all shadow-inner" id="input-extra" type="text" value="0,00">
+</div>
+<!-- Quick Preset Chips -->
+<div class="flex items-center gap-1.5 pt-0.5">
+<button class="spring-tap px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high active:bg-primary-fixed text-[11px] font-label font-bold text-on-surface transition-all border border-transparent hover:border-primary/20" onclick="setAporteQuick(5000)" type="button">+5k</button>
+<button class="spring-tap px-2.5 py-1 rounded-lg bg-primary-fixed hover:bg-primary-fixed-dim text-[11px] font-label font-bold text-on-primary-fixed transition-all border border-primary/20 shadow-xs" onclick="setAporteQuick(10000)" type="button">+10k</button>
+<button class="spring-tap px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high active:bg-primary-fixed text-[11px] font-label font-bold text-on-surface transition-all border border-transparent hover:border-primary/20" onclick="setAporteQuick(20000)" type="button">+20k</button>
+</div>
+</div>
+</div>
+<!-- Submit / Recalculate CTA -->
+<div class="mt-7">
+<button class="spring-tap shimmer-element relative overflow-hidden w-full py-4 px-6 rounded-2xl bg-primary text-on-primary font-headline font-bold text-base shadow-[0_10px_24px_-4px_rgba(0,74,198,0.45)] hover:bg-primary-container hover:shadow-[0_14px_30px_-4px_rgba(0,74,198,0.55)] transition-all flex items-center justify-center gap-2 group cursor-pointer" id="btn-recalculate" onclick="triggerRecalculate()" type="button">
+<span class="material-symbols-outlined text-[22px] group-hover:rotate-180 transition-transform duration-500">sync</span>
+<span class="tracking-wide">Recalcular Amortização</span>
+</button>
+</div>
+</div>
+<!-- 4. Direct Comparison Strategy (Cards Side by Side) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<!-- Option 1: Reduzir Prazo (The Champion / Most Interest Saved) -->
+<div class="glass-depth-card pulse-champion-card relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between overflow-hidden border-primary/20">
+<!-- Top Highlight Ribbon -->
+<div class="absolute top-0 right-6 -translate-y-0.5 z-10">
+<div class="badge-trophy-pulse inline-flex items-center gap-1.5 px-4 py-1.5 rounded-b-xl bg-gradient-to-r from-primary to-primary-container text-on-primary shadow-md text-[11px] font-label font-extrabold tracking-wider uppercase border-b border-x border-white/20">
+<span class="material-symbols-outlined text-[15px]">trophy</span>
+<span class="">Economiza mais juros</span>
+</div>
+</div>
+<div>
+<!-- Title & Subtitle -->
+<div class="flex items-start gap-3.5 mb-6 pt-2">
+<div class="w-11 h-11 rounded-2xl bg-primary-fixed/80 flex items-center justify-center text-primary flex-shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[24px]">schedule</span>
+</div>
+<div>
+<h3 class="text-xl font-headline font-extrabold text-on-surface">
+                Reduzir Prazo
+              </h3>
+<p class="text-xs font-body text-on-surface-variant">
+                Mantém a parcela atual e quita o financiamento mais rápido
+              </p>
+</div>
+</div>
+<!-- Metrics Block -->
+<div class="space-y-4">
+<!-- Row: Novo Prazo -->
+<div class="flex items-center justify-between py-2.5 px-3 rounded-xl bg-surface/80 border border-surface-container/60 shadow-xs">
+<span class="text-xs sm:text-sm font-label text-on-surface-variant font-medium">Novo prazo estimado</span>
+<div class="flex items-center gap-2">
+<span class="text-sm sm:text-base font-headline font-bold text-on-surface transition-all num-update-pop" id="res-prazo-meses">11 meses</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-label font-bold shadow-xs transition-transform" id="badge-meses-economizados">-1 meses</span>
+</div>
+</div>
+<!-- Row: Economia em Meses -->
+<div class="flex items-center justify-between py-2 px-3">
+<span class="text-xs sm:text-sm font-label text-on-surface-variant">Meses economizados</span>
+<span class="text-base font-headline font-bold text-on-surface num-update-pop" id="res-meses-diff">1 meses</span>
+</div>
+<!-- Row: Total de juros pagos -->
+<div class="flex items-center justify-between py-2 px-3">
+<span class="text-xs sm:text-sm font-label text-on-surface-variant">Total de juros</span>
+<span class="text-sm sm:text-base font-headline font-semibold text-on-surface font-mono" id="res-prazo-juros-total">R$&nbsp;20.735,00</span>
+</div>
+<!-- Row: Juros Economizados (Hero Metric) -->
+<div class="p-4 rounded-2xl bg-gradient-to-r from-secondary-container/40 to-secondary-container/20 border border-secondary/20 flex items-center justify-between mt-3 shadow-xs">
+<div>
+<p class="text-[11px] font-label uppercase tracking-wider font-bold text-on-secondary-container">Juros economizados</p>
+<p class="text-xs font-body text-secondary font-medium">Dinheiro direto no seu bolso</p>
+</div>
+<span class="text-xl sm:text-2xl font-headline font-extrabold text-secondary font-mono tracking-tight num-update-pop" id="res-prazo-economia">R$&nbsp;4.615,00</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 text-center border-t border-surface-container/60">
+<span class="text-[11px] font-label font-medium text-outline flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-secondary">check_circle</span>
+  Recomendado para quem quer pagar menos juros no montante final
+</span>
+</div>
+</div>
+<!-- Option 2: Reduzir Parcela (Budget & Cashflow Relief) -->
+<div class="glass-depth-card relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between">
+<div>
+<!-- Title & Subtitle -->
+<div class="flex items-start gap-3.5 mb-6 pt-2">
+<div class="w-11 h-11 rounded-2xl bg-surface-container flex items-center justify-center text-on-surface-variant flex-shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[24px]">trending_down</span>
+</div>
+<div>
+<h3 class="text-xl font-headline font-extrabold text-on-surface">
+                Reduzir Parcela
+              </h3>
+<p class="text-xs font-body text-on-surface-variant" id="sub-parcela-prazo">Mantém o prazo em 12 meses e diminui o valor mensal</p>
+</div>
+</div>
+<!-- Metrics Block -->
+<div class="space-y-4">
+<!-- Row: Nova Parcela -->
+<div class="flex items-center justify-between py-2.5 px-3 rounded-xl bg-surface/80 border border-surface-container/60 shadow-xs">
+<span class="text-xs sm:text-sm font-label text-on-surface-variant font-medium" id="label-parcela-mensal">Nova 1ª parcela (SAC)</span>
+<span class="text-base sm:text-lg font-headline font-extrabold text-primary font-mono num-update-pop" id="res-parcela-valor">R$&nbsp;11.010,00</span>
+</div>
+<!-- Row: Economia Mensal Imediata -->
+<div class="flex items-center justify-between py-2 px-3">
+<span class="text-xs sm:text-sm font-label text-on-surface-variant">Economia mensal</span>
+<div class="flex items-center gap-1.5">
+<span class="text-base font-headline font-bold text-secondary font-mono num-update-pop" id="res-parcela-alivio">R$&nbsp;1.223,33</span>
+<span class="text-[11px] font-label text-secondary font-semibold">/ mês</span>
+</div>
+</div>
+<!-- Row: Total de juros pagos -->
+<div class="flex items-center justify-between py-2 px-3">
+<span class="text-xs sm:text-sm font-label text-on-surface-variant">Total de juros</span>
+<span class="text-sm sm:text-base font-headline font-semibold text-on-surface font-mono" id="res-parcela-juros-total">R$&nbsp;22.815,00</span>
+</div>
+<!-- Row: Juros Economizados -->
+<div class="p-4 rounded-2xl bg-surface-container-low/90 border border-surface-container flex items-center justify-between mt-3 shadow-xs">
+<div>
+<p class="text-[11px] font-label uppercase tracking-wider font-bold text-on-surface-variant">Juros economizados</p>
+<p class="text-xs font-body text-on-surface-variant font-medium">Economia total de encargos</p>
+</div>
+<span class="text-xl sm:text-2xl font-headline font-extrabold text-on-surface font-mono tracking-tight num-update-pop" id="res-parcela-economia">R$&nbsp;2.535,00</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 text-center border-t border-surface-container/60">
+<span class="text-[11px] font-label font-medium text-outline flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-primary">savings</span>
+  Recomendado para aliviar o orçamento mensal e fluxo de caixa
+</span>
+</div>
+</div>
+</div>
+<!-- 5. Smart Recommendation Banner (F&I Insight) -->
+<div class="glass-depth-card relative rounded-3xl p-6 sm:p-7 mb-8 overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b from-primary to-primary-container rounded-l-full"></div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 pl-2">
+<div class="w-12 h-12 rounded-2xl bg-primary-fixed/80 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[26px]">insights</span>
+</div>
+<div class="flex-1">
+<h4 class="text-xs font-label font-bold uppercase tracking-wider text-primary mb-1 flex items-center gap-1.5">
+<span class="">Parecer do Especialista F&amp;I</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+</h4>
+<p class="text-sm font-body text-on-surface leading-relaxed" id="insight-text">
+            Com um aporte de <strong class="font-bold text-on-surface" id="fi-aporte">R$&nbsp;10.000,00</strong>, reduzir o <strong class="font-bold text-primary">prazo</strong> economiza <strong class="font-bold text-secondary font-mono" id="fi-diff-juros">R$&nbsp;2.080,00</strong> a mais em juros do que reduzir a parcela — mas reduzir a parcela alivia seu orçamento mensal em <strong class="font-bold text-on-surface font-mono" id="fi-alivio">R$&nbsp;1.223,33</strong> desde já. A melhor escolha depende do seu momento: priorize <span class="font-semibold text-primary">prazo</span> se busca pagar menos juros no total, ou <span class="font-semibold text-primary">parcela</span> se precisa de fôlego no caixa hoje.
+          </p>
+</div>
+<div class="self-stretch sm:self-center flex sm:flex-col items-center justify-center gap-2 pt-2 sm:pt-0 sm:pl-4 border-t sm:border-t-0 sm:border-l border-surface-container relative">
+<button class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-headline font-semibold text-on-surface transition-colors flex items-center justify-center gap-1.5 spring-tap" onclick="shareSimulation()" type="button">
+<span class="material-symbols-outlined text-[16px]">share</span>
+<span class="">Compartilhar</span>
+</button>
+<div class="absolute -top-8 right-0 bg-inverse-surface text-inverse-on-surface text-[10px] font-label py-1 px-2.5 rounded shadow-lg opacity-0 pointer-events-none transition-all duration-200" id="share-tooltip">Link copiado!</div>
+</div>
+</div>
+</div>
+<!-- Visual Chart Representation: Comparison breakdown -->
+<div class="glass-depth-card rounded-3xl p-6 sm:p-7 mb-8">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+<div>
+<h4 class="text-sm font-headline font-bold text-on-surface">Comparativo Visual de Economia Total de Juros</h4>
+<p class="text-xs font-body text-on-surface-variant">Veja a disparidade no montante pago entre as duas modalidades</p>
+</div>
+<div class="flex items-center gap-4 text-xs font-label">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-low border border-surface-container">
+<span class="w-3 h-3 rounded-full bg-secondary shadow-xs"></span>
+<span class="text-on-surface font-medium">Reduzir Prazo</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-low border border-surface-container">
+<span class="w-3 h-3 rounded-full bg-primary shadow-xs"></span>
+<span class="text-on-surface font-medium">Reduzir Parcela</span>
+</div>
+</div>
+</div>
+<!-- Comparison Progress Bars -->
+<div class="space-y-5">
+<div>
+<div class="flex justify-between text-xs font-label mb-1.5">
+<span class="font-medium text-on-surface" id="label-prazo-title">Economia ao Reduzir Prazo (11 meses)</span>
+<span class="font-bold text-secondary font-mono" id="label-bar-prazo">R$&nbsp;4.615,00 (82.1% mais eficiente)</span>
+</div>
+<div class="w-full h-4 bg-surface-container rounded-full overflow-hidden flex p-0.5 shadow-inner">
+<div class="h-full bg-gradient-to-r from-secondary to-secondary-container rounded-full transition-all duration-1000 ease-out shadow-xs" id="progress-prazo" style="width: 100%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-label mb-1.5">
+<span class="font-medium text-on-surface" id="label-parcela-title">Economia ao Reduzir Parcela (12 meses)</span>
+<span class="font-bold text-primary font-mono" id="label-bar-parcela">R$&nbsp;2.535,00</span>
+</div>
+<div class="w-full h-4 bg-surface-container rounded-full overflow-hidden flex p-0.5 shadow-inner">
+<div class="h-full bg-gradient-to-r from-primary to-primary-container rounded-full transition-all duration-1000 ease-out shadow-xs" id="progress-parcela" style="width: 54.9296%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 6. Legal & Contextual Note Footer -->
+<div class="text-center py-4 mb-8">
+<p class="text-xs font-label text-outline leading-relaxed max-w-3xl mx-auto flex items-center justify-center gap-1.5 flex-wrap">
+<span class="material-symbols-outlined text-[15px] text-outline">info</span>
+<span class="">Simulação estimada a partir do saldo devedor informado • Não considera eventuais taxas de amortização extraordinária.</span>
+</p>
+</div>
+</div>
+</div>
+<script>
+    /* ===== Design original + motor validado do sistema (calcAmortizacaoExtra) ===== */
+    let activeSystem = 'price';
+    let resultadoAtivo = false;
+    let marcaCfg = { logoClaro: null };
+    const CHAVE_ESTADO = 'amo-estado';
+    let cabecalhoOriginal = null;
+
+    /**
+ * Simulador de Amortização Extraordinária.
+ *
+ * Dado um saldo devedor atual, compara as duas estratégias clássicas de
+ * usar um aporte extra para abater o financiamento:
+ *
+ *   Estratégia 1 — Reduzir Prazo:
+ *     mantém o valor da parcela (Price) ou o ritmo de amortização mensal
+ *     (SAC) e quita o saldo mais rápido, encurtando o número de meses.
+ *
+ *   Estratégia 2 — Reduzir Parcela:
+ *     mantém o número de meses restante e recalcula uma parcela menor
+ *     sobre o novo saldo (após o aporte).
+ *
+ * Ambas simulações partem do MESMO saldo devedor reduzido (saldo - aporte)
+ * e da MESMA taxa mensal, o que garante uma comparação justa.
+ */
+
+function simularPagamentoFixo(saldoInicial, taxaMensal, pagamentoFixo) {
+  const i = taxaMensal / 100;
+  let saldo = saldoInicial;
+  const linhas = [];
+  let mes = 0;
+  const MAX_MESES = 1200; // trava de segurança (100 anos) contra loop infinito
+
+  while (saldo > 0.005 && mes < MAX_MESES) {
+    mes += 1;
+    const juros = saldo * i;
+    let parcela = pagamentoFixo;
+    let amort = parcela - juros;
+
+    // Última parcela: ajusta para quitar exatamente o saldo restante
+    if (amort >= saldo) {
+      amort = saldo;
+      parcela = amort + juros;
+    }
+    saldo = Math.max(0, saldo - amort);
+    linhas.push({ mes, parcela, juros, amortizacao: amort, saldo });
+  }
+  return linhas;
+}
+
+function simularAmortFixa(saldoInicial, taxaMensal, amortFixa) {
+  const i = taxaMensal / 100;
+  let saldo = saldoInicial;
+  const linhas = [];
+  let mes = 0;
+  const MAX_MESES = 1200;
+
+  while (saldo > 0.005 && mes < MAX_MESES) {
+    mes += 1;
+    const juros = saldo * i;
+    const amort = Math.min(amortFixa, saldo);
+    const parcela = amort + juros;
+    saldo = Math.max(0, saldo - amort);
+    linhas.push({ mes, parcela, juros, amortizacao: amort, saldo });
+  }
+  return linhas;
+}
+
+function calcPriceSchedule(pv, taxa, n) {
+  const i = taxa / 100;
+  const pmt = (pv * i) / (1 - Math.pow(1 + i, -n));
+  let saldo = pv;
+  return Array.from({ length: n }, (_, k) => {
+    const juros = saldo * i, amort = pmt - juros;
+    saldo = Math.max(0, saldo - amort);
+    return { mes: k + 1, parcela: pmt, juros, amortizacao: amort, saldo };
+  });
+}
+
+function calcSACSchedule(pv, taxa, n) {
+  const i = taxa / 100, amort = pv / n;
+  let saldo = pv;
+  return Array.from({ length: n }, (_, k) => {
+    const juros = saldo * i, parcela = amort + juros;
+    saldo = Math.max(0, saldo - amort);
+    return { mes: k + 1, parcela, juros, amortizacao: amort, saldo };
+  });
+}
+
+const soma = (rows, campo) => rows.reduce((s, r) => s + r[campo], 0);
+
+function calcAmortizacaoExtra({ saldoDevedor, taxaMensal, parcelasRestantes, aporte, sistema }) {
+  const isSAC = sistema === "SAC";
+  const saldoNovo = saldoDevedor - aporte;
+
+  // ── Cenário base: sem aporte, segue como está ──────────────────────────
+  const baseSchedule = isSAC
+    ? calcSACSchedule(saldoDevedor, taxaMensal, parcelasRestantes)
+    : calcPriceSchedule(saldoDevedor, taxaMensal, parcelasRestantes);
+  const parcelaOriginal = baseSchedule[0].parcela;
+  const totalJurosBase = soma(baseSchedule, "juros");
+  const totalPagoBase = soma(baseSchedule, "parcela");
+
+  // ── Estratégia 1: Reduzir Prazo ─────────────────────────────────────────
+  const e1Schedule = isSAC
+    ? simularAmortFixa(saldoNovo, taxaMensal, saldoDevedor / parcelasRestantes)
+    : simularPagamentoFixo(saldoNovo, taxaMensal, parcelaOriginal);
+  const totalJurosE1 = soma(e1Schedule, "juros");
+  const totalParcelasE1 = soma(e1Schedule, "parcela");
+  const mesesE1 = e1Schedule.length;
+
+  // ── Estratégia 2: Reduzir Parcela ───────────────────────────────────────
+  const e2Schedule = isSAC
+    ? calcSACSchedule(saldoNovo, taxaMensal, parcelasRestantes)
+    : calcPriceSchedule(saldoNovo, taxaMensal, parcelasRestantes);
+  const totalJurosE2 = soma(e2Schedule, "juros");
+  const totalParcelasE2 = soma(e2Schedule, "parcela");
+  const parcelaNovaE2 = e2Schedule[0].parcela;
+
+  return {
+    saldoNovo,
+    parcelaOriginal,
+    totalJurosBase,
+    totalPagoBase,
+
+    estrategia1: {
+      nome: "Reduzir Prazo",
+      schedule: e1Schedule,
+      meses: mesesE1,
+      mesesEconomizados: parcelasRestantes - mesesE1,
+      totalJuros: totalJurosE1,
+      totalPago: aporte + totalParcelasE1,
+      jurosEconomizados: totalJurosBase - totalJurosE1,
+    },
+
+    estrategia2: {
+      nome: "Reduzir Parcela",
+      schedule: e2Schedule,
+      meses: parcelasRestantes,
+      parcelaNova: parcelaNovaE2,
+      economiaMensal: parcelaOriginal - parcelaNovaE2,
+      totalJuros: totalJurosE2,
+      totalPago: aporte + totalParcelasE2,
+      jurosEconomizados: totalJurosBase - totalJurosE2,
+    },
+
+    diferencaEntreEstrategias: totalJurosE2 - totalJurosE1,
+  };
+}
+
+
+    function $(id) { return document.getElementById(id); }
+    function setT(id, t) { const el = $(id); if (el) el.textContent = t; }
+
+    function parseCurrency(str) {
+      if (!str && str !== 0) return 0;
+      const clean = str.toString().replace(/[^0-9,\.-]/g, '').replace(/\./g, '').replace(',', '.');
+      const val = parseFloat(clean);
+      return isNaN(val) ? 0 : Math.max(0, val);
+    }
+    function formatCurrency(val) {
+      return Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function formatCurrencySimple(val) {
+      return Number(val || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    /* Mascara da taxa: numeros com ponto decimal, ex.: 3.9 e 21.5 */
+    function mascaraTaxa(el) {
+      let v = el.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+      const partes = v.split('.');
+      const inteiro = partes[0].slice(0, 2);
+      const dec = partes.length > 1 ? partes.slice(1).join('').slice(0, 2) : null;
+      el.value = dec !== null ? `${inteiro}.${dec}` : inteiro;
+    }
+
+    function mascaraMoeda(el) {
+      let digits = el.value.replace(/\D/g, '');
+      if (!digits) digits = '0';
+      el.value = formatCurrencySimple(parseInt(digits, 10) / 100);
+    }
+
+    function setAviso(texto) {
+      let msg = $('amo-aviso');
+      const botao = $('btn-recalculate');
+      if (!msg && botao) {
+        msg = document.createElement('div');
+        msg.id = 'amo-aviso';
+        msg.style.cssText = 'margin-top:10px;padding:10px 12px;border-radius:12px;font-size:12px;font-weight:600;background:#fff;border:1px solid #fca5a5;color:#b91c1c;display:none';
+        botao.parentElement.appendChild(msg);
+      }
+      if (msg) { msg.textContent = texto || ''; msg.style.display = texto ? 'block' : 'none'; }
+    }
+
+    /* Cartoes de resultado ficam no lugar; sem calculo mostram tracos */
+    function setPlaceholders() {
+      ['res-prazo-meses', 'badge-meses-economizados', 'res-meses-diff', 'res-prazo-juros-total', 'res-prazo-economia',
+       'res-parcela-valor', 'res-parcela-alivio', 'res-parcela-juros-total', 'res-parcela-economia',
+       'fi-aporte', 'fi-diff-juros', 'fi-alivio', 'label-bar-prazo', 'label-bar-parcela'].forEach(id => setT(id, '—'));
+      setT('label-prazo-title', 'Economia ao Reduzir Prazo');
+      setT('label-parcela-title', 'Economia ao Reduzir Parcela');
+      const pp = $('progress-prazo'), pq = $('progress-parcela');
+      if (pp) pp.style.width = '0%';
+      if (pq) pq.style.width = '0%';
+    }
+
+    function salvarEstado() {
+      try {
+        sessionStorage.setItem(CHAVE_ESTADO, JSON.stringify({
+          saldo: $('input-balance').value,
+          taxa: $('input-rate').value,
+          parcelas: $('input-months').value,
+          aporte: $('input-extra').value,
+          sistema: activeSystem,
+          calculado: resultadoAtivo
+        }));
+      } catch (e) { /* armazenamento indisponivel */ }
+    }
+
+    function restaurarEstado() {
+      try {
+        const s = JSON.parse(sessionStorage.getItem(CHAVE_ESTADO) || 'null');
+        if (!s) return false;
+        $('input-balance').value = s.saldo;
+        $('input-rate').value = s.taxa;
+        $('input-months').value = s.parcelas;
+        $('input-extra').value = s.aporte;
+        selectSystem(s.sistema === 'sac' ? 'sac' : 'price');
+        if (s.calculado) calcularAmortizacao();
+        return true;
+      } catch (e) { return false; }
+    }
+
+    /* Qualquer alteracao invalida o resultado anterior: e preciso recalcular */
+    function onInputChanged() {
+      resultadoAtivo = false;
+      setPlaceholders();
+      setAviso('');
+      salvarEstado();
+    }
+
+    function selectSystem(system) {
+      activeSystem = system;
+      const btnPrice = $('btn-price');
+      const btnSac = $('btn-sac');
+      const ativo = "relative z-10 flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-headline font-bold text-sm transition-all duration-300 bg-surface-container-lowest text-primary shadow-[0_2px_10px_rgba(0,74,198,0.12)] border border-primary/10 spring-tap";
+      const inativo = "relative z-10 flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-headline font-medium text-sm text-on-surface-variant hover:text-on-surface transition-all duration-300 spring-tap";
+      if (system === 'price') {
+        if (btnPrice) btnPrice.className = ativo;
+        if (btnSac) btnSac.className = inativo;
+        setT('status-metodologia', 'Padrão Bacen / CDC (Price)');
+        setT('label-parcela-mensal', 'Nova parcela mensal');
+      } else {
+        if (btnSac) btnSac.className = ativo;
+        if (btnPrice) btnPrice.className = inativo;
+        setT('status-metodologia', 'Padrão Bacen / CDC (SAC)');
+        setT('label-parcela-mensal', 'Nova 1ª parcela (SAC)');
+      }
+      if (resultadoAtivo) calcularAmortizacao();
+      salvarEstado();
+    }
+
+    function setAporteQuick(addValue) {
+      const input = $('input-extra');
+      const balance = parseCurrency($('input-balance').value);
+      let updated = parseCurrency(input.value) + addValue;
+      if (balance > 0 && updated > balance) updated = balance;
+      input.value = formatCurrencySimple(updated);
+      input.classList.add('ring-2', 'ring-primary', 'bg-primary-fixed/20');
+      setTimeout(() => input.classList.remove('ring-2', 'ring-primary', 'bg-primary-fixed/20'), 350);
+      onInputChanged();
+    }
+
+    /* Calculo: usa exatamente calcAmortizacaoExtra do sistema */
+    function calcularAmortizacao() {
+      const saldo = parseCurrency($('input-balance').value);
+      const taxa = parseFloat($('input-rate').value) || 0;
+      const n = parseInt($('input-months').value, 10) || 0;
+      const aporte = parseCurrency($('input-extra').value);
+      const valido = saldo > 0 && taxa > 0 && n >= 1 && n <= 360 && aporte > 0 && aporte < saldo;
+      if (!valido) {
+        resultadoAtivo = false;
+        setPlaceholders();
+        setAviso('Informe saldo maior que zero, taxa acima de zero, parcelas de 1 a 360 e um aporte maior que zero e menor que o saldo.');
+        salvarEstado();
+        return false;
+      }
+      setAviso('');
+      const res = calcAmortizacaoExtra({
+        saldoDevedor: saldo,
+        taxaMensal: taxa,
+        parcelasRestantes: n,
+        aporte: aporte,
+        sistema: activeSystem === 'sac' ? 'SAC' : 'Price'
+      });
+      renderResultados(res, { n, aporte });
+      resultadoAtivo = true;
+      salvarEstado();
+      return true;
+    }
+
+    function renderResultados(res, p) {
+      const e1 = res.estrategia1;
+      const e2 = res.estrategia2;
+      setT('res-prazo-meses', `${e1.meses} meses`);
+      setT('badge-meses-economizados', `-${e1.mesesEconomizados} meses`);
+      setT('res-meses-diff', `${e1.mesesEconomizados} meses`);
+      setT('res-prazo-juros-total', formatCurrency(e1.totalJuros));
+      setT('res-prazo-economia', formatCurrency(e1.jurosEconomizados));
+      setT('sub-parcela-prazo', `Mantém o prazo em ${p.n} meses e diminui o valor mensal`);
+      setT('res-parcela-valor', formatCurrency(e2.parcelaNova));
+      setT('res-parcela-alivio', formatCurrency(e2.economiaMensal));
+      setT('res-parcela-juros-total', formatCurrency(e2.totalJuros));
+      setT('res-parcela-economia', formatCurrency(e2.jurosEconomizados));
+
+      const diffJuros = Math.max(0, e1.jurosEconomizados - e2.jurosEconomizados);
+      setT('fi-aporte', formatCurrency(p.aporte));
+      setT('fi-diff-juros', formatCurrency(diffJuros));
+      setT('fi-alivio', formatCurrency(e2.economiaMensal));
+
+      const max = Math.max(e1.jurosEconomizados, e2.jurosEconomizados, 1);
+      const pPrazo = Math.min(100, (e1.jurosEconomizados / max) * 100);
+      const pParc = Math.min(100, (e2.jurosEconomizados / max) * 100);
+      const pp = $('progress-prazo'), pq = $('progress-parcela');
+      if (pp) pp.style.width = `${Math.max(8, pPrazo)}%`;
+      if (pq) pq.style.width = `${Math.max(6, pParc)}%`;
+
+      setT('label-prazo-title', `Economia ao Reduzir Prazo (${e1.meses} meses)`);
+      setT('label-parcela-title', `Economia ao Reduzir Parcela (${p.n} meses)`);
+      let eff = 0;
+      if (e2.jurosEconomizados > 0) eff = ((e1.jurosEconomizados - e2.jurosEconomizados) / e2.jurosEconomizados) * 100;
+      setT('label-bar-prazo', `${formatCurrency(e1.jurosEconomizados)}${eff > 0 ? ` (${eff.toFixed(1)}% mais eficiente)` : ''}`);
+      setT('label-bar-parcela', formatCurrency(e2.jurosEconomizados));
+
+      ['res-prazo-economia', 'res-parcela-economia', 'res-prazo-meses', 'res-parcela-valor', 'res-meses-diff', 'res-parcela-alivio'].forEach(id => {
+        const el = $(id);
+        if (el) { el.classList.remove('num-update-pop'); void el.offsetWidth; el.classList.add('num-update-pop'); }
+      });
+    }
+
+    function triggerRecalculate() {
+      const btn = $('btn-recalculate');
+      const originalContent = btn.innerHTML;
+      btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[20px]">sync</span><span>Calculando amortização...</span>`;
+      btn.classList.add('opacity-90', 'scale-[0.99]');
+      const pPrazo = $('progress-prazo'), pParcela = $('progress-parcela');
+      if (pPrazo) pPrazo.style.width = '10%';
+      if (pParcela) pParcela.style.width = '5%';
+      setTimeout(() => {
+        btn.innerHTML = originalContent;
+        btn.classList.remove('opacity-90', 'scale-[0.99]');
+        calcularAmortizacao();
+      }, 380);
+    }
+
+    function shareSimulation() {
+      const shareText = `Calcula.car: Simulação de amortização extraordinária. Economize juros ao reduzir prazo ou alivie suas parcelas mensais!`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(window.location.href).then(() => showShareFeedback()).catch(() => fallbackShare(shareText));
+      } else {
+        fallbackShare(shareText);
+      }
+    }
+    function showShareFeedback() {
+      const tooltip = $('share-tooltip');
+      if (tooltip) {
+        tooltip.classList.remove('opacity-0', 'pointer-events-none');
+        tooltip.classList.add('opacity-100', '-translate-y-1');
+        setTimeout(() => {
+          tooltip.classList.add('opacity-0', 'pointer-events-none');
+          tooltip.classList.remove('opacity-100', '-translate-y-1');
+        }, 2200);
+      }
+    }
+    function fallbackShare(text) {
+      if (navigator.share) {
+        navigator.share({ title: 'Calcula.car - Simulação de Amortização Extra', text: text, url: window.location.href }).catch(() => {});
+      } else {
+        showShareFeedback();
+      }
+    }
+
+    /* Cabecalho: sino de notificacoes no lugar do perfil */
+    function montarCabecalho() {
+      const header = document.querySelector('header');
+      if (!header) return;
+      const op = Array.from(header.querySelectorAll('*')).find(e => e.children.length === 0 && e.textContent.includes('Operador'));
+      const perfil = op ? op.closest('header > div > div > div') : null;
+      const grupo = perfil ? perfil.parentElement : (header.firstElementChild ? header.firstElementChild.lastElementChild : null);
+      if (perfil) perfil.remove();
+      const sino = document.createElement('button');
+      sino.id = 'bell-slot';
+      sino.type = 'button';
+      sino.setAttribute('aria-label', 'Notificações');
+      sino.style.cssText = 'display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:12px;border:1px solid #d3e4fe;background:#fff;color:#0b1c30;cursor:pointer';
+      sino.innerHTML = '<span class="material-symbols-outlined text-[18px]">notifications</span>';
+      if (grupo) grupo.appendChild(sino);
+    }
+
+    /* Logomarca vinda das configuracoes, no lugar da marca do design */
+    function aplicarLogo() {
+      const header = document.querySelector('header');
+      if (!header) return;
+      const brandSpan = Array.from(header.querySelectorAll('span')).find(s => s.firstElementChild && s.firstElementChild.textContent.trim() === '.car');
+      const brandBox = brandSpan ? brandSpan.parentElement : null;
+      if (!brandBox) return;
+      if (cabecalhoOriginal === null) cabecalhoOriginal = brandBox.innerHTML;
+      brandBox.innerHTML = marcaCfg.logoClaro
+        ? `<img src="${marcaCfg.logoClaro}" alt="SliceX.calc" style="height:34px;width:auto;display:block">`
+        : cabecalhoOriginal;
+    }
+
+    function postParent(msg) { if (window.parent && window.parent !== window) window.parent.postMessage(msg, window.location.origin); }
+    function enviarRetangulo() {
+      const el = $('bell-slot');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      postParent({ type: 'bell-rect', rect: { x: r.left, y: r.top, w: r.width, h: r.height } });
+    }
+    window.addEventListener('resize', enviarRetangulo);
+    window.addEventListener('message', (e) => {
+      if (e.source !== window.parent) return;
+      const d = e.data || {};
+      if (d.type === 'marca') { marcaCfg = { logoClaro: d.logoClaro }; aplicarLogo(); }
+    });
+
+    function init() {
+      montarCabecalho();
+      aplicarLogo();
+      const rate = $('input-rate');
+      const bal = $('input-balance');
+      const extra = $('input-extra');
+      if (rate) {
+        rate.addEventListener('beforeinput', (e) => {
+          if (e.data && !/^[0-9.,]$/.test(e.data)) e.preventDefault();
+          if (e.data && /[.,]/.test(e.data) && /[.,]/.test(rate.value)) e.preventDefault();
+        });
+        rate.addEventListener('input', () => { mascaraTaxa(rate); onInputChanged(); });
+        rate.addEventListener('blur', () => { rate.value = rate.value.replace(/\.$/, ''); });
+      }
+      [bal, extra].forEach(el => {
+        if (!el) return;
+        el.addEventListener('input', () => { mascaraMoeda(el); onInputChanged(); });
+        el.addEventListener('blur', () => { el.value = formatCurrencySimple(parseCurrency(el.value)); });
+      });
+      const parc = $('input-months');
+      if (parc) parc.addEventListener('input', onInputChanged);
+      setPlaceholders();
+      setAviso('');
+      const restaurou = restaurarEstado();
+      if (!restaurou) selectSystem('price');
+      postParent({ type: 'pronto' });
+      enviarRetangulo();
+    }
+    init();
+</script></main><footer class="w-full bg-surface-container-lowest mt-auto shadow-[0_-1px_6px_rgba(11,28,48,0.03)] border-t border-surface-container/60"><div class="max-w-7xl mx-auto px-6 lg:px-12 py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-label text-on-surface-variant"><div class="flex items-center gap-3"><div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container text-on-surface font-medium border border-surface-container-high/50"><span class="material-symbols-outlined text-secondary text-[16px]">lock</span><span class="">SSL 256-Bit Encrypted</span></div><span class="text-on-surface-variant">© 2025 Calcula.car Brasil Tecnologia Automotiva S.A. Todos os direitos reservados.</span></div><div class="flex items-center gap-6"><span class="text-on-surface-variant">Conformidade LGPD &amp; BACEN F&amp;I</span></div></div></footer>
+
+</body></html>

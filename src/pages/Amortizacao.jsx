@@ -1,207 +1,52 @@
-import { FADE } from "../lib/motion";
-import IconeTexto from "../components/IconeTexto";
-import { useRascunho } from "../lib/rascunho";
-import { useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Clock, TrendingDown, Trophy, Ruler, AlertTriangle, Check } from "lucide-react";
-import Header from "../components/Header";
-import BackLink from "../components/BackLink";
+// sem-rascunho: formulario e resultados ficam no documento do design (iframe); o calculo usa calcAmortizacaoExtra
+import { useCallback, useEffect, useRef, useState } from "react";
 import PageTransition from "../components/PageTransition";
-import Field from "../components/Field";
-import MoneyField from "../components/MoneyField";
-import { parseMoeda } from "../lib/moeda";
-import PrimaryButton from "../components/PrimaryButton";
-import AnimatedNumber from "../components/AnimatedNumber";
-import { fmt, toF } from "../lib/format";
-import { calcAmortizacaoExtra } from "../lib/amortizacao";
-
-const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)" };
-
-function StrategyCard({ icon: Icon, title, subtitle, rows, winner, index }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-      style={{
-        ...card,
-        padding: 20,
-        position: "relative",
-        borderColor: winner ? "var(--border-focus)" : "var(--border)",
-        boxShadow: winner ? "var(--shadow-glow)" : "var(--shadow-sm)",
-      }}
-    >
-      {winner && (
-        <div
-          style={{
-            position: "absolute", top: -11, right: 16,
-            background: "var(--accent)", color: "var(--accent-ink)",
-            fontSize: 10, fontWeight: 800, letterSpacing: 0.5, textTransform: "uppercase",
-            padding: "4px 10px", borderRadius: 999,
-            display: "flex", alignItems: "center", gap: 4,
-          }}
-        >
-          <Trophy size={11} /> Economiza mais juros
-        </div>
-      )}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-        <div style={{ width: 38, height: 38, borderRadius: "var(--r-sm)", background: "var(--surface-3)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <Icon size={18} color="var(--text)" />
-        </div>
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text)" }}>{title}</div>
-          <div style={{ fontSize: 11, color: "var(--text-mute)" }}>{subtitle}</div>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {rows.map(([label, value, emphasis]) => (
-          <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
-            <span style={{ color: "var(--text-dim)" }}>{label}</span>
-            <span style={{ fontWeight: emphasis ? 800 : 600, color: emphasis ? "var(--text)" : "var(--text-dim)", fontSize: emphasis ? 16 : 13 }}>
-              {value}
-            </span>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
+import Sino from "../components/Sino";
+import { useMarca } from "../lib/marca";
 
 export default function Amortizacao() {
-  const [saldo, setSaldo] = useRascunho("amo.saldo", "120000");
-  const [taxa, setTaxa] = useRascunho("amo.taxa", "3.9");
-  const [parcelas, setParcelas] = useRascunho("amo.parcelas", "48");
-  const [aporte, setAporte] = useRascunho("amo.aporte", "10000");
-  const [sistema, setSistema] = useRascunho("amo.sistema", "Price");
-  const [calculado, setCalc] = useRascunho("amo.calculado", false);
+  const frame = useRef(null);
+  const marca = useMarca();
+  const marcaRef = useRef(marca);
+  marcaRef.current = marca;
+  const [slot, setSlot] = useState(null);
 
-  const saldoNum = toF(saldo);
-  const taxaNum = toF(taxa);
-  const parcelasNum = parseInt(parcelas) || 0;
-  const aporteNum = toF(aporte);
-  const isSAC = sistema === "SAC";
+  const enviarMarca = useCallback(() => {
+    const m = marcaRef.current;
+    frame.current?.contentWindow?.postMessage({
+      type: "marca",
+      logoClaro: m.logo_claro || m.logo_landing_claro || null,
+    }, window.location.origin);
+  }, []);
 
-  const valid =
-    saldoNum > 0 && taxaNum > 0 && parcelasNum > 0 && parcelasNum <= 360 &&
-    aporteNum > 0 && aporteNum < saldoNum;
+  useEffect(() => {
+    const ouvir = (e) => {
+      if (e.source !== frame.current?.contentWindow) return;
+      const d = e.data || {};
+      if (d.type === "bell-rect") setSlot(d.rect);
+      if (d.type === "pronto") enviarMarca();
+    };
+    window.addEventListener("message", ouvir);
+    return () => window.removeEventListener("message", ouvir);
+  }, [enviarMarca]);
 
-  const reset = useCallback(() => setCalc(false), []);
-
-  const result = useMemo(() => {
-    if (!calculado || !valid) return null;
-    return calcAmortizacaoExtra({
-      saldoDevedor: saldoNum,
-      taxaMensal: taxaNum,
-      parcelasRestantes: parcelasNum,
-      aporte: aporteNum,
-      sistema,
-    });
-  }, [calculado, valid, saldoNum, taxaNum, parcelasNum, aporteNum, sistema]);
-
-  const sysBtn = (s) => ({
-    flex: 1, padding: "12px", border: "2px solid", borderRadius: "var(--r-sm)",
-    cursor: "pointer", fontWeight: 700, fontSize: 14,
-    borderColor: sistema === s ? "var(--border-focus)" : "var(--border-strong)",
-    background: sistema === s ? "var(--surface-3)" : "var(--bg-elevated)",
-    color: sistema === s ? "var(--text)" : "var(--text-mute)",
-  });
-
-  const e1WinsInteresse = result && result.estrategia1.totalJuros <= result.estrategia2.totalJuros;
+  useEffect(() => { enviarMarca(); }, [marca, enviarMarca]);
 
   return (
     <PageTransition>
-      <div className="page-bg">
-        <Header subtitle="Simulador de amortização extraordinária" />
-        <div className="container" style={{ paddingTop: 8 }}>
-          <BackLink />
-
-          <div style={{ marginTop: 22, marginBottom: 4 }}>
-            <h1 style={{ fontSize: 22, fontWeight: 800, margin: "0 0 6px", color: "var(--text)" }}>Amortização Extra</h1>
-            <p style={{ fontSize: 13, color: "var(--text-dim)", margin: 0, lineHeight: 1.6 }}>
-              Informe os dados do seu financiamento atual e o valor do aporte extra. Comparamos <b>reduzir o prazo</b> contra <b>reduzir a parcela</b>.
-            </p>
+      <div style={{ position: "relative", height: "100vh" }}>
+        <iframe
+          ref={frame}
+          src="/calculadora-amortizacao.html"
+          title="Simulador de Amortização Extraordinária"
+          onLoad={enviarMarca}
+          style={{ display: "block", width: "100%", height: "100%", border: 0 }}
+        />
+        {slot && (
+          <div style={{ position: "absolute", left: slot.x, top: slot.y, width: slot.w, height: slot.h, zIndex: 20 }}>
+            <Sino />
           </div>
-
-          <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
-            {["Price", "SAC"].map((s) => (
-              <motion.button key={s} whileTap={{ scale: 0.97 }} onClick={() => { setSistema(s); reset(); }} style={sysBtn(s)}>
-                {s === "Price" ? <IconeTexto icon={Ruler}>Sistema Price</IconeTexto> : <IconeTexto icon={TrendingDown}>Sistema SAC</IconeTexto>}
-              </motion.button>
-            ))}
-          </div>
-
-          <div style={{ ...card, padding: 22, marginTop: 14, boxShadow: "var(--shadow-md)" }}>
-            <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>
-              Dados Atuais do Financiamento
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14 }}>
-              <MoneyField label="Saldo devedor atual (R$)" valor={parseMoeda(saldo)} onChange={(n) => { setSaldo(String(n)); reset?.(); }} />
-              <Field label="Taxa de juros mensal (%)" val={taxa} set={setTaxa} hint="Ex: 3.9" onChange={reset} />
-              <Field label="Parcelas restantes" val={parcelas} set={setParcelas} hint="Ex: 48" onChange={reset} />
-              <MoneyField label="Valor do aporte extra (R$)" valor={parseMoeda(aporte)} onChange={(n) => { setAporte(String(n)); reset?.(); }} />
-            </div>
-
-            {aporteNum >= saldoNum && aporteNum > 0 && (
-              <div style={{ marginTop: 12, padding: "9px 13px", background: "var(--bg-elevated)", borderRadius: "var(--r-sm)", fontSize: 12, color: "var(--text-dim)" }}>
-                <IconeTexto icon={AlertTriangle}>O aporte deve ser menor que o saldo devedor — se for igual ou maior, o financiamento é quitado por completo.</IconeTexto>
-              </div>
-            )}
-
-            <PrimaryButton onClick={() => valid && setCalc(true)} disabled={!valid} style={{ marginTop: 16, width: "100%" }}>
-              {calculado ? <><Check size={15} /> Recalcular</> : "Comparar Estratégias"}
-            </PrimaryButton>
-          </div>
-
-          <AnimatePresence>
-            {result && (
-              <motion.div {...FADE} exit={{ opacity: 0 }}>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14, marginTop: 22 }}>
-                  <StrategyCard
-                    icon={Clock}
-                    title="Reduzir Prazo"
-                    subtitle="Mantém a parcela, quita mais rápido"
-                    winner={e1WinsInteresse}
-                    index={0}
-                    rows={[
-                      ["Novo prazo", `${result.estrategia1.meses} meses`, false],
-                      ["Meses economizados", `${result.estrategia1.mesesEconomizados} meses`, true],
-                      ["Total de juros", fmt(result.estrategia1.totalJuros), false],
-                      ["Juros economizados", fmt(result.estrategia1.jurosEconomizados), true],
-                    ]}
-                  />
-                  <StrategyCard
-                    icon={TrendingDown}
-                    title="Reduzir Parcela"
-                    subtitle="Mantém o prazo, parcela menor"
-                    winner={!e1WinsInteresse}
-                    index={1}
-                    rows={[
-                      ["Nova parcela", fmt(result.estrategia2.parcelaNova), false],
-                      ["Economia mensal", fmt(result.estrategia2.economiaMensal), true],
-                      ["Total de juros", fmt(result.estrategia2.totalJuros), false],
-                      ["Juros economizados", fmt(result.estrategia2.jurosEconomizados), true],
-                    ]}
-                  />
-                </div>
-
-                <div style={{ background: "var(--surface)", borderLeft: "4px solid var(--accent)", borderRadius: "0 var(--r-sm) var(--r-sm) 0", padding: "14px 16px", marginTop: 16, fontSize: 13, lineHeight: 1.8, color: "var(--text-dim)" }}>
-                  Com um aporte de <b style={{ color: "var(--text)" }}>{fmt(aporteNum)}</b>, reduzir o <b style={{ color: "var(--text)" }}>prazo</b> economiza{" "}
-                  <b style={{ color: "var(--text)" }}>
-                    <AnimatedNumber value={Math.abs(result.diferencaEntreEstrategias)} format={fmt} />
-                  </b>{" "}
-                  a mais em juros do que reduzir a parcela — mas reduzir a <b style={{ color: "var(--text)" }}>parcela</b> alivia seu orçamento mensal em{" "}
-                  <b style={{ color: "var(--text)" }}>{fmt(result.estrategia2.economiaMensal)}</b> desde já. A melhor escolha depende do seu momento: priorize prazo se busca pagar menos juros no total, ou parcela se precisa de fôlego no caixa hoje.
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
-            Simulação estimada a partir do saldo devedor informado · Não considera eventuais taxas de amortização extraordinária cobradas pela instituição financeira
-          </p>
-        </div>
+        )}
       </div>
     </PageTransition>
   );
