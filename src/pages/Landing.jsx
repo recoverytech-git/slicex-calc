@@ -342,6 +342,7 @@ function CalculadoraIlustrativa() {
 }
 
 export default function Landing() {
+  const marca = useMarca();
   const paleta = "light";
   const logoCustom = marca.logo_landing_claro || null;
   const [digitado, setDigitado] = useState("");

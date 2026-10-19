@@ -1,2 +1,5 @@
 import { defineConfig } from "vitest/config";
-export default defineConfig({ test: { include: ["tests/**/*.test.js"] } });
+export default defineConfig({
+  esbuild: { jsx: "automatic" },
+  test: { include: ["tests/**/*.test.js"] },
+});
