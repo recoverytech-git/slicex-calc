@@ -438,8 +438,9 @@
 <span class="absolute right-3.5 text-xs font-headline font-semibold text-outline group-focus-within:text-primary transition-colors">meses</span>
 </div>
 <!-- Botões de atalho de meses com efeito mola suave -->
-<div class="grid grid-cols-4 gap-2 mt-1">
-<button class="btn-spring py-1.5 px-2 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-xs font-label font-semibold text-on-surface-variant cursor-pointer shadow-2xs" onclick="setTenure(24)" type="button">24x</button>
+<div class="grid grid-cols-5 gap-2 mt-1">
+<button class="btn-spring py-1.5 px-2 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-xs font-label font-semibold text-on-surface-variant cursor-pointer shadow-2xs" onclick="setTenure(12)" type="button">12x</button>
+                    <button class="btn-spring py-1.5 px-2 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-xs font-label font-semibold text-on-surface-variant cursor-pointer shadow-2xs" onclick="setTenure(24)" type="button">24x</button>
 <button class="btn-spring py-1.5 px-2 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-xs font-label font-semibold text-on-surface-variant cursor-pointer shadow-2xs" onclick="setTenure(36)" type="button">36x</button>
 <button class="btn-spring py-1.5 px-2 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-xs font-label font-semibold text-on-surface-variant cursor-pointer shadow-2xs" onclick="setTenure(48)" type="button">48x</button>
 <button class="btn-spring py-1.5 px-2 rounded-lg bg-surface-container-high hover:bg-primary hover:text-on-primary text-xs font-label font-semibold text-on-surface-variant cursor-pointer shadow-2xs" onclick="setTenure(60)" type="button">60x</button>
@@ -1059,7 +1060,8 @@
     /* ===== Design original + motor de cálculo validado do sistema (calcPrice / calcSAC) ===== */
     let currentSystem = 'PRICE';
     let resultadoAtivo = false;
-    let ultimoResultado = null;
+    let marcaCfg = { logoEscuro: null, logoClaro: null };
+    const CHAVE_ESTADO = 'fi-estado';
 
     const SYSTEM_INFO_CARDS = {
       SAC: {
@@ -1116,6 +1118,7 @@ function calcSAC(pv, taxa, n) {
     function $(id) { return document.getElementById(id); }
     function setT(id, texto) { const el = $(id); if (el) el.textContent = texto; }
     function soma(rs, k) { return rs.reduce((s, x) => s + x[k], 0); }
+    function pct1(v) { return v.toFixed(1).replace('.', ','); }
 
     function parseBrCurrency(str) {
       if (!str) return 0;
@@ -1134,7 +1137,16 @@ function calcSAC(pv, taxa, n) {
       input.value = formatBrCurrency(floatVal);
     }
 
-    /* Busca de textos da interface (folhas do DOM) para atualizar sem mudar o layout */
+    /* Mascara da taxa: numeros com ponto decimal, ex.: 3.9 e 21.5 */
+    function mascaraTaxa(el) {
+      let v = el.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+      const partes = v.split('.');
+      const inteiro = partes[0];
+      const dec = partes.length > 1 ? partes.slice(1).join('').slice(0, 2) : null;
+      el.value = dec !== null ? `${inteiro}.${dec}` : inteiro;
+    }
+
+    /* Busca de textos do design para atualizar sem alterar o layout */
     function leafIn(rootId, pred) {
       const root = $(rootId);
       if (!root) return null;
@@ -1182,7 +1194,6 @@ function calcSAC(pv, taxa, n) {
         else if (len > 10) { el.style.fontSize = 'clamp(1.25rem, 1.85vw, 1.45rem)'; el.style.lineHeight = '1.25'; }
         else if (len > 8) { el.style.fontSize = 'clamp(1.35rem, 2.1vw, 1.65rem)'; el.style.lineHeight = '1.3'; }
         else { el.style.fontSize = 'clamp(1.5rem, 2.3vw, 1.875rem)'; el.style.lineHeight = '1.3'; }
-        el.setAttribute('title', 'R$ ' + (el.textContent || '').trim());
       });
     }
 
@@ -1198,28 +1209,60 @@ function calcSAC(pv, taxa, n) {
       if (msg) { msg.textContent = texto || ''; msg.style.display = texto ? 'block' : 'none'; }
     }
 
+    /* Os cards de resultado ficam sempre no lugar; sem calculo, mostram traços */
+    function kpisVazios() {
+      ['kpi-pmt', 'kpi-total', 'kpi-juros', 'kpi-pmt-sub', 'kpi-juros-badge', 'kpi-pmt-type'].forEach(id => setT(id, '—'));
+    }
     function hideResults() {
-      ['kpi-cards-grid', 'results-panel', 'contract-summary'].forEach(id => { const el = $(id); if (el) el.style.display = 'none'; });
+      ['results-panel', 'contract-summary'].forEach(id => { const el = $(id); if (el) el.style.display = 'none'; });
+      kpisVazios();
     }
     function showResults() {
-      ['kpi-cards-grid', 'results-panel', 'contract-summary'].forEach(id => { const el = $(id); if (el) el.style.display = ''; });
+      ['results-panel', 'contract-summary'].forEach(id => { const el = $(id); if (el) el.style.display = ''; });
     }
 
     function updateEntryPercent() {
       const totalVeiculo = parseBrCurrency($('input-veiculo').value);
       const entryVal = parseBrCurrency($('input-entrada').value);
       const pct = totalVeiculo > 0 ? (entryVal / totalVeiculo) * 100 : 0;
-      setT('label-entrada-perc', pct.toFixed(1) + '% do valor');
+      setT('label-entrada-perc', pct1(pct) + '% do valor');
     }
 
-    /* Qualquer alteração nos campos invalida o resultado anterior: é preciso calcular de novo */
+    function salvarEstado() {
+      try {
+        sessionStorage.setItem(CHAVE_ESTADO, JSON.stringify({
+          veiculo: $('input-veiculo').value,
+          entrada: $('input-entrada').value,
+          taxa: $('input-taxa').value,
+          prazo: $('input-prazo').value,
+          sistema: currentSystem,
+          calculado: resultadoAtivo
+        }));
+      } catch (e) { /* armazenamento indisponivel */ }
+    }
+
+    function restaurarEstado() {
+      try {
+        const s = JSON.parse(sessionStorage.getItem(CHAVE_ESTADO) || 'null');
+        if (!s) return false;
+        $('input-veiculo').value = s.veiculo;
+        $('input-entrada').value = s.entrada;
+        $('input-taxa').value = s.taxa;
+        $('input-prazo').value = s.prazo;
+        switchSystem(s.sistema === 'SAC' ? 'SAC' : 'PRICE');
+        if (s.calculado) calcularSimulacao();
+        return true;
+      } catch (e) { return false; }
+    }
+
+    /* Qualquer alteração invalida o resultado anterior: é preciso calcular de novo */
     function onInputChanged() {
       resultadoAtivo = false;
-      ultimoResultado = null;
       hideResults();
       setAviso('');
       updateEntryPercent();
       setT('btn-calc-text', 'Calcular Simulação (Price / SAC)');
+      salvarEstado();
     }
 
     function setEntryPercentage(pct) {
@@ -1238,6 +1281,7 @@ function calcSAC(pv, taxa, n) {
       $('input-entrada').value = '0,00';
       $('input-taxa').value = '0';
       $('input-prazo').value = '0';
+      try { sessionStorage.removeItem(CHAVE_ESTADO); } catch (e) { /* ignore */ }
       switchSystem('PRICE');
       onInputChanged();
       setT('summary-financiado', fmtBRL(0));
@@ -1289,6 +1333,7 @@ function calcSAC(pv, taxa, n) {
       }
       updateSystemInfoCards(sys);
       if (resultadoAtivo) calcularSimulacao();
+      salvarEstado();
       triggerKpiFlash();
     }
 
@@ -1338,19 +1383,20 @@ function calcSAC(pv, taxa, n) {
       const valido = financiado > 0 && taxaPct > 0 && meses > 0 && meses <= 360;
       if (!valido) {
         resultadoAtivo = false;
-        ultimoResultado = null;
         hideResults();
         setAviso('Informe valor do bem maior que a entrada, taxa acima de zero e prazo de 1 a 360 meses.');
+        salvarEstado();
         return false;
       }
       setAviso('');
       const rowsP = calcPrice(financiado, taxaPct, meses);
       const rowsS = calcSAC(financiado, taxaPct, meses);
-      ultimoResultado = { valorVeiculo, entrada, financiado, taxaPct, meses, rowsP, rowsS, ativo: currentSystem === 'PRICE' ? rowsP : rowsS };
+      const r = { valorVeiculo, entrada, financiado, taxaPct, meses, rowsP, rowsS, ativo: currentSystem === 'PRICE' ? rowsP : rowsS };
       resultadoAtivo = true;
-      renderResultados(ultimoResultado);
+      renderResultados(r);
       showResults();
       setT('btn-calc-text', 'Recalcular Simulação (Price / SAC)');
+      salvarEstado();
       return true;
     }
 
@@ -1378,7 +1424,7 @@ function calcSAC(pv, taxa, n) {
         : 'text-secondary font-bold shrink-0 bg-secondary-container/20 px-1.5 py-0.5 rounded text-[11px]';
       setT('kpi-total', formatBrCurrency(totalPago));
       setT('kpi-juros', formatBrCurrency(totalJuros));
-      setT('kpi-juros-badge', `${custoSobreCapital.toFixed(1)}% s/ financ.`);
+      setT('kpi-juros-badge', `${pct1(custoSobreCapital)}% s/ financ.`);
       adjustKpiFontSizes();
 
       // Resumo da operação contratada
@@ -1389,15 +1435,15 @@ function calcSAC(pv, taxa, n) {
       setT('contract-val-prazo', `${r.meses} meses`);
       const anos = (r.meses / 12).toFixed(1).replace('.0', '');
       setT('contract-val-prazo-sub', `${anos} ano${anos > 1 ? 's' : ''} de amortização`);
-      setT('contract-val-taxa', r.taxaPct.toFixed(2).replace('.', ',') + '% a.m.');
-      setT('contract-val-taxa-aa', '~' + taxaAnual.toFixed(2).replace('.', ',') + '% a.a.');
-      setT('badge-taxa-anual', '~' + taxaAnual.toFixed(2) + '% a.a.');
+      setT('contract-val-taxa', pct1(r.taxaPct) + '% a.m.');
+      setT('contract-val-taxa-aa', '~' + pct1(taxaAnual) + '% a.a.');
+      setT('badge-taxa-anual', '~' + pct1(taxaAnual) + '% a.a.');
       setT('contract-val-pmt-first', fmtBRL(pmt1));
       setT('contract-val-pmt-trend', isP ? 'Fixa (Price)' : 'Decrescente (SAC)');
       setT('contract-val-total', fmtBRL(totalPago));
       setT('contract-val-juros', `Juros: ${fmtBRL(totalJuros)}`);
 
-      // Composição (rosca e barras)
+      // Composição (rosca, barras e textos)
       const donutCap = $('donut-slice-capital');
       const donutJur = $('donut-slice-juros');
       if (donutCap) donutCap.setAttribute('stroke-dasharray', `${pctCap.toFixed(1)}, 100`);
@@ -1405,45 +1451,46 @@ function calcSAC(pv, taxa, n) {
         donutJur.setAttribute('stroke-dasharray', `${pctJur.toFixed(1)}, 100`);
         donutJur.setAttribute('stroke-dashoffset', `-${pctCap.toFixed(1)}`);
       }
-      setT('donut-pct-juros', `${pctJur.toFixed(1)}%`);
-      setT('comp-val-capital', `${fmtBRL(r.financiado)} (${pctCap.toFixed(1)}%)`);
-      setT('comp-val-juros', `${fmtBRL(totalJuros)} (${pctJur.toFixed(1)}%)`);
+      setT('donut-pct-juros', `${pct1(pctJur)}%`);
+      setT('comp-val-capital', `${fmtBRL(r.financiado)} (${pct1(pctCap)}%)`);
+      setT('comp-val-juros', `${fmtBRL(totalJuros)} (${pct1(pctJur)}%)`);
       const barCap = $('comp-bar-capital');
       const barJur = $('comp-bar-juros');
       if (barCap) barCap.style.width = `${pctCap.toFixed(1)}%`;
       if (barJur) barJur.style.width = `${pctJur.toFixed(1)}%`;
-      setLeafText('tab-content-comp', t => t.startsWith('Principal:'), `Principal: ${pctCap.toFixed(1)}%`);
-      setLeafText('tab-content-comp', t => t.startsWith('Juros:') && !t.includes('R$'), `Juros: ${pctJur.toFixed(1)}%`);
+      setLeafText('tab-content-comp', t => t.startsWith('Principal:'), `Principal: ${pct1(pctCap)}% do total`);
+      setLeafText('tab-content-comp', t => t.startsWith('Juros:') && !t.includes('R$'), `Juros: ${pct1(pctJur)}% do total`);
       const somas = leavesIn('tab-content-comp', t => t.endsWith('da soma'));
-      if (somas[0]) somas[0].textContent = `${pctCap.toFixed(1)}% da soma`;
-      if (somas[1]) somas[1].textContent = `${pctJur.toFixed(1)}% da soma`;
-      setLeafText('tab-content-comp', t => t.startsWith('100% ='), `100% = ${fmtBRL(totalPago)}`);
-      setLeafText('tab-content-comp', t => t.startsWith('Principal (R$'), `Principal (${fmtBRL(r.financiado)})`);
-      setLeafText('tab-content-comp', t => t.startsWith('Juros BACEN'), `Juros BACEN (${fmtBRL(totalJuros)})`);
+      if (somas[0]) somas[0].textContent = `${pct1(pctCap)}% da soma`;
+      if (somas[1]) somas[1].textContent = `${pct1(pctJur)}% da soma`;
+      setTextRe('tab-content-comp', /100% = [^<]*/, `100% = ${fmtBRL(totalPago)}`);
+      setTextRe('tab-content-comp', /Principal \(R\$[^)]*\)/, `Principal (${fmtBRL(r.financiado)})`);
+      setTextRe('tab-content-comp', /Juros BACEN \(R\$[^)]*\)/, `Juros BACEN (${fmtBRL(totalJuros)})`);
       setValueAfter('tab-content-comp', t => t.startsWith('Cota fixa') || t.startsWith('Parcela fixa p/'),
         isP ? fmtBRL(pmt1) : `${fmtBRL(r.financiado / r.meses)}/mês`);
       setLeafText('tab-content-comp', t => t.startsWith('Cota fixa') || t.startsWith('Parcela fixa p/'),
         isP ? 'Parcela fixa p/ pagamento:' : 'Cota fixa p/ amortizar:');
-      setValueAfter('tab-content-comp', t => t === 'Multiplicador de custo:', `+${custoSobreCapital.toFixed(1)}% s/ capital`);
+      setValueAfter('tab-content-comp', t => t === 'Multiplicador de custo:', `+${pct1(custoSobreCapital)}% s/ capital`);
       const centro = leafIn('tab-content-comp', t => t === 'Total Financiamento');
       if (centro && centro.nextElementSibling) centro.nextElementSibling.textContent = fmtBRL(totalPago);
 
-      // Evolução da dívida (gráfico e comparativo)
-      const idx36 = Math.min(35, r.meses - 1);
-      const saldoP36 = r.rowsP[idx36].saldo;
-      const saldoS36 = r.rowsS[idx36].saldo;
+      // Evolução da dívida: ponto de comparação = mês 36 (ou metade do prazo, se for menor)
+      const ref = r.meses >= 36 ? 36 : Math.max(1, Math.round(r.meses / 2));
+      const iRef = ref - 1;
+      const saldoP = r.rowsP[iRef].saldo;
+      const saldoS = r.rowsS[iRef].saldo;
       const economia = Math.max(0, jurosP - jurosS);
       setLeafText('tab-content-graph', t => t.startsWith('Economia SAC:'), `Economia SAC: ~${fmtBRL(economia)}`);
       setTextRe('tab-content-graph', /ao longo dos \d+ meses\./, `ao longo dos ${r.meses} meses.`);
       setLeafText('tab-content-graph', t => t.startsWith('Quitação Mês'), `Quitação Mês ${r.meses}:`);
       setValueAfter('tab-content-graph', t => t.startsWith('Quitação Mês'), fmtBRL(rows[rows.length - 1].saldo));
       const lblSac = leafIn('tab-content-graph', t => t.startsWith('Saldo em') && t.includes('(SAC)'));
-      if (lblSac) { lblSac.textContent = `Saldo em ${idx36 + 1}x (SAC)`; if (lblSac.nextElementSibling) lblSac.nextElementSibling.textContent = fmtBRL(saldoS36); }
+      if (lblSac) { lblSac.textContent = `Saldo em ${ref}x (SAC)`; if (lblSac.nextElementSibling) lblSac.nextElementSibling.textContent = fmtBRL(saldoS); }
       const lblPrice = leafIn('tab-content-graph', t => t.startsWith('Saldo em') && t.includes('(Price)'));
-      if (lblPrice) { lblPrice.textContent = `Saldo em ${idx36 + 1}x (Price)`; if (lblPrice.nextElementSibling) lblPrice.nextElementSibling.textContent = fmtBRL(saldoP36); }
-      setValueAfter('tab-content-graph', t => t === 'Diferença de Capital', fmtBRLSigned(saldoS36 - saldoP36));
-      const pctDif = saldoP36 > 0 ? ((saldoS36 - saldoP36) / saldoP36) * 100 : 0;
-      setLeafText('tab-content-graph', t => /^SAC [-+]?[\d.]+%$/.test(t), `SAC ${pctDif.toFixed(0)}%`);
+      if (lblPrice) { lblPrice.textContent = `Saldo em ${ref}x (Price)`; if (lblPrice.nextElementSibling) lblPrice.nextElementSibling.textContent = fmtBRL(saldoP); }
+      setValueAfter('tab-content-graph', t => t === 'Diferença de Capital', fmtBRLSigned(saldoS - saldoP));
+      const pctDif = saldoP > 0 ? ((saldoS - saldoP) / saldoP) * 100 : 0;
+      setLeafText('tab-content-graph', t => /^SAC [-+]?[\d.,]+%$/.test(t), `SAC ${pctDif >= 0 ? '+' : ''}${pct1(pctDif)}%`);
       const marcasX = leavesIn('tab-content-graph', t => /^Mês \d+/.test(t));
       const pontos = [1, 12, 24, 36, 48, r.meses];
       marcasX.forEach((el, k) => {
@@ -1454,7 +1501,7 @@ function calcSAC(pv, taxa, n) {
       renderChart(r);
 
       // Custo detalhado (todas as parcelas)
-      renderTable(rows, r.meses, isP);
+      renderTable(rows, r.meses);
       setTextRe('tab-content-table', /até \d+x/, `até ${r.meses}x`);
       setTextRe('tab-content-table', /SAC • Amortização Constante|Price • Parcelas Fixas/, isP ? 'Price • Parcelas Fixas' : 'SAC • Amortização Constante');
       const cota = isP ? `Parcela fixa de ${fmtBRL(pmt1)}/mês` : `Cota fixa de ${fmtBRL(r.financiado / r.meses)}/mês`;
@@ -1526,7 +1573,7 @@ function calcSAC(pv, taxa, n) {
       };
     }
 
-    function renderTable(rows, n, isP) {
+    function renderTable(rows, n) {
       const tb = $('table-body-amort');
       if (!tb) return;
       tb.innerHTML = rows.map(q => {
@@ -1534,42 +1581,143 @@ function calcSAC(pv, taxa, n) {
         const tag = m === 1 ? 'Início' : (m === n ? 'Quitação' : (m % 12 === 0 ? `Ano ${m / 12}` : (m === Math.round(n / 2) ? '50%' : '')));
         const tagHtml = tag ? ` <span class="ml-2 text-[10px] font-label font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary">${tag}</span>` : '';
         return `<tr class="hover:bg-surface-container-low transition-colors ${m === 1 ? 'bg-surface-container-low' : ''}">
-          <td class="py-3 px-4 font-headline font-bold text-on-surface">${m}º</td>
-          <td class="py-3 px-4 font-label tabular-nums">${fmtBRL(q.parcela)}${tagHtml}</td>
-          <td class="py-3 px-4 tabular-nums text-secondary">${fmtBRL(q.amortizacao)}</td>
-          <td class="py-3 px-4 tabular-nums text-error">${fmtBRL(q.juros)}</td>
-          <td class="py-3 px-4 tabular-nums font-bold text-on-surface">${fmtBRL(q.saldo)}</td>
+          <td>${m}º</td>
+          <td>${fmtBRL(q.parcela)}${tagHtml}</td>
+          <td>${fmtBRL(q.amortizacao)}</td>
+          <td>${fmtBRL(q.juros)}</td>
+          <td>${fmtBRL(q.saldo)}</td>
         </tr>`;
       }).join('');
     }
 
-    function exportToCSV() {
-      if (!ultimoResultado) return;
-      const r = ultimoResultado;
-      const rows = currentSystem === 'PRICE' ? r.rowsP : r.rowsS;
-      const cab = ['Mês', 'Parcela (R$)', 'Juros (R$)', 'Amortização (R$)', 'Saldo devedor (R$)'];
-      const num = v => v.toFixed(2).replace('.', ',');
-      const corpo = rows.map(q => [q.mes, num(q.parcela), num(q.juros), num(q.amortizacao), num(q.saldo)].join(';'));
-      const csv = '\uFEFF' + [cab.join(';'), ...corpo].join('\r\n');
-      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `financiamento_${currentSystem.toLowerCase()}_${r.meses}x.csv`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    /* Exportacao: o sistema principal gera CSV, Excel e PDF com as mesmas funcoes de sempre */
+    function exportar(formato) {
+      if (!resultadoAtivo) { setAviso('Calcule a simulação antes de exportar.'); return; }
+      postParent({
+        type: 'exportar',
+        formato,
+        valor: parseBrCurrency($('input-veiculo').value),
+        entrada: parseBrCurrency($('input-entrada').value),
+        taxa: parseFloat($('input-taxa').value) || 0,
+        meses: parseInt($('input-prazo').value) || 0,
+        sistema: currentSystem === 'SAC' ? 'SAC' : 'PRICE'
+      });
     }
 
-    /* Estado inicial: campos zerados, sem resultados até o usuário calcular */
+    function montarExportacao() {
+      const botoes = Array.from(document.querySelectorAll('button'));
+      const csv = botoes.find(b => /CSV/.test(b.textContent));
+      const pdf = botoes.find(b => /PDF/.test(b.textContent));
+      if (csv) {
+        csv.onclick = () => exportar('csv');
+        const xls = csv.cloneNode(false);
+        xls.type = 'button';
+        xls.onclick = () => exportar('xlsx');
+        xls.innerHTML = '<span class="material-symbols-outlined text-[18px]">table_chart</span> Excel';
+        csv.parentElement.insertBefore(xls, csv.nextSibling);
+      }
+      if (pdf) pdf.onclick = () => exportar('pdf');
+    }
+
+    /* Cabecalho: botao de tema funcional e sino de notificacoes no lugar do perfil */
+    function montarCabecalho() {
+      const btnTema = Array.from(document.querySelectorAll('header button')).find(b => /light_mode|dark_mode/.test(b.textContent));
+      if (!btnTema) return;
+      btnTema.onclick = () => aplicarTema(!document.documentElement.classList.contains('dark'));
+      let el = btnTema.nextElementSibling;
+      while (el) { const nx = el.nextElementSibling; el.remove(); el = nx; }
+      const sino = document.createElement('button');
+      sino.id = 'bell-slot';
+      sino.type = 'button';
+      sino.setAttribute('aria-label', 'Notificações');
+      sino.className = btnTema.className;
+      sino.style.cssText = 'display:flex;align-items:center;justify-content:center;width:36px;height:36px';
+      sino.innerHTML = '<span class="material-symbols-outlined text-[18px]">notifications</span>';
+      btnTema.parentElement.appendChild(sino);
+    }
+
+    function aplicarLogo() {
+      const img = document.querySelector('header img');
+      if (!img) return;
+      if (!img.dataset.original) img.dataset.original = img.getAttribute('src');
+      const escuro = document.documentElement.classList.contains('dark');
+      const url = escuro ? marcaCfg.logoEscuro : marcaCfg.logoClaro;
+      img.src = url || img.dataset.original;
+    }
+
+    function aplicarTema(escuro) {
+      document.documentElement.classList.toggle('dark', escuro);
+      const btn = Array.from(document.querySelectorAll('header button')).find(b => /light_mode|dark_mode/.test(b.textContent));
+      if (btn) {
+        const icone = btn.querySelector('.material-symbols-outlined');
+        if (icone) icone.textContent = escuro ? 'light_mode' : 'dark_mode';
+      }
+      try { sessionStorage.setItem('fi-tema', escuro ? 'dark' : 'light'); } catch (e) { /* ignore */ }
+      aplicarLogo();
+    }
+
+    function injetarTemaEscuro() {
+      const estilo = document.createElement('style');
+      estilo.textContent = `
+        html.dark body { background:#0b1220 !important; color:#e6edf8 !important; }
+        html.dark [class*="bg-surface-container"] { background-color:#172339 !important; }
+        html.dark [class*="bg-surface-container-low"] { background-color:#0f1a2d !important; }
+        html.dark [class*="bg-surface-container-lowest"], html.dark [class*="bg-white"] { background-color:#121c30 !important; }
+        html.dark [class*="bg-surface"], html.dark [class*="bg-background"] { background-color:#0b1220 !important; }
+        html.dark [class*="text-on-surface"] { color:#e6edf8 !important; }
+        html.dark [class*="text-on-surface-variant"] { color:#9aa6bd !important; }
+        html.dark [class*="border-surface"], html.dark [class*="border-outline"], html.dark [class*="border-slate"] { border-color:#23314d !important; }
+        html.dark [class*="shadow"] { box-shadow:0 10px 30px rgba(0,0,0,0.35) !important; }
+        #tab-content-table table { table-layout:fixed; width:100%; border-collapse:separate; border-spacing:0; }
+        #tab-content-table th, #tab-content-table td { padding:12px 16px !important; text-align:left !important; white-space:nowrap; vertical-align:middle; }
+        #tab-content-table th:nth-child(1), #tab-content-table td:nth-child(1) { width:12%; }
+        #tab-content-table th:nth-child(2), #tab-content-table td:nth-child(2) { width:26%; }
+        #tab-content-table th:nth-child(3), #tab-content-table td:nth-child(3) { width:20%; }
+        #tab-content-table th:nth-child(4), #tab-content-table td:nth-child(4) { width:20%; }
+        #tab-content-table th:nth-child(5), #tab-content-table td:nth-child(5) { width:22%; }
+        #tab-content-table td { font-variant-numeric: tabular-nums; }
+      `;
+      document.head.appendChild(estilo);
+    }
+
+    function postParent(msg) { if (window.parent && window.parent !== window) window.parent.postMessage(msg, window.location.origin); }
+
+    function enviarRetangulo() {
+      const el = $('bell-slot');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      postParent({ type: 'bell-rect', rect: { x: r.left, y: r.top, w: r.width, h: r.height } });
+    }
+
+    window.addEventListener('resize', enviarRetangulo);
+    window.addEventListener('message', (e) => {
+      if (e.source !== window.parent) return;
+      const d = e.data || {};
+      if (d.type === 'marca') { marcaCfg = { logoEscuro: d.logoEscuro, logoClaro: d.logoClaro }; aplicarLogo(); }
+    });
+
+    /* Estado inicial: Price selecionado; valores mantidos durante a sessao */
     function init() {
-      currentSystem = 'PRICE';
-      updateEntryPercent();
+      injetarTemaEscuro();
+      montarCabecalho();
+      montarExportacao();
+      const tx = $('input-taxa');
+      if (tx) {
+        tx.type = 'text';
+        tx.inputMode = 'decimal';
+        tx.addEventListener('input', () => { mascaraTaxa(tx); onInputChanged(); });
+      }
+      try { aplicarTema(sessionStorage.getItem('fi-tema') === 'dark'); } catch (e) { aplicarTema(false); }
       setT('summary-financiado', fmtBRL(0));
       setT('badge-taxa-anual', '~0.00% a.a.');
-      updateSystemInfoCards('PRICE');
+      currentSystem = 'PRICE';
+      updateEntryPercent();
       hideResults();
       setAviso('');
+      const restaurou = restaurarEstado();
+      if (!restaurou) switchSystem('PRICE');
+      postParent({ type: 'pronto' });
+      enviarRetangulo();
     }
     init();
 </script>
