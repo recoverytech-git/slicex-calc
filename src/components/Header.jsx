@@ -23,10 +23,9 @@ export default function Header({ subtitle }) {
       <Link to="/dashboard" style={{ display: "flex", alignItems: "center", gap: 16 }}>
         <motion.img
           src={logoSrc}
-          style={{ height: 38, width: "auto", display: "block", filter: claro && logoPadrao ? "invert(1)" : "none" }}
           data-logo
           alt="SliceX.calc"
-          style={{ height: 38, width: "auto", display: "block" }}
+          style={{ height: 38, width: "auto", display: "block", filter: claro && logoPadrao ? "invert(1)" : "none" }}
           whileHover={{ scale: 1.04 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         />
