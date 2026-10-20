@@ -1,4 +1,6 @@
-<!DOCTYPE html><html class="light" lang="pt-BR" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><title>Calcula.car - Inteligência e Precisão Automotiva</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<!DOCTYPE html><html class="light" lang="pt-BR" style=""><head>
+<script>document.documentElement.classList.add('carregando');</script>
+<style>html.carregando body { opacity: 0; }</style><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><title>Calcula.car - Inteligência e Precisão Automotiva</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>
 @layer base {
   html, body {
@@ -475,9 +477,9 @@
       const grade = acharGradeResumo();
       const s = dados.stats;
       if (!grade || !s) return;
-      const margemTxt = s.margem == null ? 'Restrito ao seu perfil' : `${s.margem >= 0 ? '+' : ''}${s.margem.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}%`;
+      const margemTxt = s.margem == null ? 'Restrito ao seu perfil' : `${s.margem >= 0 ? '+' : ''}${s.margem.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
       const margemCor = s.margem == null ? '#64748b' : (s.margem >= 0 ? '#059669' : '#ba1a1a');
-      const lucroTxt = s.lucro == null ? 'Dados financeiros restritos' : `${fmtBRL(s.lucro)} · pátio − compra`;
+      const lucroTxt = s.lucro == null ? 'Dados financeiros restritos' : `${fmtBRL(s.lucro)} · potencial − capital investido`;
       const checkTxt = s.checados == null ? 'Checklist não disponível' : `${s.checados} de ${s.total} com checklist`;
       const cartoes = [
         { rot: 'TOTAL NO PÁTIO', ico: 'inventory_2', val: String(s.total), sub: 'unidades físicas', rod: checkTxt },
@@ -697,12 +699,34 @@
         dados = { papel: d.papel, itens: d.itens || [], stats: d.stats || null };
         renderCards();
         renderStats();
+        atualizarContagens(true);
         applyFilters();
       }
     });
 
+    const ROT_PILL = { all: 'Todos', em_preparacao: 'Em preparação', disponivel: 'Disponível', reservado: 'Reservado', vendido: 'Vendido', retirado: 'Retirado' };
+    function definirTextoPill(pill, texto) {
+      const no = Array.from(pill.childNodes).reverse().find(n => n.nodeType === 3 && n.nodeValue.trim());
+      if (no) no.nodeValue = texto; else pill.appendChild(document.createTextNode(texto));
+    }
+    function atualizarContagens(carregado) {
+      document.querySelectorAll('.filter-pill').forEach(p => {
+        const st = p.getAttribute('data-filter');
+        const n = carregado === false ? '…' : (st === 'all' ? dados.itens.length : dados.itens.filter(v => v.status === st).length);
+        definirTextoPill(p, `${ROT_PILL[st] || st} (${n})`);
+      });
+    }
+    function renderStatsCarregando() {
+      const grade = acharGradeResumo();
+      if (!grade) return;
+      grade.innerHTML = ['TOTAL NO PÁTIO', 'VALOR TOTAL EM PÁTIO', 'TICKET MÉDIO', 'MARGEM ESTIMADA'].map(r =>
+        `<div class="stat-card"><div class="stat-top"><span class="stat-label">${r}</span></div><div class="stat-value" style="color:#94a3b8">…</div><div class="stat-sub">Carregando dados do sistema</div></div>`).join('');
+      atualizarContagens(false);
+    }
+
     function init() {
       injetarEstilos();
+      renderStatsCarregando();
       montarCabecalho();
       aplicarLogo();
       montarFiltros();
@@ -711,6 +735,7 @@
       const container = $('vehicle-list-container');
       if (container) container.innerHTML = '';
       applyFilters();
+      document.documentElement.classList.remove('carregando');
       postParent({ type: 'pronto' });
       enviarRetangulo();
     }

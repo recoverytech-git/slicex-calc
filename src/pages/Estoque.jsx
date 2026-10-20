@@ -13,22 +13,25 @@ import { useMarca } from "../lib/marca";
 
 const ROTULO = { em_preparacao: "Em preparação", disponivel: "Disponível", reservado: "Reservado", vendido: "Vendido", retirado: "Retirado" };
 
-/** Resumo calculado com as mesmas regras do painel: pátio = tudo que não está vendido; lucro = venda − compra − custos. */
+/** Regras do painel de estoque:
+ * - Valor total em patio = soma dos precos de venda pretendidos (veiculos nao vendidos)
+ * - Capital investido = soma dos valores de compra + custos adicionais
+ * - Margem estimada = potencial de venda - capital investido; percentual sobre o potencial de venda
+ * - Ticket medio = (menor preco + maior preco) / 2 */
 function calcularResumo(itens, extras, custos, checklists, vendedor) {
   const patio = itens.filter((v) => v.status !== "vendido");
   const total = patio.length;
   const valorTotal = patio.reduce((s, v) => s + Number(v.preco || 0), 0);
   const precos = patio.map((v) => Number(v.preco || 0)).filter((p) => p > 0);
-  const ticket = total ? valorTotal / total : 0;
   const min = precos.length ? Math.min(...precos) : 0;
   const max = precos.length ? Math.max(...precos) : 0;
+  const ticket = precos.length ? (min + max) / 2 : 0;
   const checados = checklists ? patio.filter((v) => checklists.has(v.id)).length : null;
   let lucro = null;
   let margem = null;
   if (!vendedor) {
-    // Margem = valor total em patio - valor total de compra dos veiculos
-    const compraTotal = patio.reduce((s, v) => s + Number(extras[v.id]?.preco_compra || 0), 0);
-    lucro = valorTotal - compraTotal;
+    const capital = patio.reduce((s, v) => s + Number(extras[v.id]?.preco_compra || 0) + Number(custos[v.id] || 0), 0);
+    lucro = valorTotal - capital;
     margem = valorTotal > 0 ? (lucro / valorTotal) * 100 : 0;
   }
   return { total, valorTotal, ticket, min, max, checados, lucro, margem };
