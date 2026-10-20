@@ -41,34 +41,44 @@ export default function VeiculoDetalheVisual() {
     let vivo = true;
     (async () => {
       const tabela = papel === "vendedor" ? "v_veiculos_vendedor" : "veiculos";
-      const { data: veiculo, error } = await supabase.from(tabela).select("*").eq("id", id).maybeSingle();
+      // Consultas independentes em paralelo
+      const [vRes, fRes, cRes, finRes, vdRes, ckRes] = await Promise.all([
+        supabase.from(tabela).select("*").eq("id", id).maybeSingle(),
+        supabase.from("veiculo_fotos").select("id, caminho_storage, ordem_exibicao").eq("veiculo_id", id).order("ordem_exibicao"),
+        gestao ? supabase.from("veiculo_custos").select("id, descricao, valor").eq("veiculo_id", id).order("criado_em") : Promise.resolve({ data: [] }),
+        gestao ? supabase.from("veiculo_financiamentos").select("*").eq("veiculo_id", id).maybeSingle() : Promise.resolve({ data: null }),
+        gestao ? supabase.from("veiculo_vendas").select("id, data_venda, valor_venda, despesas_venda, descontos").eq("veiculo_id", id).order("data_venda", { ascending: false }) : Promise.resolve({ data: [] }),
+        supabase.from("veiculo_checklists").select("*").eq("veiculo_id", id).maybeSingle(),
+      ]);
       if (!vivo) return;
-      if (error || !veiculo) { setErro(error?.message || "Veículo não encontrado."); cache.current = { erro: error?.message || "Veículo não encontrado." }; enviar(); return; }
-      const { data: fs } = await supabase.from("veiculo_fotos").select("id, caminho_storage, ordem_exibicao").eq("veiculo_id", id).order("ordem_exibicao");
-      const fotos = [];
-      for (const f of fs ?? []) {
-        const { data: s } = await supabase.storage.from(BUCKET_FOTOS).createSignedUrl(f.caminho_storage, 3600);
-        fotos.push({ id: f.id, url: s?.signedUrl ?? null });
+      const veiculo = vRes.data;
+      if (vRes.error || !veiculo) {
+        const msg = vRes.error?.message || "Veículo não encontrado.";
+        setErro(msg);
+        cache.current = { erro: msg };
+        enviar();
+        return;
       }
-      let custos = [], financiamento = null, vendas = [], checklist = null;
-      if (papel !== "vendedor") {
-        const [c, fin, vd, ck] = await Promise.all([
-          supabase.from("veiculo_custos").select("id, descricao, valor").eq("veiculo_id", id).order("criado_em"),
-          supabase.from("veiculo_financiamentos").select("*").eq("veiculo_id", id).maybeSingle(),
-          supabase.from("veiculo_vendas").select("id, data_venda, valor_venda, despesas_venda, descontos").eq("veiculo_id", id).order("data_venda", { ascending: false }),
-          supabase.from("veiculo_checklists").select("*").eq("veiculo_id", id).maybeSingle(),
-        ]);
-        custos = c.data ?? []; financiamento = fin.data ?? null; vendas = vd.data ?? []; checklist = ck.data ?? null;
-      } else {
-        const { data: ck } = await supabase.from("veiculo_checklists").select("*").eq("veiculo_id", id).maybeSingle();
-        checklist = ck ?? null;
+      // Links das fotos em uma unica chamada
+      const lista = fRes.data ?? [];
+      let urls = {};
+      if (lista.length) {
+        const { data: assinadas } = await supabase.storage.from(BUCKET_FOTOS).createSignedUrls(lista.map((f) => f.caminho_storage), 3600);
+        urls = Object.fromEntries((assinadas ?? []).map((s) => [s.path, s.signedUrl]));
       }
-      if (!vivo) return;
-      cache.current = { veiculo, fotos, custos, financiamento, vendas, checklist, erro: null };
+      const fotos = lista.map((f) => ({ id: f.id, url: urls[f.caminho_storage] ?? null }));
+      cache.current = {
+        veiculo, fotos,
+        custos: cRes.data ?? [],
+        financiamento: finRes.data ?? null,
+        vendas: vdRes.data ?? [],
+        checklist: ckRes.data ?? null,
+        erro: null,
+      };
       enviar();
     })();
     return () => { vivo = false; };
-  }, [id, papel, perfil, enviar]);
+  }, [id, papel, perfil, gestao, enviar]);
 
   useEffect(() => {
     const ouvir = async (e) => {
@@ -86,16 +96,13 @@ export default function VeiculoDetalheVisual() {
       }
       if (d.acao === "pdf" && cache.current?.veiculo) {
         const c = cache.current;
-        const [{ default: jsPDF }, { default: autoTable }, { data: ck }] = await Promise.all([
-          import("jspdf"), import("jspdf-autotable"),
-          supabase.from("veiculo_checklists").select("*").eq("veiculo_id", id).maybeSingle(),
-        ]);
+        const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
         const imgs = (await Promise.all(c.fotos.filter((f) => f.url).map((f) => urlParaDataUrl(f.url)))).filter(Boolean);
         const doc = gerarPdfVeiculo({
           veiculo: c.veiculo, financiamento: c.financiamento, custos: c.custos, vendas: c.vendas,
-          checklist: ck, fotos: imgs, jsPDF, autoTable, ITENS, DOCUMENTACAO,
+          checklist: c.checklist, fotos: imgs, jsPDF, autoTable, ITENS, DOCUMENTACAO,
         });
-        doc.save(`veiculo-${(c.veiculo.modelo || "veiculo").toLowerCase().replace(/\s+/g, "-")}.pdf`);
+        doc.save(`veiculo-${(c.veiculo.modelo || "veiculo").toLowerCase().replace(/\\s+/g, "-")}.pdf`);
       }
     };
     window.addEventListener("message", ouvir);
