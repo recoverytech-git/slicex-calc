@@ -86,141 +86,585 @@
     transform: none !important;
   }
 }
-</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-dim": "#cbdbf5", "on-tertiary-fixed-variant": "#3f465c", "on-secondary": "#ffffff", "on-primary-fixed-variant": "#003ea8", "background": "#f8f9ff", "error": "#ba1a1a", "inverse-surface": "#213145", "surface-container": "#e5eeff", "tertiary-fixed": "#dae2fd", "on-secondary-fixed-variant": "#005236", "surface": "#f8f9ff", "secondary-container": "#6cf8bb", "secondary": "#006c49", "secondary-fixed": "#6ffbbe", "on-tertiary": "#ffffff", "on-secondary-container": "#00714d", "primary-fixed": "#dbe1ff", "on-surface-variant": "#434655", "surface-variant": "#d3e4fe", "on-error": "#ffffff", "outline": "#737686", "primary": "#004ac6", "on-primary": "#ffffff", "error-container": "#ffdad6", "outline-variant": "#c3c6d7", "surface-container-highest": "#d3e4fe", "on-primary-fixed": "#00174b", "on-primary-container": "#eeefff", "on-tertiary-container": "#eef0ff", "primary-container": "#2563eb", "on-surface": "#0b1c30", "inverse-primary": "#b4c5ff", "surface-tint": "#0053db", "secondary-fixed-dim": "#4edea3", "on-error-container": "#93000a", "surface-container-lowest": "#ffffff", "surface-bright": "#f8f9ff", "primary-fixed-dim": "#b4c5ff", "tertiary": "#4d556b", "surface-container-low": "#eff4ff", "on-tertiary-fixed": "#131b2e", "tertiary-container": "#656d84", "tertiary-fixed-dim": "#bec6e0", "inverse-on-surface": "#eaf1ff", "surface-container-high": "#dce9ff", "on-background": "#0b1c30", "on-secondary-fixed": "#002113" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": {}, "fontFamily": { "headline": [ "Plus Jakarta Sans" ], "display": [ "Plus Jakarta Sans" ], "body": [ "Plus Jakarta Sans" ], "label": [ "Inter" ] }, "fontSize": {} } } }</script><style>body{font-family:"Inter",sans-serif}</style></head>
-<body class="bg-surface font-body text-on-surface min-h-screen">
-<main id="app" class="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 space-y-6 min-w-0"></main>
-<script>
-    const ROT = { em_preparacao: 'Em preparação', disponivel: 'Disponível', reservado: 'Reservado', vendido: 'Vendido', retirado: 'Retirado' };
-    const COR = { em_preparacao: '#f59e0b', disponivel: '#10b981', reservado: '#2563eb', vendido: '#64748b', retirado: '#ef4444' };
-    let D = null;
-    const $ = id => document.getElementById(id);
-    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const brl = v => (v == null || !isFinite(v)) ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    const pct = v => (v == null || !isFinite(v)) ? '—' : `${v.toFixed(2).replace('.', ',')}%`;
-    const dataBR = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
-    const post = (acao) => window.parent && window.parent.postMessage({ type: 'acao', acao }, window.location.origin);
-
-    function secao(n, titulo, conteudo) {
-      return `<section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/40 shadow-sm p-5 sm:p-6 min-w-0">
-        <header class="flex items-center gap-3 mb-5">
-          <span class="w-8 h-8 rounded-lg bg-primary-container/10 text-primary font-headline font-bold flex items-center justify-center text-sm shrink-0">${n}</span>
-          <h2 class="font-headline font-extrabold text-base text-on-surface">${titulo}</h2>
-        </header>${conteudo}</section>`;
-    }
-    function campo(rot, val) {
-      return `<div class="space-y-1 min-w-0">
-        <div class="text-[11px] font-label font-semibold text-on-surface-variant uppercase tracking-wider">${rot}</div>
-        <div class="rounded-xl border border-outline-variant bg-surface px-3 py-2.5 text-sm font-semibold text-on-surface tabular-nums break-words">${val ?? '—'}</div>
-      </div>`;
-    }
-    function linha(rot, val, destaque) {
-      return `<div class="flex items-center justify-between gap-4 py-2.5 border-b border-outline-variant/30 last:border-0">
-        <span class="text-sm text-on-surface-variant">${rot}</span>
-        <span class="text-sm font-bold tabular-nums ${destaque || 'text-on-surface'}">${val ?? '—'}</span></div>`;
-    }
-
-    function render() {
-      const app = $('app');
-      if (!D) { app.innerHTML = '<div class="animate-pulse h-40 rounded-2xl bg-surface-container"></div>'; return; }
-      if (D.erro) { app.innerHTML = `<div class="rounded-2xl border border-error/30 bg-error-container/30 p-6 text-sm font-semibold text-on-surface">${esc(D.erro)}</div>`; return; }
-      const v = D.veiculo, g = D.gestao, fin = D.financiamento, custos = D.custos || [], vendas = D.vendas || [], ck = D.checklist, fotos = D.fotos || [];
-      const compra = Number(v.preco_compra || 0);
-      const fipe = Number(v.valor_fipe || 0);
-      const venda = Number(v.preco_venda_pretendido || 0);
-      const totalCustos = custos.reduce((s, c) => s + Number(c.valor || 0), 0);
-      const juros = fin ? Number(fin.total_juros || 0) : 0;
-      const investimento = compra + totalCustos + juros;
-      const parcial = venda - investimento;
-      const pParcial = investimento > 0 ? (parcial / investimento) * 100 : null;
-      const venda0 = vendas[0];
-      const final = venda0 ? Number(venda0.valor_venda) - Number(venda0.despesas_venda || 0) - Number(venda0.descontos || 0) - investimento : null;
-      const pFinal = venda0 && investimento > 0 ? (final / investimento) * 100 : null;
-      const diffFipe = fipe - compra;
-      const pFipe = fipe > 0 ? (diffFipe / fipe) * 100 : null;
-      const cor = COR[v.status] || '#64748b';
-      const rotStatus = ROT[v.status] || v.status;
-
-      const topo = `
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 min-w-0">
-          <div class="min-w-0">
-            <button id="btn-voltar" class="inline-flex items-center gap-2 h-9 px-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-sm font-semibold text-on-surface hover:bg-surface-container transition"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Voltar para o estoque</button>
-            <h1 class="font-headline font-extrabold text-2xl text-on-surface mt-4 uppercase truncate">${esc(v.modelo)}</h1>
-            <div class="flex flex-wrap items-center gap-2 mt-2">
-              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold uppercase" style="border-color:${cor};color:${cor}"><span class="w-2 h-2 rounded-full" style="background:${cor}"></span>${esc(rotStatus)}</span>
-              ${g && v.placa ? `<span class="px-2.5 py-1 rounded-md bg-inverse-surface text-inverse-on-surface text-xs font-bold tracking-widest">${esc(v.placa)}</span>` : ''}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-dim": "#cbdbf5", "on-tertiary-fixed-variant": "#3f465c", "on-secondary": "#ffffff", "on-primary-fixed-variant": "#003ea8", "background": "#f8f9ff", "error": "#ba1a1a", "inverse-surface": "#213145", "surface-container": "#e5eeff", "tertiary-fixed": "#dae2fd", "on-secondary-fixed-variant": "#005236", "surface": "#f8f9ff", "secondary-container": "#6cf8bb", "secondary": "#006c49", "secondary-fixed": "#6ffbbe", "on-tertiary": "#ffffff", "on-secondary-container": "#00714d", "primary-fixed": "#dbe1ff", "on-surface-variant": "#434655", "surface-variant": "#d3e4fe", "on-error": "#ffffff", "outline": "#737686", "primary": "#004ac6", "on-primary": "#ffffff", "error-container": "#ffdad6", "outline-variant": "#c3c6d7", "surface-container-highest": "#d3e4fe", "on-primary-fixed": "#00174b", "on-primary-container": "#eeefff", "on-tertiary-container": "#eef0ff", "primary-container": "#2563eb", "on-surface": "#0b1c30", "inverse-primary": "#b4c5ff", "surface-tint": "#0053db", "secondary-fixed-dim": "#4edea3", "on-error-container": "#93000a", "surface-container-lowest": "#ffffff", "surface-bright": "#f8f9ff", "primary-fixed-dim": "#b4c5ff", "tertiary": "#4d556b", "surface-container-low": "#eff4ff", "on-tertiary-fixed": "#131b2e", "tertiary-container": "#656d84", "tertiary-fixed-dim": "#bec6e0", "inverse-on-surface": "#eaf1ff", "surface-container-high": "#dce9ff", "on-background": "#0b1c30", "on-secondary-fixed": "#002113" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": {}, "fontFamily": { "headline": [ "Plus Jakarta Sans" ], "display": [ "Plus Jakarta Sans" ], "body": [ "Plus Jakarta Sans" ], "label": [ "Inter" ] }, "fontSize": {} } } }</script><style id="sistema-veiculo">
+  header { display: none !important; }
+  main { padding-top: 0 !important; }
+  body { overflow-x: clip !important; }
+</style></head><body class="bg-surface font-body text-on-surface min-h-screen relative overflow-x-hidden antialiased"><div class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.07),rgba(255,255,255,0))]"></div><header class="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(11,28,48,0.03)]"><div class="h-20 max-w-[1440px] mx-auto px-6 lg:px-8 flex items-center justify-between gap-6"><div class="flex items-center gap-10"><div class="flex items-center gap-2 group cursor-pointer"><span class="text-2xl font-headline font-extrabold tracking-tight text-on-surface">Calcula<span class="text-primary-container inline-block font-black">.</span>car</span></div><nav class="hidden xl:flex items-center gap-7" data-active-classes="text-primary font-bold"><a class="text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-path="overview-geral" href="#">Visão Geral</a><a class="text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-path="simulador-financiamento" href="#">Simulador de Financiamento</a><a aria-current="page" class="transition-colors text-primary font-bold" data-path="tabela-fipe-estoque" href="#">Precificação &amp; FIPE</a><a class="text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-path="analise-margem-lucro" href="#">Margem &amp; Retorno</a><a class="text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-path="propostas-credito" href="#">Propostas de Crédito</a></nav></div><div class="flex items-center gap-4 sm:gap-6"><div class="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container-low shadow-[0_1px_4px_rgba(0,108,73,0.06)]"><span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-fixed-dim opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span></span><span class="text-xs font-label font-semibold text-secondary tracking-tight">Operador F&amp;I Online • Conectado</span></div><button aria-label="Notificações" class="relative p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-container ring-2 ring-surface-container-lowest"></span></button><div class="flex items-center gap-3 pl-2 sm:pl-3 border-l-0"><div class="text-right hidden sm:block"></div></div></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full relative">
+<!-- ATMOSPHERE & AMBIENT GLOW SYSTEM: Floating Multi-Layered Orbs -->
+<div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+<div class="ambient-orb-1 absolute top-16 left-[18%] w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-primary/18 via-primary-container/14 to-transparent blur-[85px] opacity-75"></div>
+<div class="ambient-orb-2 absolute top-[36rem] right-[8%] w-[480px] h-[480px] rounded-full bg-gradient-to-bl from-[#38bdf8]/18 via-secondary/12 to-transparent blur-[80px] opacity-70"></div>
+<div class="ambient-orb-3 absolute top-[72rem] left-[10%] w-[560px] h-[560px] rounded-full bg-gradient-to-br from-primary-fixed/25 via-[#06b6d4]/10 to-transparent blur-[90px] opacity-65"></div>
+</div>
+<!-- Main Container -->
+<div class="max-w-[1240px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+<!-- Top Navigation / Back Button & Export Action (Stagger 0) -->
+<div class="motion-stagger stagger-d0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<a class="group inline-flex items-center gap-3 px-4 py-2.5 rounded-full bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/40 shadow-[0_2px_8px_rgba(11,28,48,0.04),0_12px_24px_-4px_rgba(11,28,48,0.06)] hover:shadow-[0_8px_22px_rgba(37,99,235,0.14)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985] transition-all duration-300 w-fit" data-path="todas-as-calculadoras" href="#">
+<span class="w-7 h-7 rounded-full bg-surface-container-low text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 transform group-hover:-translate-x-1">
+<span class="material-symbols-outlined text-[17px] leading-none transition-transform duration-300">arrow_back</span>
+</span>
+<span class="text-xs sm:text-sm font-label font-semibold text-on-surface-variant group-hover:text-on-surface tracking-tight transition-colors">
+          Voltar para todas as calculadoras
+        </span>
+</a>
+<div class="flex items-center gap-3">
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest/95 backdrop-blur-md border border-outline-variant/40 text-on-surface font-label text-xs sm:text-sm font-semibold shadow-[0_2px_8px_rgba(11,28,48,0.04)] hover:bg-surface-container-low hover:border-outline-variant/80 hover:shadow-[0_8px_18px_rgba(37,99,235,0.09)] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200" id="btn-export-pdf" type="button">
+<span class="material-symbols-outlined text-primary text-[19px]">picture_as_pdf</span>
+<span class="">Exportar PDF</span>
+</button>
+</div>
+</div>
+<!-- Vehicle Identity Banner (Stagger 1) -->
+<div class="motion-stagger stagger-d1 relative overflow-hidden rounded-2xl glass-card p-6 sm:p-8">
+<div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2.5">
+<span class="px-2.5 py-1 rounded-md text-[10px] font-label font-extrabold uppercase tracking-widest bg-surface-container-high text-primary">EM Estoque</span>
+<span class="text-xs font-label text-outline"><br></span>
+</div>
+<h1 class="text-3xl sm:text-4xl font-headline font-extrabold text-on-surface tracking-tight">
+            POLO 1.6 MSI
+          </h1>
+<div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-label mt-0.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-container font-mono font-bold text-on-surface border border-outline-variant/30">
+<span class="material-symbols-outlined text-[15px] text-tertiary">pin</span>
+              RBV6F64
+            </span>
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/30 border border-secondary/20 text-on-secondary-container font-semibold shadow-[0_1px_4px_rgba(0,108,73,0.06)]">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+              Disponível para Venda
+            </span>
+<span class="text-on-surface-variant text-xs hidden sm:inline">• Volkswagen 2020/2020 Flex</span>
+</div>
+</div>
+<!-- Highlight Quick Price Card -->
+<div class="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low/80 border border-outline-variant/40 shadow-[0_2px_8px_rgba(11,28,48,0.03)] hover:border-primary/30 transition-all duration-300">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[22px]">sell</span>
+</div>
+<div>
+<div class="text-[11px] font-label uppercase tracking-wider text-outline font-semibold">Preço Pretendido</div>
+<div class="text-2xl font-headline font-extrabold text-primary tabular-nums">R$ 65.313,00</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Structured Analytics & Operational Cards -->
+<div class="flex flex-col gap-6">
+<!-- 1. IDENTIFICAÇÃO E CARACTERÍSTICAS (Stagger 2) -->
+<section class="motion-stagger stagger-d2 rounded-2xl glass-card p-6 sm:p-7"><div class="flex items-center justify-between pb-5 border-b-0"><div class="flex items-center gap-2.5"><span class="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center"><span class="material-symbols-outlined text-[17px]">directions_car</span></span><h2 class="text-xs sm:text-sm font-label font-bold uppercase tracking-wider text-on-surface">1. Identificação e Características</h2></div><button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-label font-semibold text-on-surface-variant hover:text-on-surface transition-all duration-200 active:scale-95" type="button"><span class="material-symbols-outlined text-[15px]">edit</span><span class="">Editar</span></button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3.5 pt-3 text-sm font-label"><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Data de aquisição</span><span class="text-on-surface font-semibold">—</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Placa</span><span class="text-on-surface font-mono font-bold tracking-tight">RBV6F64</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">RENAVAM</span><span class="text-on-surface font-mono font-medium">01235527406</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Chassi</span><span class="text-on-surface font-mono text-xs font-bold truncate max-w-[170px]" title="9BWAL5BZ7LP128564">9BWAL5BZ7LP128564</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Marca</span><span class="text-on-surface font-semibold">VOLKSWAGEN</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Ano de fabricação</span><span class="text-on-surface font-semibold tabular-nums">2020</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Ano do modelo</span><span class="text-on-surface font-semibold tabular-nums">2020</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Quilometragem</span><span class="text-on-surface font-semibold tabular-nums">135.000 km</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Cor</span><span class="text-on-surface font-semibold">PRATA</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Combustível</span><span class="text-on-surface font-semibold">FLEX</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Câmbio</span><span class="text-on-surface font-semibold">MANUAL</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Categoria / Carroceria</span><span class="text-on-surface font-semibold">Hatch</span></div><div class="flex items-center justify-between py-2.5 bg-surface-container-low px-4 rounded-xl md:col-span-2 lg:col-span-3 mt-2"><span class="text-outline font-semibold">Valor de venda pretendido</span><span class="text-primary font-bold tabular-nums text-base">R$ 65.313,00</span></div></div></section>
+<!-- Split Analytical Row: FIPE X Compra & Origem do Capital (Stagger 3) -->
+<div class="motion-stagger stagger-d3 grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- 2. ANÁLISE FIPE X COMPRA -->
+<section class="rounded-2xl glass-card p-6 sm:p-7 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-5">
+<div class="flex items-center gap-2.5">
+<span class="w-7 h-7 rounded-lg bg-primary-fixed text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[17px]">price_check</span>
+</span>
+<h2 class="text-xs sm:text-sm font-label font-bold uppercase tracking-wider text-on-surface">
+                  2. Análise FIPE x Compra
+                </h2>
+</div>
+<span class="px-2.5 py-1 rounded-md text-[11px] font-label font-bold bg-secondary-container/40 text-secondary border border-secondary/20">
+                Compra Abaixo FIPE
+              </span>
+</div>
+<div class="flex flex-col gap-3 pt-2 text-sm font-label"><div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Valor FIPE</span>
+<span class="text-on-surface font-semibold tabular-nums">R$ 65.313,00</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Valor de compra</span>
+<span class="text-on-surface font-semibold tabular-nums">R$ 54.200,00</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Diferença em reais</span>
+<span class="text-secondary font-bold tabular-nums">R$ 11.113,00</span>
+</div></div>
+</div>
+<div class="mt-6 pt-4 flex items-center justify-between p-3.5 rounded-xl bg-secondary-container/20 border border-secondary/15 transition-all duration-300 hover:bg-secondary-container/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">trending_up</span>
+<span class="text-xs font-label font-bold text-on-secondary-container uppercase tracking-wider">Margem Bruta disponivel.</span>
+</div>
+<div class="text-lg font-headline font-extrabold text-secondary tabular-nums">17.01%</div>
+</div>
+</section>
+<!-- 3. ORIGEM DO CAPITAL -->
+<section class="rounded-2xl glass-card p-6 sm:p-7">
+<div class="flex items-center justify-between pb-5">
+<div class="flex items-center gap-2.5">
+<span class="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[17px]">account_balance</span>
+</span>
+<h2 class="text-xs sm:text-sm font-label font-bold uppercase tracking-wider text-on-surface">
+                3. Origem do Capital
+              </h2>
+</div>
+<span class="px-2 py-0.5 rounded text-[11px] font-label font-semibold bg-surface-container-high text-on-surface-variant">Tabela Price</span>
+</div>
+<div class="flex flex-col gap-3 pt-2 text-sm font-label"><div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Origem do capital</span>
+<span class="text-on-surface font-semibold">Financiamento</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Modo de financiamento</span>
+<span class="text-on-surface font-semibold">PRICE</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Valor financiado</span>
+<span class="text-on-surface font-semibold tabular-nums">R$ 54.200,00</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Taxa de juros</span>
+<span class="text-on-surface font-semibold tabular-nums">3.9% mensal</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Prazo</span>
+<span class="text-on-surface font-semibold">1 parcelas</span>
+</div>
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/30">
+<span class="text-outline font-medium">Valor da parcela</span>
+<span class="text-on-surface font-semibold tabular-nums">R$ 56.313,80</span>
+</div>
+<div class="flex items-center justify-between py-2.5 px-4 rounded-xl bg-surface-container-low mt-2 border-b border-outline-variant/30">
+<span class="text-outline font-semibold">Total de juros</span>
+<span class="text-error font-bold tabular-nums">R$ 2.113,80</span>
+</div></div>
+</section>
+</div>
+<!-- 4. CUSTOS ADICIONAIS & 5. RESULTADO (Stagger 4) -->
+<div class="motion-stagger stagger-d4 flex flex-col gap-6">
+<!-- 4. CUSTOS ADICIONAIS -->
+<section class="rounded-2xl glass-card p-6 sm:p-7">
+<div class="flex items-center justify-between pb-5">
+<div class="flex items-center gap-2.5">
+<span class="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[17px]">build</span>
+</span>
+<h2 class="text-xs sm:text-sm font-label font-bold uppercase tracking-wider text-on-surface">
+              4. Custos Adicionais
+            </h2>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-label font-semibold text-on-surface-variant hover:text-on-surface transition-all duration-200 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[15px]">edit</span>
+<span class="">Editar</span>
+</button>
+</div>
+<div class="flex flex-col gap-1 pt-3 text-sm font-label"><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Martelinho de Ouro</span><span class="text-on-surface font-semibold tabular-nums">R$ 80,00</span></div><div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">Higienização</span><span class="text-on-surface font-semibold tabular-nums">R$ 300,00</span></div><div class="flex items-center justify-between py-2.5 bg-surface-container-low px-4 rounded-xl mt-2"><span class="text-outline font-semibold">Total Custos Adicionais</span><span class="text-primary font-bold tabular-nums text-base">R$ 380,00</span></div></div>
+</section>
+<!-- 5. RESULTADO DA OPERAÇÃO (Destaque Principal de Margem) -->
+<section class="relative overflow-hidden rounded-2xl glass-card bg-gradient-to-r from-surface-container-lowest via-surface-container-low/60 to-surface-container-lowest p-6 sm:p-8">
+<div class="flex items-center justify-between pb-6">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+</span>
+<div>
+<h2 class="text-xs sm:text-sm font-label font-bold uppercase tracking-wider text-on-surface">
+                5. Resultado da Operação
+              </h2>
+<p class="text-[11px] font-label text-on-surface-variant">Lucro projetado considerando preço pretendido e juros incorridos</p>
+</div>
+</div>
+<span class="hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-label font-bold bg-secondary-container/40 text-on-secondary-container border border-secondary/20 shadow-sm">
+            Operação Rentável
+          </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+<div class="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-label uppercase tracking-wider text-outline">Investimento Total</span>
+<span class="text-[11px] font-label text-tertiary">Compra + Juros + Custos</span>
+</div>
+<div class="text-xl sm:text-2xl font-headline font-extrabold text-on-surface tabular-nums">
+              R$ 56.693,80
             </div>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button id="btn-export-pdf" class="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-sm font-semibold text-on-surface hover:bg-surface-container transition"><span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>Exportar PDF</button>
-            ${g ? `<button id="btn-completo" class="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-primary-container text-on-primary text-sm font-semibold shadow-md hover:-translate-y-0.5 transition"><span class="material-symbols-outlined text-[18px]">edit</span>Editar dados</button>` : ''}
-            ${g ? `<button id="btn-excluir-veiculo" class="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-error/40 text-error text-sm font-semibold hover:bg-error-container/40 transition"><span class="material-symbols-outlined text-[18px]">delete</span>Excluir</button>` : ''}
-          </div>
-        </div>`;
+</div>
+<div class="p-4 rounded-xl bg-secondary-container/30 border border-secondary/25 shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="text-xs font-label uppercase tracking-wider text-on-secondary-container font-bold">Resultado Parcial</span>
+<span class="text-[11px] font-label text-secondary font-semibold">Venda pretendida</span>
+</div>
+<div class="text-right">
+<div class="text-xl sm:text-2xl font-headline font-extrabold text-secondary tabular-nums">
+                R$ 8.619,20
+              </div>
+<div class="text-xs font-label font-bold text-secondary">
+                15.20% de margem
+              </div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Fotos do Veículo (Stagger 5) -->
+<section class="motion-stagger stagger-d5 rounded-2xl glass-card p-6 sm:p-7">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5">
+<div class="flex items-center gap-3">
+<span class="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[17px]">photo_library</span>
+</span>
+<div class="flex items-baseline gap-2">
+<h2 class="text-xs sm:text-sm font-label font-bold uppercase tracking-wider text-on-surface">
+                Fotos
+              </h2>
+<span class="text-xs font-label text-outline">(8) • 8 de 15 foto(s)</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-2">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-label font-medium text-on-surface transition-all duration-200 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]">cloud_download</span>
+<span class="">Baixar todas</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-label font-medium text-on-surface transition-all duration-200 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]">share</span>
+<span class="">Compartilhar todas</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-label font-medium text-on-surface transition-all duration-200 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+<span class="">Editar</span>
+</button>
+</div>
+</div>
+<!-- Gallery Grid with Micro-Zoom & Elevating Hover -->
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 pt-2">
+<!-- Photo 1: Front 3/4 -->
+<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="A silver Volkswagen Polo 1.6 MSI hatchback parked outdoors under bright sunlight, angled front three-quarter view showing clean body lines and headlamp design, high-resolution automotive dealership photograph." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBukUpJsGXUnPJAxYdmaPKTFvzV0jq3ca0ngj99Gd7r5so4Dw-V6I3nZNgTGRWj3cfuqs27N8XY7KO4APAqUev_IyimIuzBacm3KDUsY4-5MlHCQIrGgmYbK_k6ZeZ_PWN9jA9F-uR4aiPOMYOWjecS_D87I6WEFmZQCyfTBvdrNdToVMnpt6ep5d9RPFvmBLXaf3lPO9CVUbjwbj8D81QEZfS_rzFUHJjrfWqjZGfnvP4026jFVdPuew">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5">
+<span class="text-[10px] font-label font-semibold text-white tracking-wide">Frente 3/4</span>
+</div>
+</div>
+<!-- Photo 2: Front Head-on -->
+<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Close-up front view of a modern silver Volkswagen Polo showcasing the chrome grille, Volkswagen badge emblem, and sharp LED headlights, captured in daylight on dealership grounds." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkpz5-ogz5IqF5d0K6itCeWLurdq_KtWOWvLq-sec9JQ7aReznAS9y8oQ0e2K5VdFW8drwAioo13iQeQjk1UAcTrjMHXEkTONFlt0BVd7ORMVjYhp1leY-KNhZ--jhfgiYQIvoaVxnzZkNmjzHm8qtDMmstEFsSkPPjO-EnCekgu1lY0Zy5Taet7ct81JjO-1gSJizK5Szgk1s75Pfy6mtdnDEnKSHcoBJlOG6W8Y7woELSd7gb4hpVw">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5">
+<span class="text-[10px] font-label font-semibold text-white tracking-wide">Grade Dianteira</span>
+</div>
+</div>
+<!-- Photo 3: Side Profile -->
+<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Full side profile view of a silver metallic Volkswagen Polo hatchback parked near green trees with alloy wheels, clean paint reflections, professional automotive catalog photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMNSKUMhZJ6AIDxn38sUKTgK3u4Iz0iqxkce9JOMelN8ptjOdxvpD083KBDT4XfjMDIZqCxZGcPzHDKagLUGgnZ0vFSAQDeWjuvdKkhapy2PQveEeZBUXCngsG3p0kh4wohbW4RxgL7nIv3eP29nbPry0HpdSfPfok12TurT1-mscV5SEKgD91NeLCPgZ7j_n9W6pBVO3BVsLrXQb77kxs2akDqMb5pYe7yNa8nFE0jUk3YjWPTE4bAw">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5">
+<span class="text-[10px] font-label font-semibold text-white tracking-wide">Lateral Esquerda</span>
+</div>
+</div>
+<!-- Photo 4: Rear 3/4 -->
+<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Rear three-quarter view of a silver Volkswagen Polo showing the tailgate, taillights, rear bumper, and clean silver bodywork parked outdoors on a paved lot." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsNX8xf4Ck2fsDRMa4TqFIbcEI1kY4XknRrjN0fiiH6P00M607r4wADQ8LTqsDxhHi9raLqaJPuU6VBdugSOvni2AreBzSynMK94fBGGZQga4eeehaKP-lSdcFZfSRb3PbNFj7rQKUSlBgpBLUDy1ZpAtMhzhZmA5CMnwwntdOAdt1cE8uIOS6feXEc1fOMnotERgjb_YqfMQYrPDds7Uo5tgtLoz9xbugqhzPGVFvjKxB1Nt7TRC-4g">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5">
+<span class="text-[10px] font-label font-semibold text-white tracking-wide">Traseira 3/4</span>
+</div>
+</div>
+<!-- Photo 5: Rear Plate RBV6F64 -->
+<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Direct rear view of a silver Volkswagen Polo showing trunk lid, Volkswagen logo, MSI badging, and rear license plate RBV6F64 in focus, crisp daylight inspection shot." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVixe9ZFv6ji_RnQpRYAb4JPv_Faxwt0_9KirO2Q1vdgKoM3tpknAOWYUU1fVvDJLQyYvg3Qj4XPjyq3sf5p5GPKoGB2f-67QiPz_60lPLWxVPTIv3MbYspKcyaPxabGdGo9IR95s7yir-w6L7tPNzmPyDrFMfjbzg_I2fNujL-bjqG-csmQPlO2ApB7qg743vLk8minRkdT4MlXdXKt-SchV35v02mm6UMj6CtdPChYTsg-gGUmw8oA">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5">
+<span class="text-[10px] font-label font-semibold text-white tracking-wide">Tampa Traseira</span>
+</div>
+</div>
+<!-- Photo 6: Left Side Rear Profile -->
+<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Low-angle view of a silver Volkswagen Polo hatchback parked in a lot, highlighting passenger doors, roofline, and rear styling under natural daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7P0hWQU91RpvF68oceSUKn7mFtBvhH5hpWf_a6lhVpENqGTb9xy12lp4RxqUVtOqeA8N8oIYqUT-rrFsC99A9m8e-0rRhs-_0My7W7sTh11hk4IFeUDd6iUPN5drI7bOLFptf_gpCPKuoyLAGsR1qLH3wuCvRGsvA88nRPgSlEdgZhx9QCrdNLodvZhRSw_jHboOCkIdpnjyPerJvh117SPXga6rqg6BxcnHxJetj3USYKCJgr14Dag">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5">
+<span class="text-[10px] font-label font-semibold text-white tracking-wide">Lateral Traseira</span>
+</div>
+</div>
+<!-- Photo 7: Driver Cockpit & Steering Wheel -->
+<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Interior driver cockpit of Volkswagen Polo showing multi-function steering wheel with emblem, instrument cluster gauges, dark cloth seats, and pristine dashboard condition." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2Jo19iHst_4XvFCAGzQXsvtLevNXS9IHvH6OYjUyV2VgHnnRm-DAusCrGBjANZEwUhvrZEospgnybhVrgvzPoQDFh4sHEDVjPPnViKXiDpBCgGboqDVqIkw8xXy02QdoZJcp1WC4khCliYXm_gGtj5DysofYCv1sl8vrNjNRYvYZcUzm5HR1CPEA_YY5djG-KS4m6cyVoub3v_SGh0g-NMQ7QdCkSKAwNcSljSciiPBjY8iEcrkzb_w">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5">
+<span class="text-[10px] font-label font-semibold text-white tracking-wide">Posto Motorista</span>
+</div>
+</div>
+<!-- Photo 8: Dashboard & Center Console -->
+<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" data-alt="Wide shot of the dashboard and center console of a Volkswagen Polo, featuring air vents, central multimedia audio area, manual gear shift stick, and clean front upholstery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-zCHLDzFnzUFb8oNQPNKs7u_GSBmQOa9oX0iE7bAe8NcHqKzZIfF2Gu9FK47PPPpKSjpdfVpnOWoqBPUyaHDtnsAmG_yzSPfEw7nlodoZgeBfOixnvjkeUuE0pruz44V-J7a086bF3V7xxYmMMhieRQw5MLAdNM3ZDWmNEMflSZjn6o0-AXqa6oEV69jTQmtxoJbLhPHpTtNKuo3ZVptd2SvDpg2ni5zzX6QUpZDb0Q5c82uckLitQA">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5">
+<span class="text-[10px] font-label font-semibold text-white tracking-wide">Painel Central</span>
+</div>
+</div>
+<!-- Upload Photos Slot -->
+<div class="aspect-[4/3] rounded-xl bg-surface-container-low/70 border border-dashed border-outline-variant hover:border-primary hover:bg-surface-container transition-all flex flex-col items-center justify-center cursor-pointer p-3 text-center group active:scale-95 duration-200">
+<div class="w-9 h-9 rounded-full bg-surface-container-lowest text-primary flex items-center justify-center mb-1 group-hover:scale-110 shadow-sm transition-transform duration-200">
+<span class="material-symbols-outlined text-[20px]">add_photo_alternate</span>
+</div>
+<span class="text-xs font-label font-bold text-on-surface">Escolher fotos</span>
+<span class="text-[10px] font-label text-outline mt-0.5">8 de 15 foto(s)</span>
+</div>
+</div>
+</section>
+<!-- Checklist do Veículo (Stagger 6) -->
+<section class="motion-stagger stagger-d6 rounded-2xl glass-card p-6 sm:p-7">
+<div class="flex items-center justify-between pb-5 border-b-0">
+<div class="flex items-center gap-2.5">
+<span class="w-7 h-7 rounded-lg bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[17px]">checklist</span>
+</span>
+<h2 class="text-xs sm:text-sm font-label font-bold uppercase tracking-wider text-on-surface">
+              Checklist do Veículo
+            </h2>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-xs font-label font-semibold text-on-surface-variant hover:text-on-surface transition-all duration-200 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[15px]">edit</span>
+<span class="">Editar</span>
+</button>
+</div>
+<!-- 2 Column Checklist Breakdown -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2.5 pt-2 text-sm font-label"><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Direção hidráulica/elétrica</span><span class="text-xs font-medium text-outline">Não informado</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">IPVA pago</span><span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Vidros elétricos</span><span class="text-xs font-medium text-outline">Não informado</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Licenciamento em dia</span><span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Travas elétricas</span><span class="text-xs font-medium text-outline">Não informado</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Multas verificadas</span><span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Ar condicionado</span><span class="text-xs font-medium text-outline">Não informado</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Pneus em boas condições</span><span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Rodas de liga leve</span><span class="text-xs font-medium text-outline">Não informado</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Manual do proprietário</span><span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Multimídia</span><span class="text-xs font-medium text-outline">Não informado</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Chave reserva</span><span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Bancos em couro</span><span class="text-xs font-medium text-outline">Não informado</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Histórico de manutenção</span><span class="inline-flex items-center gap-1 text-xs font-bold text-outline"><span class="material-symbols-outlined text-[16px]">cancel</span>Não</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">Airbag</span><span class="text-xs font-medium text-outline">Não informado</span></div><div class="flex items-center justify-between py-3 border-b border-outline-variant/30 bg-surface-container-low px-3 rounded-lg"><span class="text-on-surface-variant font-medium">Documentação</span><span class="text-xs font-bold text-secondary inline-flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">verified</span>Conferida</span></div></div>
+<!-- Observações Box -->
+<div class="mt-6 pt-4 p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/30 flex flex-col gap-1">
+<span class="text-xs font-label uppercase tracking-wider text-outline font-semibold">Observações</span>
+<span class="text-sm font-label text-on-surface">—</span>
+</div>
+</section>
+<!-- Main Action & Delete Area (Stagger 7) -->
+<div class="motion-stagger stagger-d7 flex flex-col gap-4 pt-2">
+<!-- Main Action: Registrar Venda with Continuous Elegant Shimmer -->
+<div>
+<button class="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-primary-container to-primary px-8 py-4 text-center font-headline font-bold text-base sm:text-lg text-on-primary shadow-[0_4px_16px_rgba(37,99,235,0.28),0_14px_30px_-4px_rgba(37,99,235,0.4)] hover:shadow-[0_8px_28px_rgba(37,99,235,0.48)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.985] transition-all duration-300" id="btn-registrar-venda" type="button">
+<!-- Continuous soft light shimmer sweep (loop a cada 4s) -->
+<div class="pointer-events-none absolute inset-0 -translate-x-full shimmer-active bg-gradient-to-r from-transparent via-white/25 to-transparent"></div>
+<div class="relative z-10 flex items-center justify-center gap-2.5">
+<span class="material-symbols-outlined text-[24px]">monetization_on</span>
+<span class="">Registrar venda</span>
+</div>
+</button>
+</div>
+<!-- Excluir Veículo Module -->
+<div class="rounded-2xl glass-card p-6 sm:p-7 mt-2">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex flex-col gap-1">
+<h3 class="text-xs sm:text-sm font-label font-bold uppercase tracking-wider text-error">ESTA OPERAÇÃO NÃO PODE SER DESFEITA!</h3>
+</div>
+<button class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-error-container/40 hover:bg-error-container/80 text-error text-xs sm:text-sm font-label font-bold transition-all duration-200 active:scale-[0.98] w-full sm:w-auto" id="btn-excluir-veiculo" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+<span class="">Excluir veículo</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Commercial status chips interactive toggle
+  document.querySelectorAll('.status-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.status-chip').forEach(c => {
+        c.className = 'status-chip px-4 py-2 rounded-xl text-xs font-label font-semibold text-on-surface-variant bg-surface-container-low hover:bg-surface-container transition-all';
+      });
+      chip.className = 'status-chip px-4 py-2 rounded-xl text-xs font-label font-bold bg-primary text-on-primary shadow-sm ring-2 ring-primary/20 transition-all';
+    });
+  });
 
-      const sec1 = secao(1, 'Identificação e características', `<div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        ${campo('Data de aquisição', dataBR(v.data_aquisicao))}
-        ${campo('Placa', g ? esc(v.placa) : 'Restrito')}
-        ${campo('Chassi', g ? esc(v.chassi) : 'Restrito')}
-        ${campo('RENAVAM', g ? esc(v.renavam) : 'Restrito')}
-        ${campo('Marca', esc(v.marca))}
-        ${campo('Modelo', esc(v.modelo))}
-        ${campo('Ano de fabricação', esc(v.ano_fabricacao))}
-        ${campo('Ano do modelo', esc(v.ano_modelo))}
-        ${campo('Cor', esc(v.cor))}
-        ${campo('Quilometragem', v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString('pt-BR')} km` : '—')}
-        ${campo('Combustível', esc(v.combustivel))}
-        ${campo('Câmbio', esc(v.cambio))}
-      </div>`);
+  // Micro-interaction click feedback for actions with spring feel
+  const btnVenda = document.getElementById('btn-registrar-venda');
+  if (btnVenda) {
+    btnVenda.addEventListener('click', () => {
+      const originalText = btnVenda.innerHTML;
+      btnVenda.innerHTML = '<span class="relative z-10 flex items-center justify-center gap-2"><span class="material-symbols-outlined animate-spin text-[22px]">progress_activity</span><span>Processando Venda...</span></span>';
+      setTimeout(() => {
+        btnVenda.innerHTML = originalText;
+      }, 1200);
+    });
+  }
 
-      const sec2 = secao(2, 'Análise FIPE x Compra', g ? `<div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
-        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Diferença FIPE − compra</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 ${diffFipe >= 0 ? 'text-secondary' : 'text-error'}">${brl(diffFipe)}</div></div>
-        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Diferença percentual</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 text-on-surface">${pct(pFipe)}</div></div>
-        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Valor FIPE</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 text-on-surface">${brl(fipe)}</div></div>
-      </div>` : '<p class="text-sm text-on-surface-variant">Dados financeiros restritos ao seu perfil.</p>');
+  const btnExport = document.getElementById('btn-export-pdf');
+  if (btnExport) {
+    btnExport.addEventListener('click', () => {
+      btnExport.classList.add('scale-95');
+      setTimeout(() => btnExport.classList.remove('scale-95'), 150);
+    });
+  }
+</script></main><footer class="w-full bg-surface-container-lowest shadow-[0_-1px_6px_rgba(11,28,48,0.02)] mt-auto"><div class="max-w-[1440px] mx-auto px-6 lg:px-8 py-10"><div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-8"><div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left"><div class="flex items-center gap-2 text-on-surface font-headline font-bold text-lg">Calcula<span class="text-primary-container">.</span>car</div><div class="hidden sm:block text-outline-variant font-light">•</div><p class="text-xs font-body text-on-surface-variant">© 2025 Calcula.car Soluções Automotivas Ltda. Todos os direitos reservados.</p></div><div class="flex flex-wrap items-center justify-center gap-5 sm:gap-7"><div class="flex items-center gap-2 text-xs font-label font-medium text-secondary bg-surface-container-low px-3 py-1.5 rounded-full"><span class="material-symbols-outlined text-[16px]">lock</span><span class="">Criptografia SSL 256-bit • Ambiente Seguro</span></div><a class="flex items-center gap-1.5 text-xs font-label font-semibold text-primary hover:text-on-primary-fixed-variant transition-colors" data-path="suporte-especializado" href="#"><span class="material-symbols-outlined text-[16px]">support_agent</span><span class="">Suporte Especializado</span></a></div></div></div></footer>
 
-      const sec3 = secao(3, 'Origem do capital', g ? `<div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
-        ${campo('Origem', v.tipo_aquisicao === 'financiamento' ? 'Financiamento' : (v.tipo_aquisicao === 'capital_proprio' ? 'Capital próprio' : '—'))}
-        ${fin ? campo('Financiado', brl(fin.valor_financiado)) : ''}
-        ${fin ? campo('Taxa mensal', `${fin.taxa_juros_percentual}%`) : ''}
-        ${fin ? campo('Prazo', `${fin.quantidade_parcelas} meses`) : ''}
-        ${fin ? campo('Parcela', brl(fin.valor_parcela)) : ''}
-        ${fin ? campo('Total de juros', brl(fin.total_juros)) : ''}
-      </div>` : '<p class="text-sm text-on-surface-variant">Dados financeiros restritos ao seu perfil.</p>');
 
-      const sec4 = secao(4, 'Custos adicionais', g ? `<div class="rounded-xl border border-outline-variant/40 px-4">
-        ${custos.length ? custos.map(c => linha(esc(c.descricao), brl(c.valor))).join('') : '<p class="py-4 text-sm text-on-surface-variant">Nenhum custo cadastrado.</p>'}
-        ${linha('Total de custos', brl(totalCustos), 'text-secondary')}
-      </div>` : '<p class="text-sm text-on-surface-variant">Dados financeiros restritos ao seu perfil.</p>');
 
-      const sec5 = secao(5, 'Resultado da operação', g ? `<div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
-        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Investimento total</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1">${brl(investimento)}</div></div>
-        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Resultado parcial (venda pretendida)</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 ${parcial >= 0 ? 'text-secondary' : 'text-error'}">${brl(parcial)} <span class="text-sm">${pct(pParcial)}</span></div></div>
-        ${venda0 ? `<div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Resultado final da venda</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 ${final >= 0 ? 'text-secondary' : 'text-error'}">${brl(final)} <span class="text-sm">${pct(pFinal)}</span></div></div>` : ''}
-      </div>` : '<p class="text-sm text-on-surface-variant">Dados financeiros restritos ao seu perfil.</p>');
+<script id="sistema-veiculo-dados">
+(function () {
+  let D = null;
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const brl = v => (v == null || !isFinite(v)) ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const pctF = v => (v == null || !isFinite(v)) ? '—' : v.toFixed(2).replace('.', ',') + '%';
+  const dataBR = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+  const post = acao => window.parent && window.parent.postMessage({ type: 'acao', acao }, window.location.origin);
+  const ROT = { em_preparacao: 'Em preparação', disponivel: 'Disponível', reservado: 'Reservado', vendido: 'Vendido', retirado: 'Retirado' };
+  const secao = titulo => $$('h2').find(h => h.textContent.trim().startsWith(titulo))?.closest('section') || null;
+  const folha = (pred, raiz) => $$('*', raiz || document).find(e => e.children.length === 0 && pred(e.textContent.trim())) || null;
+  const linha = (rot, val, cls) => `<div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">${esc(rot)}</span><span class="${cls || 'text-on-surface font-semibold'} tabular-nums">${esc(val)}</span></div>`;
+  const total = (rot, val, cls) => `<div class="flex items-center justify-between py-2.5 bg-surface-container-low px-4 rounded-xl mt-2"><span class="text-outline font-semibold">${esc(rot)}</span><span class="${cls || 'text-primary font-bold'} tabular-nums text-base">${esc(val)}</span></div>`;
 
-      const sec6 = secao('', 'Fotos', `${fotos.length ? `<div class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-        ${fotos.map((f, i) => f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container hover:shadow-md transition"><img src="${esc(f.url)}" alt="Foto ${i + 1}" class="w-full h-full object-cover"></a>` : '').join('')}
-      </div>` : '<p class="text-sm text-on-surface-variant">Nenhuma foto cadastrada.</p>'}`);
+  function render() {
+    if (!D) return;
+    if (D.erro) {
+      const main = $('main');
+      if (main) main.innerHTML = '<div class="p-6 text-sm font-semibold text-on-surface">' + esc(D.erro) + '</div>';
+      return;
+    }
+    const v = D.veiculo, g = D.gestao, fin = D.financiamento, custos = D.custos || [], vendas = D.vendas || [], ck = D.checklist, fotos = D.fotos || [];
+    const compra = Number(v.preco_compra || 0), fipe = Number(v.valor_fipe || 0), venda = Number(v.preco_venda_pretendido || 0);
+    const totalCustos = custos.reduce((s, c) => s + Number(c.valor || 0), 0);
+    const juros = fin ? Number(fin.total_juros || 0) : 0;
+    const invest = compra + totalCustos + juros;
+    const parcial = venda - invest;
+    const pParc = invest > 0 ? (parcial / invest) * 100 : null;
+    const v0 = vendas[0];
+    const final = v0 ? Number(v0.valor_venda) - Number(v0.despesas_venda || 0) - Number(v0.descontos || 0) - invest : null;
+    const pFinal = v0 && invest > 0 ? (final / invest) * 100 : null;
+    const diffF = fipe - compra;
+    const pF = fipe > 0 ? (diffF / fipe) * 100 : null;
+    const km = v.quilometragem != null ? Number(v.quilometragem).toLocaleString('pt-BR') + ' km' : '—';
 
-      const itensCk = (D.itensChecklist || []);
-      const sec7 = secao('', 'Checklist do veículo', ck ? `<div class="grid gap-x-8 grid-cols-1 sm:grid-cols-2">
-        ${itensCk.map(([k, rot]) => linha(rot, ck[k] === true ? 'Sim' : (ck[k] === false ? 'Não' : 'Não informado'), ck[k] === true ? 'text-secondary' : (ck[k] === false ? 'text-error' : ''))).join('')}
-        ${linha('Documentação', (D.docLabels || {})[ck.documentacao_status] || 'Não informado')}
-      </div>${ck.observacoes ? `<p class="mt-4 text-sm text-on-surface-variant">Observações: ${esc(ck.observacoes)}</p>` : ''}` : '<p class="text-sm text-on-surface-variant">Checklist não preenchido.</p>');
+    // Banner do veiculo
+    const h1 = $('h1'); if (h1) h1.textContent = (v.modelo || '').toUpperCase();
+    const status = folha(t => t === 'Disponível para Venda' || Object.values(ROT).includes(t));
+    if (status) status.textContent = ROT[v.status] || v.status;
+    const placaTopo = folha(t => t === 'RBV6F64');
+    if (placaTopo) placaTopo.textContent = g ? (v.placa || '—') : 'Restrito';
+    const precoTopo = $$('div.text-2xl').find(e => /R\$/.test(e.textContent));
+    if (precoTopo) precoTopo.textContent = brl(venda);
+    const sub = folha(t => t.startsWith('• Volkswagen') || t.startsWith('• '));
+    if (sub) sub.textContent = '• ' + (v.marca || '') + ' ' + (v.ano_fabricacao || '') + '/' + (v.ano_modelo || '') + ' ' + (v.combustivel || '');
 
-      app.innerHTML = [topo, sec1, sec2, sec3, sec4, sec5, sec6, sec7].map(s => `<div class="min-w-0">${s}</div>`).join('');
-      $('btn-voltar').addEventListener('click', () => post('voltar'));
-      $('btn-export-pdf').addEventListener('click', () => post('pdf'));
-      if ($('btn-completo')) $('btn-completo').addEventListener('click', () => post('completo'));
-      if ($('btn-excluir-veiculo')) $('btn-excluir-veiculo').addEventListener('click', () => post('excluir'));
+    // 1. Identificacao
+    const s1 = secao('1. Identificação');
+    if (s1) {
+      const grade = $('.grid', s1);
+      const campos = [
+        ['Data de aquisição', dataBR(v.data_aquisicao)], ['Placa', g ? (v.placa || '—') : 'Restrito'],
+        ['RENAVAM', g ? (v.renavam || '—') : 'Restrito'], ['Chassi', g ? (v.chassi || '—') : 'Restrito'],
+        ['Marca', v.marca || '—'], ['Ano de fabricação', v.ano_fabricacao ?? '—'], ['Ano do modelo', v.ano_modelo ?? '—'],
+        ['Quilometragem', km], ['Cor', v.cor || '—'], ['Combustível', v.combustivel || '—'], ['Câmbio', v.cambio || '—'],
+        ['Categoria / Carroceria', v.categoria || '—'],
+      ];
+      grade.innerHTML = campos.map(([l, x]) => linha(l, x)).join('') + total('Valor de venda pretendido', brl(venda));
     }
 
-    window.addEventListener('message', (e) => {
-      if (e.source !== window.parent) return;
-      const d = e.data || {};
-      if (d.type === 'dados') { D = d; render(); }
-    });
-    window.parent && window.parent.postMessage({ type: 'pronto' }, window.location.origin);
-</script>
-</body>
-</html>
+    // 2. Analise FIPE x Compra
+    const s2 = secao('2. Análise FIPE');
+    if (s2) {
+      const badge = folha(t => t === 'Compra Abaixo FIPE' || t === 'Compra Acima FIPE', s2);
+      if (badge) badge.textContent = diffF >= 0 ? 'Compra Abaixo FIPE' : 'Compra Acima FIPE';
+      const lista = $('.flex.flex-col.gap-3', s2);
+      if (lista) lista.innerHTML = linha('Valor FIPE', brl(fipe)) + linha('Valor de compra', brl(compra)) + linha('Diferença em reais', brl(diffF), diffF >= 0 ? 'text-secondary font-bold tabular-nums' : 'text-error font-bold tabular-nums');
+      const margem = $('.text-lg.font-headline', s2);
+      if (margem) margem.textContent = pctF(pF);
+      const rotMargem = folha(t => t.startsWith('Margem Bruta'), s2);
+      if (rotMargem) rotMargem.textContent = 'Margem Bruta disponível.';
+    }
+
+    // 3. Origem do capital
+    const s3 = secao('3. Origem do Capital');
+    if (s3) {
+      const modo = fin ? (String(fin.sistema_amortizacao || '').toLowerCase() === 'sac' ? 'SAC' : 'PRICE') : null;
+      const badge3 = folha(t => t === 'Tabela Price' || t === 'SAC', s3);
+      if (badge3) badge3.textContent = modo === 'SAC' ? 'SAC' : 'Tabela Price';
+      const lista = $('.flex.flex-col.gap-3', s3);
+      if (lista) {
+        if (!g) lista.innerHTML = '<p class="py-2 text-sm text-on-surface-variant">Restrito ao seu perfil.</p>';
+        else lista.innerHTML =
+          linha('Origem do capital', v.tipo_aquisicao === 'financiamento' ? 'Financiamento' : (v.tipo_aquisicao === 'capital_proprio' ? 'Capital próprio' : '—')) +
+          linha('Modo de financiamento', modo || '—') +
+          linha('Valor financiado', fin ? brl(fin.valor_financiado) : '—') +
+          linha('Taxa de juros', fin ? `${fin.taxa_juros_percentual}% mensal` : '—') +
+          linha('Prazo', fin ? `${fin.quantidade_parcelas} parcelas` : '—') +
+          linha('Valor da parcela', fin ? brl(fin.valor_parcela) : '—') +
+          total('Total de juros', brl(juros), 'text-error font-bold');
+      }
+    }
+
+    // 4. Custos adicionais
+    const s4 = secao('4. Custos Adicionais');
+    if (s4) {
+      const lista = $('.flex.flex-col.gap-1', s4);
+      if (lista) {
+        if (!g) lista.innerHTML = '<p class="py-2 text-sm text-on-surface-variant">Restrito ao seu perfil.</p>';
+        else lista.innerHTML = (custos.length ? custos.map(c => linha(c.descricao, brl(c.valor))).join('') : linha('Nenhum custo cadastrado', '—')) + total('Total Custos Adicionais', brl(totalCustos));
+      }
+    }
+
+    // 5. Resultado da operacao
+    const s5 = secao('5. Resultado da Operação');
+    if (s5) {
+      const sel = folha(t => t === 'Operação Rentável' || t === 'Operação com Prejuízo', s5);
+      if (sel) sel.textContent = parcial >= 0 ? 'Operação Rentável' : 'Operação com Prejuízo';
+      const grade = $('.grid', s5);
+      if (grade) {
+        if (!g) grade.innerHTML = '<p class="text-sm text-on-surface-variant">Restrito ao seu perfil.</p>';
+        else grade.innerHTML =
+          `<div class="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-outline">Investimento Total</span><span class="text-[11px] font-label text-tertiary">Compra + Juros + Custos</span></div><div class="text-xl sm:text-2xl font-headline font-extrabold text-on-surface tabular-nums">${brl(invest)}</div></div>` +
+          `<div class="p-4 rounded-xl bg-secondary-container/30 border border-secondary/25 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-on-secondary-container font-bold">Resultado Parcial</span><span class="text-[11px] font-label text-secondary font-semibold">Venda pretendida</span></div><div class="text-right"><div class="text-xl sm:text-2xl font-headline font-extrabold tabular-nums ${parcial >= 0 ? 'text-secondary' : 'text-error'}">${brl(parcial)}</div><div class="text-xs font-label font-bold ${parcial >= 0 ? 'text-secondary' : 'text-error'}">${pctF(pParc)} de margem</div></div></div>` +
+          (v0 ? `<div class="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-outline">Resultado Final da Venda</span><span class="text-[11px] font-label text-tertiary">Venda − despesas − descontos − investimento</span></div><div class="text-right"><div class="text-xl sm:text-2xl font-headline font-extrabold tabular-nums ${final >= 0 ? 'text-secondary' : 'text-error'}">${brl(final)}</div><div class="text-xs font-label font-bold">${pctF(pFinal)}</div></div></div>` : '');
+      }
+    }
+
+    // Fotos
+    const grade = $$('div.grid').find(d => d.querySelector('img[data-alt]'));
+    if (grade) {
+      const slot = grade.lastElementChild ? grade.lastElementChild.outerHTML : '';
+      const urls = fotos.filter(f => f.url);
+      grade.innerHTML = urls.map((f, i) =>
+        `<a href="${esc(f.url)}" target="_blank" rel="noopener" class="group relative block aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"><img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" src="${esc(f.url)}" alt="Foto ${i + 1}" loading="lazy"></a>`
+      ).join('') + slot;
+    }
+    const contFotos = folha(t => /^\(\d+\) • /.test(t));
+    if (contFotos) contFotos.textContent = `(${fotos.length}) • ${fotos.length} de 15 foto(s)`;
+
+    // Checklist
+    const s7 = secao('Checklist do Veículo');
+    if (s7) {
+      const grade7 = $('.grid', s7);
+      const itens = D.itensChecklist || [];
+      const docs = D.docLabels || {};
+      if (grade7) {
+        if (!ck) grade7.innerHTML = '<p class="py-2 text-sm text-on-surface-variant">Checklist não preenchido.</p>';
+        else grade7.innerHTML = itens.map(([k, rot]) => {
+          const val = ck[k];
+          const st = val === true ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span>'
+            : (val === false ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-outline"><span class="material-symbols-outlined text-[16px]">cancel</span>Não</span>'
+            : '<span class="text-xs font-medium text-outline">Não informado</span>');
+          return `<div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">${esc(rot)}</span>${st}</div>`;
+        }).join('') + `<div class="flex items-center justify-between py-3 border-b border-outline-variant/30 bg-surface-container-low px-3 rounded-lg"><span class="text-on-surface-variant font-medium">Documentação</span><span class="text-xs font-bold text-secondary inline-flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">verified</span>${esc(docs[ck.documentacao_status] || 'Não informado')}</span></div>`;
+      }
+      const obsRot = folha(t => t === 'Observações', s7);
+      if (obsRot && obsRot.nextElementSibling) obsRot.nextElementSibling.textContent = ck ? (ck.observacoes || '—') : '—';
+    }
+
+    // Acoes e links
+    const sup = $('a[data-path="suporte-especializado"]');
+    if (sup) { sup.setAttribute('href', 'https://wa.me/5561991432700?text=Preciso%20de%20ajuda%20para%20acessar%20a%20plataforma%20CALCULA.CAR%20'); sup.setAttribute('target', '_blank'); sup.setAttribute('rel', 'noopener noreferrer'); }
+  }
+
+  // Acoes: voltar, editar, venda, fotos, excluir e PDF passam pelo sistema
+  document.addEventListener('click', e => {
+    const el = e.target.closest('button, a');
+    if (!el) return;
+    if (el.dataset.path === 'todas-as-calculadoras') { e.preventDefault(); return post('voltar'); }
+    if (el.id === 'btn-export-pdf') { e.preventDefault(); return post('pdf'); }
+    if (el.id === 'btn-excluir-veiculo') { e.preventDefault(); return post('excluir'); }
+    if (el.id === 'btn-registrar-venda') { e.preventDefault(); return post('completo'); }
+    const t = el.textContent.trim();
+    if (el.tagName === 'BUTTON' && (t.includes('Editar') || t.includes('Escolher fotos') || t.includes('Baixar todas') || t.includes('Compartilhar todas'))) {
+      e.preventDefault(); return post('completo');
+    }
+  }, true);
+
+  window.addEventListener('message', e => {
+    if (e.source !== window.parent) return;
+    const d = e.data || {};
+    if (d.type === 'dados') { D = d; try { render(); } catch (err) { console.error(err); } }
+  });
+  window.parent && window.parent.postMessage({ type: 'pronto' }, window.location.origin);
+})();
+</script></body></html>
