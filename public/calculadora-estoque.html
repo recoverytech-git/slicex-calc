@@ -134,16 +134,8 @@
 }
 </style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"on-primary":"#ffffff","on-error":"#ffffff","on-secondary-fixed":"#002113","on-tertiary-container":"#eef0ff","primary-fixed":"#dbe1ff","surface-dim":"#cbdbf5","outline":"#737686","primary-container":"#2563eb","outline-variant":"#c3c6d7","secondary-fixed":"#6ffbbe","on-secondary":"#ffffff","inverse-on-surface":"#eaf1ff","secondary-fixed-dim":"#4edea3","on-primary-container":"#eeefff","on-error-container":"#93000a","on-tertiary-fixed":"#131b2e","surface-container-highest":"#d3e4fe","on-background":"#0b1c30","surface-tint":"#0053db","secondary-container":"#6cf8bb","error":"#ba1a1a","on-tertiary":"#ffffff","on-primary-fixed":"#00174b","tertiary":"#4d556b","primary-fixed-dim":"#b4c5ff","background":"#f8f9ff","tertiary-fixed":"#dae2fd","surface-variant":"#d3e4fe","on-surface-variant":"#434655","primary":"#004ac6","on-tertiary-fixed-variant":"#3f465c","on-surface":"#0b1c30","error-container":"#ffdad6","surface-container-low":"#eff4ff","tertiary-fixed-dim":"#bec6e0","tertiary-container":"#656d84","surface-container":"#e5eeff","inverse-primary":"#b4c5ff","secondary":"#006c49","on-secondary-fixed-variant":"#005236","inverse-surface":"#213145","surface-bright":"#f8f9ff","on-secondary-container":"#00714d","surface-container-lowest":"#ffffff","on-primary-fixed-variant":"#003ea8","surface-container-high":"#dce9ff","surface":"#f8f9ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{},"fontFamily":{"headline":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"body":["Plus Jakarta Sans"],"label":["Inter"]},"fontSize":{}}}}</script>
 <style id="responsivo-sistema">
-  html, body { max-width: 100% !important; overflow-x: hidden !important; }
-  *, *::before, *::after { min-width: 0; box-sizing: border-box; }
+  html, body { max-width: 100%; overflow-x: hidden; }
   img, svg, video { max-width: 100%; }
-  .grid, .grid-cols-2, .grid-cols-3, .grid-cols-4, .sm\:grid-cols-2, .md\:grid-cols-2, .md\:grid-cols-3, .md\:grid-cols-4, .lg\:grid-cols-2, .lg\:grid-cols-3, .lg\:grid-cols-4 {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)) !important;
-  }
-  [class*="w-["] { max-width: 100% !important; }
-  main, section, header, footer, .container { max-width: 100%; }
-  h1 { font-size: clamp(2rem, 5vw, 3.5rem) !important; line-height: 1.05 !important; }
-  h2 { font-size: clamp(1.25rem, 3vw, 1.75rem) !important; }
 </style>
 </head><body class="bg-surface font-body text-on-surface min-h-screen relative selection:bg-primary-fixed selection:text-on-primary-fixed"><div class="pointer-events-none fixed inset-0 z-0 overflow-hidden"><div class="absolute -top-32 -left-32 w-[34rem] h-[34rem] rounded-full bg-gradient-to-tr from-[#2563eb]/25 to-[#60a5fa]/20 blur-[100px] animate-glow-1"></div><div class="absolute top-1/3 -right-36 w-[36rem] h-[36rem] rounded-full bg-gradient-to-bl from-[#38bdf8]/20 via-[#2563eb]/15 to-[#6ffbbe]/15 blur-[110px] animate-glow-2"></div><div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[38rem] h-[30rem] rounded-full bg-gradient-to-t from-[#2563eb]/15 to-[#38bdf8]/10 blur-[120px] animate-glow-3"></div></div><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl border-b border-white/60 shadow-[0_2px_16px_rgba(11,28,48,0.04)]"><div class="h-20 max-w-[1440px] mx-auto px-6 lg:px-8 flex items-center justify-between gap-6"><div class="flex items-center gap-6"><a class="flex items-center gap-3 group focus:outline-none transition-transform duration-200 hover:scale-[1.02]" data-path="calculadoras-hub" href="/dashboard" target="_top"><div class="flex flex-col"><span class="font-headline text-lg font-bold tracking-tight text-on-surface leading-tight">Calcula<span class="text-primary">.car</span></span></div></a><div class="hidden xl:block h-6 w-px bg-outline-variant/60"></div></div><div class="flex items-center gap-3"><div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container-low/90 backdrop-blur-md border border-white/80 shadow-xs"><span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600 ring-2 ring-emerald-200"></span></span><span class="font-label text-xs font-medium text-secondary-container-on">Operador F&amp;I Online</span><span class="text-[10px] text-outline">•</span><span class="font-label text-[11px] font-semibold text-emerald-700">Conectado</span></div><button aria-label="Alternar modo visual" class="h-9 w-9 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" type="button"></button><div class="relative"><button aria-label="Notificações" class="h-9 w-9 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 hover:scale-105 active:scale-95" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button><span class="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full ring-2 ring-surface animate-pulse"></span></div><div class="h-6 w-px bg-outline-variant/60 hidden sm:block"></div><div class="flex items-center gap-2.5 pl-1"><div class="hidden text-right lg:flex flex-col"></div></div></div></div></header><main class="relative z-10 w-full pt-20 bg-surface/60 backdrop-blur-[2px] min-h-[calc(100vh-140px)]"><div class="flex flex-col w-full">
 <div class="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -572,7 +564,7 @@
       if (e.source !== window.parent) return;
       const d = e.data || {};
       if (d.type === 'marca') { marcaCfg = { logoClaro: d.logoClaro }; aplicarLogo(); }
-      if (d.type === 'dados') { dados = { papel: d.papel, itens: d.itens || [] }; renderCards(); applyFilters(); }
+      if (d.type === 'dados') { dados = { papel: d.papel, itens: d.itens || [] }; renderCards(); applyFilters(); if (typeof ajustarEscala === 'function') ajustarEscala(); }
     });
 
     function init() {
@@ -589,4 +581,21 @@
 </script></main><footer class="relative z-10 w-full bg-surface-container-low/85 backdrop-blur-md border-t border-white/60 shadow-[0_-1px_8px_rgba(0,0,0,0.02)]"><div class="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-6"><div class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-label text-on-surface-variant"><div class="flex items-center gap-1.5 bg-surface-container-lowest/90 px-3 py-1.5 rounded-lg border border-white/70 shadow-xs"><span class="material-symbols-outlined text-secondary text-[16px]">lock</span><span class="font-semibold text-on-surface">Criptografia SSL 256-bit</span><span class="text-outline">•</span><span class="">Ambiente Seguro</span></div></div><div class="flex flex-col sm:flex-row items-center gap-4 text-xs font-label text-on-surface-variant"><span class="text-center sm:text-right">© 2025 Calcula.car Soluções Automotivas Ltda. Todos os direitos reservados.</span><span class="hidden sm:inline text-outline">•</span><a class="inline-flex items-center gap-1 text-primary font-semibold hover:text-blue-700 active:scale-95 transition-all" data-path="suporte-operacional" href="#"><span class="material-symbols-outlined text-[16px]">support_agent</span><span class="">Suporte Especializado</span></a></div></div></footer>
 
 
+
+<script id="escala-sistema">
+  /* Reduz a pagina de forma proporcional apenas quando o conteudo passa da largura disponivel. */
+  function ajustarEscala() {
+    const root = document.documentElement;
+    root.style.zoom = '';
+    const disponivel = root.clientWidth;
+    const necessario = root.scrollWidth;
+    if (necessario > disponivel + 1) {
+      root.style.zoom = Math.max(0.5, disponivel / necessario).toFixed(3);
+    }
+  }
+  window.addEventListener('load', () => setTimeout(ajustarEscala, 50));
+  window.addEventListener('resize', ajustarEscala);
+  document.addEventListener('click', () => setTimeout(ajustarEscala, 40));
+  document.addEventListener('input', () => setTimeout(ajustarEscala, 40));
+</script>
 </body></html>
