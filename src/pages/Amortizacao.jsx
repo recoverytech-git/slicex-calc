@@ -1,6 +1,8 @@
 // sem-rascunho: formulario e resultados ficam no documento do design (iframe); o calculo usa calcAmortizacaoExtra
 import { useCallback, useEffect, useRef, useState } from "react";
 import PageTransition from "../components/PageTransition";
+import Header from "../components/Header";
+import BackLink from "../components/BackLink";
 import Sino from "../components/Sino";
 import { useMarca } from "../lib/marca";
 
@@ -34,19 +36,16 @@ export default function Amortizacao() {
 
   return (
     <PageTransition>
-      <div style={{ position: "relative", height: "100vh" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Header subtitle="Simulador de Amortização Extraordinária" />
+        <BackLink />
         <iframe
           ref={frame}
           src="/calculadora-amortizacao.html"
           title="Simulador de Amortização Extraordinária"
           onLoad={enviarMarca}
-          style={{ display: "block", width: "100%", height: "100%", border: 0 }}
+          style={{ display: "block", width: "100%", flex: 1, minHeight: 0, border: 0 }}
         />
-        {slot && (
-          <div style={{ position: "absolute", left: slot.x, top: slot.y, width: slot.w, height: slot.h, zIndex: 20 }}>
-            <Sino />
-          </div>
-        )}
       </div>
     </PageTransition>
   );

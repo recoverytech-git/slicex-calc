@@ -2,6 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageTransition from "../components/PageTransition";
+import Header from "../components/Header";
+import BackLink from "../components/BackLink";
 import Sino from "../components/Sino";
 import { listarVeiculos } from "../lib/estoque";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
@@ -25,11 +27,9 @@ function calcularResumo(itens, extras, custos, checklists, vendedor) {
   let lucro = null;
   let margem = null;
   if (!vendedor) {
-    lucro = patio.reduce((s, v) => {
-      const compra = Number(extras[v.id]?.preco_compra || 0);
-      const custo = custos[v.id] || 0;
-      return s + (Number(v.preco || 0) - compra - custo);
-    }, 0);
+    // Margem = valor total em patio - valor total de compra dos veiculos
+    const compraTotal = patio.reduce((s, v) => s + Number(extras[v.id]?.preco_compra || 0), 0);
+    lucro = valorTotal - compraTotal;
     margem = valorTotal > 0 ? (lucro / valorTotal) * 100 : 0;
   }
   return { total, valorTotal, ticket, min, max, checados, lucro, margem };
@@ -148,19 +148,16 @@ export default function Estoque() {
 
   return (
     <PageTransition>
-      <div style={{ position: "relative", height: "100vh" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        <Header subtitle="Estoque de veículos" />
+        <BackLink />
         <iframe
           ref={frame}
           src="/calculadora-estoque.html"
           title="Estoque de veículos"
           onLoad={() => { enviarMarca(); enviarDados(); }}
-          style={{ display: "block", width: "100%", height: "100%", border: 0 }}
+          style={{ display: "block", width: "100%", flex: 1, minHeight: 0, border: 0 }}
         />
-        {slot && (
-          <div style={{ position: "absolute", left: slot.x, top: slot.y, width: slot.w, height: slot.h, zIndex: 20 }}>
-            <Sino />
-          </div>
-        )}
       </div>
     </PageTransition>
   );
