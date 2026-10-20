@@ -1,0 +1,592 @@
+<!DOCTYPE html><html class="light" lang="pt-BR" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><title>Calcula.car - Inteligência e Precisão Automotiva</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    overscroll-behavior: none;
+  }
+  main > :first-child {
+    margin-top: 0 !important;
+  }
+  main > :last-child {
+    margin-bottom: 0 !important;
+  }
+}
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Efeitos Atmosféricos e Animações Orgânicas */
+@keyframes floatGlowSlow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(35px, -30px) scale(1.08);
+  }
+  66% {
+    transform: translate(-25px, 25px) scale(0.94);
+  }
+}
+
+@keyframes floatGlowReverse {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 35px) scale(1.12);
+  }
+  66% {
+    transform: translate(30px, -20px) scale(0.96);
+  }
+}
+
+@keyframes floatGlowCenter {
+  0%, 100% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -40px) scale(1.15);
+  }
+}
+
+/* Shimmer de luz nos botões principais */
+@keyframes shimmerLight {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+/* Entrada escalonada refinada com cubic-bezier */
+@keyframes enterSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-glow-1 {
+  animation: floatGlowSlow 14s ease-in-out infinite;
+}
+.animate-glow-2 {
+  animation: floatGlowReverse 17s ease-in-out infinite;
+}
+.animate-glow-3 {
+  animation: floatGlowCenter 20s ease-in-out infinite;
+}
+
+.shimmer-btn-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-btn-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  animation: shimmerLight 4.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+.shimmer-btn-white::after {
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.12), transparent);
+}
+
+.stagger-in {
+  opacity: 0;
+  animation: enterSlideUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-delay-1 { animation-delay: 0.05s; }
+.stagger-delay-2 { animation-delay: 0.12s; }
+.stagger-delay-3 { animation-delay: 0.2s; }
+.stagger-delay-4 { animation-delay: 0.28s; }
+.stagger-delay-5 { animation-delay: 0.36s; }
+.stagger-delay-6 { animation-delay: 0.44s; }
+.stagger-delay-7 { animation-delay: 0.52s; }
+.stagger-delay-8 { animation-delay: 0.6s; }
+.stagger-delay-9 { animation-delay: 0.68s; }
+
+/* Respeito a preferência de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  .animate-glow-1,
+  .animate-glow-2,
+  .animate-glow-3,
+  .shimmer-btn-wrap::after,
+  .stagger-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"on-primary":"#ffffff","on-error":"#ffffff","on-secondary-fixed":"#002113","on-tertiary-container":"#eef0ff","primary-fixed":"#dbe1ff","surface-dim":"#cbdbf5","outline":"#737686","primary-container":"#2563eb","outline-variant":"#c3c6d7","secondary-fixed":"#6ffbbe","on-secondary":"#ffffff","inverse-on-surface":"#eaf1ff","secondary-fixed-dim":"#4edea3","on-primary-container":"#eeefff","on-error-container":"#93000a","on-tertiary-fixed":"#131b2e","surface-container-highest":"#d3e4fe","on-background":"#0b1c30","surface-tint":"#0053db","secondary-container":"#6cf8bb","error":"#ba1a1a","on-tertiary":"#ffffff","on-primary-fixed":"#00174b","tertiary":"#4d556b","primary-fixed-dim":"#b4c5ff","background":"#f8f9ff","tertiary-fixed":"#dae2fd","surface-variant":"#d3e4fe","on-surface-variant":"#434655","primary":"#004ac6","on-tertiary-fixed-variant":"#3f465c","on-surface":"#0b1c30","error-container":"#ffdad6","surface-container-low":"#eff4ff","tertiary-fixed-dim":"#bec6e0","tertiary-container":"#656d84","surface-container":"#e5eeff","inverse-primary":"#b4c5ff","secondary":"#006c49","on-secondary-fixed-variant":"#005236","inverse-surface":"#213145","surface-bright":"#f8f9ff","on-secondary-container":"#00714d","surface-container-lowest":"#ffffff","on-primary-fixed-variant":"#003ea8","surface-container-high":"#dce9ff","surface":"#f8f9ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{},"fontFamily":{"headline":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"body":["Plus Jakarta Sans"],"label":["Inter"]},"fontSize":{}}}}</script>
+<style id="responsivo-sistema">
+  html, body { max-width: 100% !important; overflow-x: hidden !important; }
+  *, *::before, *::after { min-width: 0; box-sizing: border-box; }
+  img, svg, video { max-width: 100%; }
+  .grid, .grid-cols-2, .grid-cols-3, .grid-cols-4, .sm\:grid-cols-2, .md\:grid-cols-2, .md\:grid-cols-3, .md\:grid-cols-4, .lg\:grid-cols-2, .lg\:grid-cols-3, .lg\:grid-cols-4 {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)) !important;
+  }
+  [class*="w-["] { max-width: 100% !important; }
+  main, section, header, footer, .container { max-width: 100%; }
+  h1 { font-size: clamp(2rem, 5vw, 3.5rem) !important; line-height: 1.05 !important; }
+  h2 { font-size: clamp(1.25rem, 3vw, 1.75rem) !important; }
+</style>
+</head><body class="bg-surface font-body text-on-surface min-h-screen relative selection:bg-primary-fixed selection:text-on-primary-fixed"><div class="pointer-events-none fixed inset-0 z-0 overflow-hidden"><div class="absolute -top-32 -left-32 w-[34rem] h-[34rem] rounded-full bg-gradient-to-tr from-[#2563eb]/25 to-[#60a5fa]/20 blur-[100px] animate-glow-1"></div><div class="absolute top-1/3 -right-36 w-[36rem] h-[36rem] rounded-full bg-gradient-to-bl from-[#38bdf8]/20 via-[#2563eb]/15 to-[#6ffbbe]/15 blur-[110px] animate-glow-2"></div><div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[38rem] h-[30rem] rounded-full bg-gradient-to-t from-[#2563eb]/15 to-[#38bdf8]/10 blur-[120px] animate-glow-3"></div></div><header class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl border-b border-white/60 shadow-[0_2px_16px_rgba(11,28,48,0.04)]"><div class="h-20 max-w-[1440px] mx-auto px-6 lg:px-8 flex items-center justify-between gap-6"><div class="flex items-center gap-6"><a class="flex items-center gap-3 group focus:outline-none transition-transform duration-200 hover:scale-[1.02]" data-path="calculadoras-hub" href="/dashboard" target="_top"><div class="flex flex-col"><span class="font-headline text-lg font-bold tracking-tight text-on-surface leading-tight">Calcula<span class="text-primary">.car</span></span></div></a><div class="hidden xl:block h-6 w-px bg-outline-variant/60"></div></div><div class="flex items-center gap-3"><div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container-low/90 backdrop-blur-md border border-white/80 shadow-xs"><span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600 ring-2 ring-emerald-200"></span></span><span class="font-label text-xs font-medium text-secondary-container-on">Operador F&amp;I Online</span><span class="text-[10px] text-outline">•</span><span class="font-label text-[11px] font-semibold text-emerald-700">Conectado</span></div><button aria-label="Alternar modo visual" class="h-9 w-9 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" type="button"></button><div class="relative"><button aria-label="Notificações" class="h-9 w-9 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200 hover:scale-105 active:scale-95" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button><span class="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full ring-2 ring-surface animate-pulse"></span></div><div class="h-6 w-px bg-outline-variant/60 hidden sm:block"></div><div class="flex items-center gap-2.5 pl-1"><div class="hidden text-right lg:flex flex-col"></div></div></div></div></header><main class="relative z-10 w-full pt-20 bg-surface/60 backdrop-blur-[2px] min-h-[calc(100vh-140px)]"><div class="flex flex-col w-full">
+<div class="max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+<!-- Top Breadcrumb & Controls Banner -->
+<div class="stagger-in stagger-delay-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<a class="group inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/85 hover:bg-white backdrop-blur-md border border-blue-100 hover:border-blue-300 shadow-sm hover:shadow-md hover:shadow-blue-500/10 text-xs font-label font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 focus:outline-none" data-path="calculadoras-hub" href="/dashboard" target="_top">
+<span class="w-6 h-6 rounded-lg bg-blue-50 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-inner group-hover:-translate-x-0.5 shrink-0">
+<span class="material-symbols-outlined text-[15px] transition-transform duration-200">arrow_back</span>
+</span>
+<span class="relative">
+  Voltar para todas as calculadoras
+  <span class="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-blue-500/60 transition-all duration-300 group-hover:w-full rounded-full"></span>
+</span>
+</a>
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high/80 backdrop-blur-md border border-white/60 text-[11px] font-label font-medium text-on-surface-variant shadow-xs">
+<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span>
+          Sincronizado com SISVEÍCULOS • Hoje, 14:32
+        </span>
+</div>
+</div>
+<!-- Main Title & Primary Actions Area -->
+<div class="stagger-in stagger-delay-2 flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-2">
+<div class="space-y-2">
+<div class="flex flex-wrap items-center gap-3">
+<div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary-container/25 border border-primary/20 flex items-center justify-center text-primary shadow-sm shadow-primary/10 transition-transform duration-300 hover:rotate-3">
+<span class="material-symbols-outlined text-[28px]">directions_car</span>
+</div>
+<div>
+<div class="flex items-center gap-3">
+<h1 class="font-headline text-2xl sm:text-3xl lg:text-4xl font-extrabold text-on-surface tracking-tight">Estoque de Veículos</h1>
+</div>
+<p class="font-body text-sm sm:text-base text-on-surface-variant mt-0.5">
+              Busque por placa, RENAVAM, chassi ou modelo. Gestão em tempo real de margem e status comercial.
+            </p>
+</div>
+</div>
+</div>
+<!-- Action CTAs com Shimmer Contínuo -->
+<div class="flex flex-wrap items-center gap-3">
+<button class="shimmer-btn-wrap inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-[#2563eb] text-on-primary font-headline text-sm font-semibold shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/35 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 transition-all duration-200" id="btn-export-pdf" type="button">
+<span class="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+<span class="relative z-10">Exportar PDF</span>
+</button>
+<button class="shimmer-btn-wrap shimmer-btn-white inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md text-on-surface font-headline text-sm font-semibold border border-white/80 shadow-sm hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 active:scale-95 active:translate-y-0 transition-all duration-200" id="btn-new-vehicle" type="button">
+<span class="material-symbols-outlined text-[20px] text-primary">add_circle</span>
+<span class="relative z-10">Novo Veículo</span>
+</button>
+</div>
+</div>
+<!-- KPI Metric Summary Ribbon -->
+<div class="stagger-in stagger-delay-3 grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+<div class="p-4 rounded-2xl bg-surface-container-lowest/85 backdrop-blur-md border border-white/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+<div class="flex items-center justify-between">
+<span class="text-xs font-label uppercase tracking-wider text-outline font-bold">Total no Pátio</span>
+<div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined text-primary text-[20px]">inventory_2</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="font-headline text-2xl font-bold text-on-surface" id="kpi-count">4</span>
+<span class="text-xs font-label text-on-surface-variant">unidades físicas</span>
+</div>
+<div class="mt-2 text-[11px] font-label text-secondary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> 100% checados</div>
+</div>
+<div class="p-4 rounded-2xl bg-surface-container-lowest/85 backdrop-blur-md border border-white/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+<div class="flex items-center justify-between">
+<span class="text-xs font-label uppercase tracking-wider text-outline font-bold">Valor Total em Pátio</span>
+<div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined text-primary text-[20px]">payments</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="font-headline text-xl sm:text-2xl font-bold text-on-surface" style="font-variant-numeric: tabular-nums;">R$ 187.722,00</span>
+</div>
+<div class="mt-2 text-[11px] font-label text-on-surface-variant flex items-center gap-1">
+ Média FIPE + 2.8%
+        </div>
+</div>
+<div class="p-4 rounded-2xl bg-surface-container-lowest/85 backdrop-blur-md border border-white/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+<div class="flex items-center justify-between">
+<span class="text-xs font-label uppercase tracking-wider text-outline font-bold">Ticket Médio</span>
+<div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined text-primary text-[20px]">bar_chart</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="font-headline text-xl sm:text-2xl font-bold text-on-surface" style="font-variant-numeric: tabular-nums;">R$ 46.930,50</span>
+</div>
+<div class="mt-2 text-[11px] font-label text-on-surface-variant flex items-center gap-1">
+          Faixa R$ 30k – R$ 65k
+        </div>
+</div>
+<div class="p-4 rounded-2xl bg-surface-container-lowest/85 backdrop-blur-md border border-white/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group">
+<div class="flex items-center justify-between">
+<span class="text-xs font-label uppercase tracking-wider text-outline font-bold">Margem Estimada</span>
+<div class="w-8 h-8 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+<span class="material-symbols-outlined text-secondary text-[20px]">trending_up</span>
+</div>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="font-headline text-2xl font-bold text-secondary">+18.4%</span>
+<span class="text-xs font-label text-secondary font-semibold">R$ 29.800</span>
+</div>
+<div class="mt-2 text-[11px] font-label text-on-surface-variant flex items-center gap-1">Custos gerais inclusa
+        </div>
+</div>
+</div>
+<!-- Advanced Filter Console Panel -->
+<div class="stagger-in stagger-delay-4 bg-surface-container-lowest/85 backdrop-blur-md border border-white/80 rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow duration-300 space-y-5">
+<!-- Row 1: Numeric & Price inputs -->
+<div>
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs font-label font-bold uppercase tracking-wider text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">tune</span>
+            Parâmetros de Filtro
+          </span>
+<button class="text-xs font-label font-semibold text-primary hover:text-blue-700 active:scale-95 transition-all flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-primary/5" id="btn-clear-filters" type="button">
+<span class="material-symbols-outlined text-[14px]">refresh</span>
+            Limpar filtros
+          </button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+<div class="space-y-1">
+<label class="block font-label text-xs font-semibold text-on-surface-variant" for="filter-year-min">Ano a partir de</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low/90 border border-slate-200/70 text-on-surface placeholder:text-outline/70 font-label text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 focus:bg-surface-container-lowest transition-all" id="filter-year-min" max="2026" min="2000" placeholder="Ex: 2018" type="number">
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline text-[18px] pointer-events-none">calendar_today</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="block font-label text-xs font-semibold text-on-surface-variant" for="filter-year-max">Ano até</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low/90 border border-slate-200/70 text-on-surface placeholder:text-outline/70 font-label text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 focus:bg-surface-container-lowest transition-all" id="filter-year-max" max="2026" min="2000" placeholder="Ex: 2024" type="number">
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline text-[18px] pointer-events-none">event</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="block font-label text-xs font-semibold text-on-surface-variant" for="filter-price-min">Preço mínimo (R$)</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low/90 border border-slate-200/70 text-on-surface placeholder:text-outline/70 font-label text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 focus:bg-surface-container-lowest transition-all font-mono" id="filter-price-min" placeholder="R$ 0,00" type="text">
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline text-[18px] pointer-events-none">attach_money</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="block font-label text-xs font-semibold text-on-surface-variant" for="filter-price-max">Preço máximo (R$)</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low/90 border border-slate-200/70 text-on-surface placeholder:text-outline/70 font-label text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 focus:bg-surface-container-lowest transition-all font-mono" id="filter-price-max" placeholder="R$ 0,00" type="text">
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-outline text-[18px] pointer-events-none">payments</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 2: Broad Search Input Bar -->
+<div class="space-y-1.5">
+<label class="block font-label text-xs font-semibold text-on-surface-variant" for="filter-search">Buscar</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3.5 top-3 text-outline group-focus-within:text-primary text-[20px] pointer-events-none transition-colors">search</span>
+<input class="w-full pl-11 pr-24 py-2.5 bg-surface-container-low/90 border border-slate-200/70 text-on-surface placeholder:text-outline/70 font-label text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/50 focus:bg-surface-container-lowest transition-all" id="filter-search" placeholder="Placa, RENAVAM, chassi ou modelo..." type="text">
+<div class="absolute right-2.5 top-2 flex items-center gap-1.5 pointer-events-none">
+<span class="hidden sm:inline-flex px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-label font-bold text-outline">ESC</span>
+<span class="hidden sm:inline-flex px-1.5 py-0.5 rounded bg-surface-container text-[10px] font-label font-bold text-outline">↵</span>
+</div>
+</div>
+</div>
+<!-- Row 3: Status Segmented Filter Pills -->
+<div class="flex flex-wrap items-center gap-2 pt-1">
+<button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-bold transition-all duration-200 hover:shadow hover:scale-105 active:scale-95 active bg-primary-container text-on-primary shadow-xs" data-filter="all" type="button">
+          Todos <span class="ml-1 opacity-90">(4)</span>
+</button>
+<button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 hover:bg-surface-container hover:scale-105 active:scale-95 border border-slate-200/50 bg-surface-container-low text-on-surface" data-filter="disponivel" type="button">
+          Disponível <span class="ml-1 text-on-surface-variant font-medium">(3)</span>
+</button>
+<button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 bg-surface-container-low text-on-surface hover:bg-surface-container hover:scale-105 active:scale-95 border border-slate-200/50" data-filter="preparacao" type="button">
+          Em preparação <span class="ml-1 text-on-surface-variant font-medium">(1)</span>
+</button>
+<button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 bg-surface-container-low text-outline opacity-70 hover:opacity-100 hover:scale-105 active:scale-95 border border-slate-200/50 text-on-surface" data-filter="reservado" type="button">
+          Reservado <span class="ml-1 font-medium">(0)</span>
+</button>
+<button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 bg-surface-container-low text-outline opacity-70 hover:opacity-100 hover:scale-105 active:scale-95 border border-slate-200/50 text-on-surface" data-filter="vendido" type="button">
+          Vendido <span class="ml-1 font-medium">(0)</span>
+</button>
+<button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 bg-surface-container-low text-outline opacity-70 hover:opacity-100 hover:scale-105 active:scale-95 border border-slate-200/50 text-on-surface" data-filter="retirado" type="button">
+          Retirado <span class="ml-1 font-medium">(0)</span>
+</button>
+</div>
+</div>
+<!-- Inventory Listing Cards -->
+<div class="space-y-4" id="vehicle-list-container">
+<!-- Vehicle Card 1: SANDERO -->
+<div class="stagger-in stagger-delay-5 vehicle-card group relative bg-surface-container-lowest/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/90 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 hover:border-blue-200/70 transition-all duration-300" data-price="38000" data-search="sandero pay5b76 2019 flex renault" data-status="disponivel" data-vehicle-id="1" data-year="2019"><div class="flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex items-center gap-4 sm:gap-5 min-w-0"><div class="relative w-24 sm:w-32 h-20 sm:h-24 rounded-xl overflow-hidden bg-surface-container shrink-0 shadow-sm"><img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Close-up front view of a clean red Renault Sandero hatchback parked in a modern bright car showroom with clear license plate PAY5B76 visible on bumper, automotive studio lighting, soft shadows, sharp reflections, professional dealership inventory photography, high detail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmv676H7H_ilcfTGHYCsTm6V_h30614Z6i8hQckIkFQUaJ1eF84VaLG9bJYGbXeBQTjSIK5NzGhODOaRmvDoGbcPUAPmTL4Y-9qJZehItWkXaxDu11FDwpXQ70WtRSXfK8cSCi9YDb8Y9PmWl7p5-j15SbspVrE2Bus6DSQSGBLQY04aM8QB_djJ1bmUduBQvwStghPqOj21RQoyIY2wQbiZMJZ6n6meSYhWki5g05GG581-sWgS8odw"><div class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-inverse-surface/85 backdrop-blur-xs text-inverse-on-surface text-[9px] font-label font-bold tracking-widest uppercase shadow-xs">PAY-5B76</div></div><div class="min-w-0 space-y-1.5"><div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-xs"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-label text-xs font-bold uppercase tracking-wider text-secondary">DISPONÍVEL</span></div><div class="flex items-center gap-2 flex-wrap"><h2 class="font-headline text-lg sm:text-xl font-extrabold text-on-surface tracking-tight truncate group-hover:text-primary transition-colors">SANDERO</h2></div><p class="font-label text-xs sm:text-sm text-on-surface-variant font-medium flex flex-wrap items-center gap-x-2 gap-y-1"><span class="font-bold text-on-surface">Placa PAY5B76</span><span class="text-outline">•</span><span class="">2019</span><span class="text-outline">•</span><span style="font-variant-numeric: tabular-nums;" class="">152.000 km</span><span class="text-outline">•</span><span class="">Flex • 1.0</span></p></div></div><div class="flex items-end md:flex-col md:items-end justify-between md:justify-center gap-3 border-t md:border-t-0 pt-3 md:pt-0 border-surface-container"><div class="text-left md:text-right"><div class="font-headline text-xl sm:text-2xl font-black text-on-surface tracking-tight" style="font-variant-numeric: tabular-nums;">R$ 38.000,00</div></div><div class="flex items-center gap-1.5"><button class="group/btn px-5 py-2.5 rounded-xl bg-surface-container text-on-surface font-label text-sm font-semibold hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-xs hover:shadow-md" title="Visualizar Detalhes" type="button"><span class="material-symbols-outlined text-[18px] group-hover/btn:scale-110 transition-transform duration-200">visibility</span><span class="">Visualizar</span></button></div></div></div></div>
+<!-- Vehicle Card 2: GOL MPI 1.0 -->
+<div class="stagger-in stagger-delay-6 vehicle-card group relative bg-surface-container-lowest/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/90 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 hover:border-blue-200/70 transition-all duration-300" data-price="54401" data-search="gol mpi 1.0 seb3i04 2023 flex volkswagen vw cinza" data-status="disponivel" data-vehicle-id="2" data-year="2023"><div class="flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex items-center gap-4 sm:gap-5 min-w-0"><div class="relative w-24 sm:w-32 h-20 sm:h-24 rounded-xl overflow-hidden bg-surface-container shrink-0 shadow-sm"><img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="High angle diagonal shot of modern gray Volkswagen Gol hatchback parked on outdoor dealer asphalt lot with metallic paint reflections and clean front grill, clear license plate SEB3I04, afternoon soft natural daylight, crisp corporate automotive style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_04XTbVjaqAVojEpvsf8d8us70RkAdEIGDg0X3gOYWWj3wpsK3qeN9S9uqi73M76dXYkPGUeuoxCD_YnqYsUbGgSCf6HeVJiKlvOKz-1tlOgBV-_pDOu6C7uW3nCFwjejM7sC8o9J7BEignNLHkKzqjO39PH8grPSG7fA62KmV01lKnjdqd1HwrCb30cjLYTZg7GG5VYGsfwQdGsHfKasDYZdQMhPHAk_etRgYnr5QkI9CyIjq_QG4g"><div class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-inverse-surface/85 backdrop-blur-xs text-inverse-on-surface text-[9px] font-label font-bold tracking-widest uppercase shadow-xs">SEB-3I04</div></div><div class="min-w-0 space-y-1.5"><div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-xs"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-label text-xs font-bold uppercase tracking-wider text-secondary">DISPONÍVEL</span></div><div class="flex items-center gap-2 flex-wrap"><h2 class="font-headline text-lg sm:text-xl font-extrabold text-on-surface tracking-tight truncate group-hover:text-primary transition-colors">GOL MPI 1.0</h2></div><p class="font-label text-xs sm:text-sm text-on-surface-variant font-medium flex flex-wrap items-center gap-x-2 gap-y-1"><span class="font-bold text-on-surface">Placa SEB3I04</span><span class="text-outline">•</span><span class="">2023</span><span class="text-outline">•</span><span style="font-variant-numeric: tabular-nums;" class="">88.000 km</span><span class="text-outline">•</span><span class="">Flex • MPI</span></p></div></div><div class="flex items-end md:flex-col md:items-end justify-between md:justify-center gap-3 border-t md:border-t-0 pt-3 md:pt-0 border-surface-container"><div class="text-left md:text-right"><div class="font-headline text-xl sm:text-2xl font-black text-on-surface tracking-tight" style="font-variant-numeric: tabular-nums;">R$ 54.401,00</div></div><div class="flex items-center gap-1.5"><button class="group/btn px-5 py-2.5 rounded-xl bg-surface-container text-on-surface font-label text-sm font-semibold hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-xs hover:shadow-md" title="Visualizar Detalhes" type="button"><span class="material-symbols-outlined text-[18px] group-hover/btn:scale-110 transition-transform duration-200">visibility</span><span class="">Visualizar</span></button></div></div></div></div>
+<!-- Vehicle Card 3: SANDERO EXP. 1.0 (EM PREPARAÇÃO) -->
+<div class="stagger-in stagger-delay-7 vehicle-card group relative bg-surface-container-lowest/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/90 shadow-sm hover:shadow-xl hover:shadow-amber-500/10 hover:-translate-y-1 hover:border-amber-200/70 transition-all duration-300" data-price="30408" data-search="sandero exp 1.0 oqs1j51 2014 flex renault prata preparation" data-status="preparacao" data-vehicle-id="3" data-year="2014"><div class="flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex items-center gap-4 sm:gap-5 min-w-0"><div class="relative w-24 sm:w-32 h-20 sm:h-24 rounded-xl overflow-hidden bg-surface-container shrink-0 shadow-sm"><img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Silver Renault Sandero Expression parked in detailing bay of dealership service center, automotive polishers and clean workshop environment in background, clear plate OQS1J51, warm golden hour workshop lighting, high resolution automotive presentation" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxaYHHIPN_Ger5CY7DfsfU-fe_ClfHyn0gVwFUHBkwDRqJwEh8wfNtVrOfVzQYUSbQtzVM8ERG--ciaK1ldHU5J_ojpVEq_X341sSIaIdT7KNWEBaLBAgym5-PM-CFUi8UP4dQ68zJI6jUI9G68HL20OX1wRHnsPqGwfk4gq7DAzdA9xrC515zSs3rowOjUcaFa_84Fk-Y21RBqC_1Fif31mO8QGFHt5GzHuFwRcku0sN8Pv8cHBBscQ"><div class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-inverse-surface/85 backdrop-blur-xs text-inverse-on-surface text-[9px] font-label font-bold tracking-widest uppercase shadow-xs">OQS-1J51</div></div><div class="min-w-0 space-y-1.5"><div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 shadow-xs"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-60"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span></span><span class="font-label text-xs font-bold uppercase tracking-wider text-amber-700">EM PREPARAÇÃO</span></div><div class="flex items-center gap-2 flex-wrap"><h2 class="font-headline text-lg sm:text-xl font-extrabold text-on-surface tracking-tight truncate group-hover:text-primary transition-colors">SANDERO EXP. 1.0</h2></div><p class="font-label text-xs sm:text-sm text-on-surface-variant font-medium flex flex-wrap items-center gap-x-2 gap-y-1"><span class="font-bold text-on-surface">Placa OQS1J51</span><span class="text-outline">•</span><span class="">2014</span><span class="text-outline">•</span><span style="font-variant-numeric: tabular-nums;" class="">118.000 km</span><span class="text-outline">•</span><span class="">Flex • Expression</span></p></div></div><div class="flex items-end md:flex-col md:items-end justify-between md:justify-center gap-3 border-t md:border-t-0 pt-3 md:pt-0 border-surface-container"><div class="text-left md:text-right"><div class="font-headline text-xl sm:text-2xl font-black text-on-surface tracking-tight" style="font-variant-numeric: tabular-nums;">R$ 30.408,00</div></div><div class="flex items-center gap-1.5"><button class="group/btn px-5 py-2.5 rounded-xl bg-surface-container text-on-surface font-label text-sm font-semibold hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-xs hover:shadow-md" title="Visualizar Detalhes" type="button"><span class="material-symbols-outlined text-[18px] group-hover/btn:scale-110 transition-transform duration-200">visibility</span><span class="">Visualizar</span></button></div></div></div></div>
+<!-- Vehicle Card 4: POLO 1.6 MSI -->
+<div class="stagger-in stagger-delay-8 vehicle-card group relative bg-surface-container-lowest/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/90 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 hover:border-blue-200/70 transition-all duration-300" data-price="65313" data-search="polo 1.6 msi rbv6f64 2020 manual volkswagen vw cinza" data-status="disponivel" data-vehicle-id="4" data-year="2020"><div class="flex flex-col md:flex-row md:items-center justify-between gap-4"><div class="flex items-center gap-4 sm:gap-5 min-w-0"><div class="relative w-24 sm:w-32 h-20 sm:h-24 rounded-xl overflow-hidden bg-surface-container shrink-0 shadow-sm"><img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Sleek charcoal gray Volkswagen Polo 1.6 MSI parked in an open modern dealership plaza with smooth paved floor and glass facade showroom, plate RBV6F64 sharp in focus, bright sunny skies, high contrast contemporary vehicle catalog styling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBR25PVoxMUtiZqg2ou5pvd7DvvE2_e-aPdeXZkTHlckYEUSGPy1b5bT9dQBGhAHW2lImdoMFXKULuNyWDTOZKDVQzWDF6XWyUQbS_SMOFr5zFGLQDlXJOzB5v0PPBxPCDdGiVd4Dyk-_VWWqS5Z7GAUGFyfU8rOwGjK7OsSKPRsVzVBYXgr9SMZkiGTE84RzZiPw3I5S-WeoxLsV4f4l-scVqVAy-fC6gVcrY_9nYWMXtC2zrzn95uA"><div class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-inverse-surface/85 backdrop-blur-xs text-inverse-on-surface text-[9px] font-label font-bold tracking-widest uppercase shadow-xs">RBV-6F64</div></div><div class="min-w-0 space-y-1.5"><div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-xs"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span></span><span class="font-label text-xs font-bold uppercase tracking-wider text-secondary">DISPONÍVEL</span></div><div class="flex items-center gap-2 flex-wrap"><h2 class="font-headline text-lg sm:text-xl font-extrabold text-on-surface tracking-tight truncate group-hover:text-primary transition-colors">POLO 1.6 MSI</h2></div><p class="font-label text-xs sm:text-sm text-on-surface-variant font-medium flex flex-wrap items-center gap-x-2 gap-y-1"><span class="font-bold text-on-surface">Placa RBV6F64</span><span class="text-outline">•</span><span class="">2020</span><span class="text-outline">•</span><span style="font-variant-numeric: tabular-nums;" class="">135.000 km</span><span class="text-outline">•</span><span class="">Manual • 1.6 16V</span></p></div></div><div class="flex items-end md:flex-col md:items-end justify-between md:justify-center gap-3 border-t md:border-t-0 pt-3 md:pt-0 border-surface-container"><div class="text-left md:text-right"><div class="font-headline text-xl sm:text-2xl font-black text-on-surface tracking-tight" style="font-variant-numeric: tabular-nums;">R$ 65.313,00</div></div><div class="flex items-center gap-1.5"><button class="group/btn px-5 py-2.5 rounded-xl bg-surface-container text-on-surface font-label text-sm font-semibold hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200 flex items-center gap-2 shadow-xs hover:shadow-md" title="Visualizar Detalhes" type="button"><span class="material-symbols-outlined text-[18px] group-hover/btn:scale-110 transition-transform duration-200">visibility</span><span class="">Visualizar</span></button></div></div></div></div>
+<!-- Empty State Fallback -->
+<div class="hidden p-12 text-center bg-surface-container-lowest/90 backdrop-blur-md rounded-3xl border border-white/80 shadow-sm space-y-3" id="empty-state">
+<div class="w-14 h-14 mx-auto rounded-full bg-surface-container-high flex items-center justify-center text-outline">
+<span class="material-symbols-outlined text-[32px]">search_off</span>
+</div>
+<h3 class="font-headline text-lg font-bold text-on-surface">Nenhum veículo encontrado</h3>
+<p class="font-body text-sm text-on-surface-variant max-w-sm mx-auto">
+          Tente ajustar os critérios de ano, preço ou buscar por outra placa ou modelo.
+        </p>
+<button class="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-on-primary text-xs font-headline font-semibold active:scale-95 transition-transform" id="btn-reset-empty" type="button">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+          Restaurar Filtros
+        </button>
+</div>
+</div>
+<!-- Notification Toast System (Simulated Microinteraction) -->
+<div class="fixed bottom-6 right-6 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3" id="toast-container">
+<div class="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl bg-inverse-surface/95 backdrop-blur-xl border border-white/10 text-inverse-on-surface shadow-2xl">
+<span class="material-symbols-outlined text-secondary text-[22px]">check_circle</span>
+<div class="text-xs font-label">
+<span class="font-bold block" id="toast-title">PDF Exportado com Sucesso</span>
+<span class="text-inverse-on-surface/80" id="toast-body">O inventário consolidado foi gerado para download.</span>
+</div>
+<button class="ml-2 text-inverse-on-surface/60 hover:text-inverse-on-surface transition-colors" id="toast-close" type="button">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+    /* ===== Design original + dados e acoes do sistema ===== */
+    const ROTULO = { em_preparacao: 'Em preparação', disponivel: 'Disponível', reservado: 'Reservado', vendido: 'Vendido', retirado: 'Retirado' };
+    const COR = { em_preparacao: 'text-tertiary', disponivel: 'text-secondary', reservado: 'text-primary', vendido: 'text-on-surface-variant', retirado: 'text-error' };
+    const FUNDO = { em_preparacao: 'bg-tertiary/10 border-tertiary/20', disponivel: 'bg-emerald-500/10 border-emerald-500/20', reservado: 'bg-primary/10 border-primary/20', vendido: 'bg-surface-container border-outline-variant', retirado: 'bg-error/10 border-error/20' };
+    const BOLA = { em_preparacao: 'bg-tertiary', disponivel: 'bg-secondary', reservado: 'bg-primary', vendido: 'bg-outline', retirado: 'bg-error' };
+
+    let dados = { papel: null, itens: [] };
+    let activeFilterStatus = 'all';
+    let marcaCfg = { logoClaro: null };
+    let cabecalhoOriginal = null;
+
+    function $(id) { return document.getElementById(id); }
+    function postParent(msg) { if (window.parent && window.parent !== window) window.parent.postMessage(msg, window.location.origin); }
+    function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+    function fmtBRL(v) { return v == null ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    function parseCurrency(str) {
+      if (!str) return 0;
+      const clean = String(str).replace(/[^\d]/g, '');
+      return clean ? parseInt(clean, 10) / 100 : 0;
+    }
+
+    /* Cartoes gerados a partir dos veiculos do sistema, no formato do design */
+    function renderCards() {
+      const container = $('vehicle-list-container');
+      if (!container) return;
+      const mostraPlaca = dados.papel !== 'vendedor';
+      container.innerHTML = dados.itens.map(v => {
+        const km = v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString('pt-BR')} km` : 'km não informado';
+        const busca = [v.modelo, mostraPlaca ? v.placa : '', v.ano_modelo, v.marca].filter(Boolean).join(' ').toLowerCase();
+        const img = v.capa
+          ? `<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="${esc(v.capa)}" alt="">`
+          : `<div class="w-full h-full flex items-center justify-center text-on-surface-variant text-xs font-label">Sem foto</div>`;
+        const etiquetaPlaca = mostraPlaca && v.placa
+          ? `<div class="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-inverse-surface/85 text-inverse-on-surface text-[9px] font-label font-bold tracking-widest uppercase shadow-xs">${esc(v.placa)}</div>` : '';
+        const placaTxt = mostraPlaca && v.placa ? `<span class="font-bold text-on-surface">Placa ${esc(v.placa)}</span><span class="text-outline">•</span>` : '';
+        return `
+        <div class="vehicle-card group relative bg-surface-container-lowest/90 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/90 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 hover:border-blue-200/70 transition-all duration-300 cursor-pointer"
+             data-price="${Number(v.preco || 0)}" data-search="${esc(busca)}" data-status="${esc(v.status)}" data-year="${Number(v.ano_modelo || 0)}" data-id="${esc(v.id)}" tabindex="0">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4 sm:gap-5 min-w-0">
+              <div class="relative w-24 sm:w-32 h-20 sm:h-24 rounded-xl overflow-hidden bg-surface-container shrink-0 shadow-sm">${img}${etiquetaPlaca}</div>
+              <div class="min-w-0 space-y-1.5">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border shadow-xs ${FUNDO[v.status] || 'bg-surface-container border-outline-variant'}">
+                  <span class="h-2 w-2 rounded-full ${BOLA[v.status] || 'bg-outline'}"></span>
+                  <span class="font-label text-xs font-bold uppercase tracking-wider ${COR[v.status] || 'text-on-surface'}">${esc(ROTULO[v.status] || v.status)}</span>
+                </div>
+                <h2 class="font-headline text-lg sm:text-xl font-extrabold text-on-surface tracking-tight truncate group-hover:text-primary transition-colors">${esc(v.modelo)}</h2>
+                <p class="font-label text-xs sm:text-sm text-on-surface-variant font-medium flex flex-wrap items-center gap-x-2 gap-y-1">
+                  ${placaTxt}<span>${esc(v.ano_modelo ?? '—')}</span><span class="text-outline">•</span><span style="font-variant-numeric: tabular-nums;">${km}</span>
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between md:justify-end gap-4 md:text-right">
+              <div>
+                <p class="font-label text-[11px] uppercase tracking-wider text-on-surface-variant">Preço pretendido</p>
+                <p class="font-headline text-lg sm:text-xl font-extrabold text-on-surface tabular-nums">${fmtBRL(v.preco)}</p>
+              </div>
+              <span class="material-symbols-outlined text-primary">arrow_forward</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+      container.querySelectorAll('.vehicle-card').forEach(c => {
+        c.addEventListener('click', () => postParent({ type: 'abrir', id: c.dataset.id }));
+        c.addEventListener('keydown', (e) => { if (e.key === 'Enter') postParent({ type: 'abrir', id: c.dataset.id }); });
+      });
+    }
+
+    function applyFilters() {
+      const query = (($('filter-search') || {}).value || '').trim().toLowerCase();
+      const minYear = parseInt(($('filter-year-min') || {}).value, 10) || 0;
+      const maxYear = parseInt(($('filter-year-max') || {}).value, 10) || Infinity;
+      const minPrice = parseCurrency(($('filter-price-min') || {}).value);
+      const maxPrice = parseCurrency(($('filter-price-max') || {}).value) || Infinity;
+      let visible = 0;
+      document.querySelectorAll('.vehicle-card').forEach(card => {
+        const ok = (activeFilterStatus === 'all' || card.dataset.status === activeFilterStatus)
+          && (!query || (card.dataset.search || '').includes(query))
+          && Number(card.dataset.year) >= minYear && Number(card.dataset.year) <= maxYear
+          && Number(card.dataset.price) >= minPrice && Number(card.dataset.price) <= maxPrice;
+        card.classList.toggle('hidden', !ok);
+        if (ok) visible++;
+      });
+      const empty = $('empty-state');
+      if (empty) empty.classList.toggle('hidden', visible > 0);
+      const badge = $('badge-total-vehicles');
+      if (badge) badge.textContent = `${visible} veículo${visible === 1 ? '' : 's'} ativo${visible === 1 ? '' : 's'}`;
+      const kpi = $('kpi-count');
+      if (kpi) kpi.textContent = visible;
+    }
+
+    function formatCurrencyInput(e) {
+      let val = e.target.value.replace(/\D/g, '');
+      e.target.value = val ? (parseInt(val, 10) / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '';
+      applyFilters();
+    }
+
+    function showToast(title, body) {
+      const toast = $('toast-container');
+      if (!toast) return;
+      if ($('toast-title')) $('toast-title').textContent = title;
+      if ($('toast-body')) $('toast-body').textContent = body;
+      toast.classList.remove('opacity-0', 'translate-y-3');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-3');
+      }, 4000);
+    }
+
+    function resetAllFilters() {
+      ['filter-search', 'filter-year-min', 'filter-year-max', 'filter-price-min', 'filter-price-max'].forEach(id => { const el = $(id); if (el) el.value = ''; });
+      activeFilterStatus = 'all';
+      document.querySelectorAll('.filter-pill').forEach(p => {
+        const ativo = p.getAttribute('data-filter') === 'all';
+        p.classList.toggle('active', ativo);
+        p.classList.toggle('bg-primary-container', ativo);
+        p.classList.toggle('text-on-primary', ativo);
+        p.classList.toggle('shadow-xs', ativo);
+        p.classList.toggle('bg-surface-container-low', !ativo);
+        p.classList.toggle('text-on-surface', !ativo);
+      });
+      applyFilters();
+    }
+
+    function montarFiltros() {
+      document.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          document.querySelectorAll('.filter-pill').forEach(p => {
+            p.classList.remove('active', 'bg-primary-container', 'text-on-primary', 'shadow-xs');
+            p.classList.add('bg-surface-container-low', 'text-on-surface');
+          });
+          pill.classList.add('active', 'bg-primary-container', 'text-on-primary', 'shadow-xs');
+          pill.classList.remove('bg-surface-container-low', 'text-on-surface');
+          activeFilterStatus = pill.getAttribute('data-filter');
+          applyFilters();
+        });
+      });
+      ['filter-search', 'filter-year-min', 'filter-year-max'].forEach(id => { const el = $(id); if (el) el.addEventListener('input', applyFilters); });
+      ['filter-price-min', 'filter-price-max'].forEach(id => { const el = $(id); if (el) el.addEventListener('input', formatCurrencyInput); });
+      ['btn-clear-filters', 'btn-reset-empty'].forEach(id => { const el = $(id); if (el) el.addEventListener('click', resetAllFilters); });
+      const pdf = $('btn-export-pdf');
+      if (pdf) pdf.addEventListener('click', () => {
+        const ids = Array.from(document.querySelectorAll('.vehicle-card:not(.hidden)')).map(c => c.dataset.id);
+        showToast('Gerando relatório de estoque', 'O PDF será gerado com os veículos listados.');
+        postParent({ type: 'exportar-pdf', ids });
+      });
+      const novo = $('btn-new-vehicle');
+      if (novo) novo.addEventListener('click', () => postParent({ type: 'novo' }));
+      const toastClose = $('toast-close');
+      if (toastClose) toastClose.addEventListener('click', () => {
+        const t = $('toast-container');
+        if (t) { t.classList.remove('opacity-100', 'translate-y-0'); t.classList.add('opacity-0', 'translate-y-3'); }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { const s = $('filter-search'); if (s) { s.value = ''; applyFilters(); } }
+      });
+    }
+
+    /* Cabecalho: sino de notificacoes no lugar do perfil */
+    function montarCabecalho() {
+      const header = document.querySelector('header');
+      if (!header) return;
+      const op = Array.from(header.querySelectorAll('*')).find(e => e.children.length === 0 && e.textContent.includes('Operador'));
+      const perfil = op ? op.closest('header > div > div > div') : null;
+      const grupo = perfil ? perfil.parentElement : (header.firstElementChild ? header.firstElementChild.lastElementChild : null);
+      if (perfil) perfil.remove();
+      const sino = document.createElement('button');
+      sino.id = 'bell-slot';
+      sino.type = 'button';
+      sino.setAttribute('aria-label', 'Notificações');
+      sino.style.cssText = 'display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:12px;border:1px solid #d3e4fe;background:#fff;color:#0b1c30;cursor:pointer';
+      sino.innerHTML = '<span class="material-symbols-outlined text-[18px]">notifications</span>';
+      if (grupo) grupo.appendChild(sino);
+    }
+
+    function aplicarLogo() {
+      const header = document.querySelector('header');
+      if (!header) return;
+      const brandSpan = Array.from(header.querySelectorAll('span')).find(s => s.firstElementChild && s.firstElementChild.textContent.trim() === '.car');
+      const brandBox = brandSpan ? brandSpan.parentElement : null;
+      if (!brandBox) return;
+      if (cabecalhoOriginal === null) cabecalhoOriginal = brandBox.innerHTML;
+      brandBox.innerHTML = marcaCfg.logoClaro
+        ? `<img src="${marcaCfg.logoClaro}" alt="SliceX.calc" style="height:34px;width:auto;display:block">`
+        : cabecalhoOriginal;
+    }
+
+    function enviarRetangulo() {
+      const el = $('bell-slot');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      postParent({ type: 'bell-rect', rect: { x: r.left, y: r.top, w: r.width, h: r.height } });
+    }
+    window.addEventListener('resize', enviarRetangulo);
+    window.addEventListener('message', (e) => {
+      if (e.source !== window.parent) return;
+      const d = e.data || {};
+      if (d.type === 'marca') { marcaCfg = { logoClaro: d.logoClaro }; aplicarLogo(); }
+      if (d.type === 'dados') { dados = { papel: d.papel, itens: d.itens || [] }; renderCards(); applyFilters(); }
+    });
+
+    function init() {
+      montarCabecalho();
+      aplicarLogo();
+      montarFiltros();
+      const container = $('vehicle-list-container');
+      if (container) container.innerHTML = '';
+      applyFilters();
+      postParent({ type: 'pronto' });
+      enviarRetangulo();
+    }
+    init();
+</script></main><footer class="relative z-10 w-full bg-surface-container-low/85 backdrop-blur-md border-t border-white/60 shadow-[0_-1px_8px_rgba(0,0,0,0.02)]"><div class="max-w-[1440px] mx-auto px-6 lg:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-6"><div class="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-label text-on-surface-variant"><div class="flex items-center gap-1.5 bg-surface-container-lowest/90 px-3 py-1.5 rounded-lg border border-white/70 shadow-xs"><span class="material-symbols-outlined text-secondary text-[16px]">lock</span><span class="font-semibold text-on-surface">Criptografia SSL 256-bit</span><span class="text-outline">•</span><span class="">Ambiente Seguro</span></div></div><div class="flex flex-col sm:flex-row items-center gap-4 text-xs font-label text-on-surface-variant"><span class="text-center sm:text-right">© 2025 Calcula.car Soluções Automotivas Ltda. Todos os direitos reservados.</span><span class="hidden sm:inline text-outline">•</span><a class="inline-flex items-center gap-1 text-primary font-semibold hover:text-blue-700 active:scale-95 transition-all" data-path="suporte-operacional" href="#"><span class="material-symbols-outlined text-[16px]">support_agent</span><span class="">Suporte Especializado</span></a></div></div></footer>
+
+
+</body></html>
