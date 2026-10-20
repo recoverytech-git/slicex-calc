@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="pt-BR" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_standard" name="shell-type"><title>Calcula.car | Gestão Automotiva e F&amp;I - POLO 1.6 MSI</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}
+/* Atmospheric Glow Keyframes & Smooth Drifting */
+@keyframes ambientDrift1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(35px, -25px) scale(1.08); }
+  66% { transform: translate(-25px, 20px) scale(0.95); }
+}
+@keyframes ambientDrift2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  40% { transform: translate(-40px, 30px) scale(1.1); }
+  80% { transform: translate(25px, -20px) scale(0.92); }
+}
+@keyframes ambientDrift3 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(30px, 35px) scale(1.06); }
+}
+.ambient-orb-1 {
+  animation: ambientDrift1 18s ease-in-out infinite;
+}
+.ambient-orb-2 {
+  animation: ambientDrift2 22s ease-in-out infinite;
+}
+.ambient-orb-3 {
+  animation: ambientDrift3 20s ease-in-out infinite;
+}
+
+/* Staggered Entrance Motion with Elastic Ease */
+@keyframes staggerFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.motion-stagger {
+  opacity: 0;
+  animation: staggerFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.stagger-d0 { animation-delay: 0.02s; }
+.stagger-d1 { animation-delay: 0.08s; }
+.stagger-d2 { animation-delay: 0.16s; }
+.stagger-d3 { animation-delay: 0.24s; }
+.stagger-d4 { animation-delay: 0.32s; }
+.stagger-d5 { animation-delay: 0.40s; }
+.stagger-d6 { animation-delay: 0.48s; }
+.stagger-d7 { animation-delay: 0.54s; }
+
+/* Continuous Light Shimmer for Primary Action */
+@keyframes shimmerSweep {
+  0% { transform: translateX(-120%); }
+  35%, 100% { transform: translateX(220%); }
+}
+.shimmer-active {
+  animation: shimmerSweep 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Premium Card Shadows & Glass Surface */
+.glass-card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 1px 3px rgba(11, 28, 48, 0.02), 0 8px 24px -6px rgba(11, 28, 48, 0.04), 0 20px 38px -12px rgba(11, 28, 48, 0.05);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+}
+.glass-card:hover {
+  transform: translateY(-2.5px);
+  border-color: rgba(195, 198, 215, 0.7);
+  box-shadow: 0 4px 10px rgba(11, 28, 48, 0.03), 0 16px 36px -8px rgba(37, 99, 235, 0.09), 0 26px 48px -12px rgba(11, 28, 48, 0.08);
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .motion-stagger {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .ambient-orb-1, .ambient-orb-2, .ambient-orb-3, .shimmer-active {
+    animation: none !important;
+  }
+  .glass-card:hover {
+    transform: none !important;
+  }
+}
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-dim": "#cbdbf5", "on-tertiary-fixed-variant": "#3f465c", "on-secondary": "#ffffff", "on-primary-fixed-variant": "#003ea8", "background": "#f8f9ff", "error": "#ba1a1a", "inverse-surface": "#213145", "surface-container": "#e5eeff", "tertiary-fixed": "#dae2fd", "on-secondary-fixed-variant": "#005236", "surface": "#f8f9ff", "secondary-container": "#6cf8bb", "secondary": "#006c49", "secondary-fixed": "#6ffbbe", "on-tertiary": "#ffffff", "on-secondary-container": "#00714d", "primary-fixed": "#dbe1ff", "on-surface-variant": "#434655", "surface-variant": "#d3e4fe", "on-error": "#ffffff", "outline": "#737686", "primary": "#004ac6", "on-primary": "#ffffff", "error-container": "#ffdad6", "outline-variant": "#c3c6d7", "surface-container-highest": "#d3e4fe", "on-primary-fixed": "#00174b", "on-primary-container": "#eeefff", "on-tertiary-container": "#eef0ff", "primary-container": "#2563eb", "on-surface": "#0b1c30", "inverse-primary": "#b4c5ff", "surface-tint": "#0053db", "secondary-fixed-dim": "#4edea3", "on-error-container": "#93000a", "surface-container-lowest": "#ffffff", "surface-bright": "#f8f9ff", "primary-fixed-dim": "#b4c5ff", "tertiary": "#4d556b", "surface-container-low": "#eff4ff", "on-tertiary-fixed": "#131b2e", "tertiary-container": "#656d84", "tertiary-fixed-dim": "#bec6e0", "inverse-on-surface": "#eaf1ff", "surface-container-high": "#dce9ff", "on-background": "#0b1c30", "on-secondary-fixed": "#002113" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": {}, "fontFamily": { "headline": [ "Plus Jakarta Sans" ], "display": [ "Plus Jakarta Sans" ], "body": [ "Plus Jakarta Sans" ], "label": [ "Inter" ] }, "fontSize": {} } } }</script><style>body{font-family:"Inter",sans-serif}</style></head>
+<body class="bg-surface font-body text-on-surface min-h-screen">
+<main id="app" class="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 space-y-6 min-w-0"></main>
+<script>
+    const ROT = { em_preparacao: 'Em preparação', disponivel: 'Disponível', reservado: 'Reservado', vendido: 'Vendido', retirado: 'Retirado' };
+    const COR = { em_preparacao: '#f59e0b', disponivel: '#10b981', reservado: '#2563eb', vendido: '#64748b', retirado: '#ef4444' };
+    let D = null;
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const brl = v => (v == null || !isFinite(v)) ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const pct = v => (v == null || !isFinite(v)) ? '—' : `${v.toFixed(2).replace('.', ',')}%`;
+    const dataBR = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+    const post = (acao) => window.parent && window.parent.postMessage({ type: 'acao', acao }, window.location.origin);
+
+    function secao(n, titulo, conteudo) {
+      return `<section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/40 shadow-sm p-5 sm:p-6 min-w-0">
+        <header class="flex items-center gap-3 mb-5">
+          <span class="w-8 h-8 rounded-lg bg-primary-container/10 text-primary font-headline font-bold flex items-center justify-center text-sm shrink-0">${n}</span>
+          <h2 class="font-headline font-extrabold text-base text-on-surface">${titulo}</h2>
+        </header>${conteudo}</section>`;
+    }
+    function campo(rot, val) {
+      return `<div class="space-y-1 min-w-0">
+        <div class="text-[11px] font-label font-semibold text-on-surface-variant uppercase tracking-wider">${rot}</div>
+        <div class="rounded-xl border border-outline-variant bg-surface px-3 py-2.5 text-sm font-semibold text-on-surface tabular-nums break-words">${val ?? '—'}</div>
+      </div>`;
+    }
+    function linha(rot, val, destaque) {
+      return `<div class="flex items-center justify-between gap-4 py-2.5 border-b border-outline-variant/30 last:border-0">
+        <span class="text-sm text-on-surface-variant">${rot}</span>
+        <span class="text-sm font-bold tabular-nums ${destaque || 'text-on-surface'}">${val ?? '—'}</span></div>`;
+    }
+
+    function render() {
+      const app = $('app');
+      if (!D) { app.innerHTML = '<div class="animate-pulse h-40 rounded-2xl bg-surface-container"></div>'; return; }
+      if (D.erro) { app.innerHTML = `<div class="rounded-2xl border border-error/30 bg-error-container/30 p-6 text-sm font-semibold text-on-surface">${esc(D.erro)}</div>`; return; }
+      const v = D.veiculo, g = D.gestao, fin = D.financiamento, custos = D.custos || [], vendas = D.vendas || [], ck = D.checklist, fotos = D.fotos || [];
+      const compra = Number(v.preco_compra || 0);
+      const fipe = Number(v.valor_fipe || 0);
+      const venda = Number(v.preco_venda_pretendido || 0);
+      const totalCustos = custos.reduce((s, c) => s + Number(c.valor || 0), 0);
+      const juros = fin ? Number(fin.total_juros || 0) : 0;
+      const investimento = compra + totalCustos + juros;
+      const parcial = venda - investimento;
+      const pParcial = investimento > 0 ? (parcial / investimento) * 100 : null;
+      const venda0 = vendas[0];
+      const final = venda0 ? Number(venda0.valor_venda) - Number(venda0.despesas_venda || 0) - Number(venda0.descontos || 0) - investimento : null;
+      const pFinal = venda0 && investimento > 0 ? (final / investimento) * 100 : null;
+      const diffFipe = fipe - compra;
+      const pFipe = fipe > 0 ? (diffFipe / fipe) * 100 : null;
+      const cor = COR[v.status] || '#64748b';
+      const rotStatus = ROT[v.status] || v.status;
+
+      const topo = `
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 min-w-0">
+          <div class="min-w-0">
+            <button id="btn-voltar" class="inline-flex items-center gap-2 h-9 px-3 rounded-xl border border-outline-variant bg-surface-container-lowest text-sm font-semibold text-on-surface hover:bg-surface-container transition"><span class="material-symbols-outlined text-[18px]">arrow_back</span>Voltar para o estoque</button>
+            <h1 class="font-headline font-extrabold text-2xl text-on-surface mt-4 uppercase truncate">${esc(v.modelo)}</h1>
+            <div class="flex flex-wrap items-center gap-2 mt-2">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-bold uppercase" style="border-color:${cor};color:${cor}"><span class="w-2 h-2 rounded-full" style="background:${cor}"></span>${esc(rotStatus)}</span>
+              ${g && v.placa ? `<span class="px-2.5 py-1 rounded-md bg-inverse-surface text-inverse-on-surface text-xs font-bold tracking-widest">${esc(v.placa)}</span>` : ''}
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="btn-export-pdf" class="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-outline-variant bg-surface-container-lowest text-sm font-semibold text-on-surface hover:bg-surface-container transition"><span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>Exportar PDF</button>
+            ${g ? `<button id="btn-completo" class="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-primary-container text-on-primary text-sm font-semibold shadow-md hover:-translate-y-0.5 transition"><span class="material-symbols-outlined text-[18px]">edit</span>Editar dados</button>` : ''}
+            ${g ? `<button id="btn-excluir-veiculo" class="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-error/40 text-error text-sm font-semibold hover:bg-error-container/40 transition"><span class="material-symbols-outlined text-[18px]">delete</span>Excluir</button>` : ''}
+          </div>
+        </div>`;
+
+      const sec1 = secao(1, 'Identificação e características', `<div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        ${campo('Data de aquisição', dataBR(v.data_aquisicao))}
+        ${campo('Placa', g ? esc(v.placa) : 'Restrito')}
+        ${campo('Chassi', g ? esc(v.chassi) : 'Restrito')}
+        ${campo('RENAVAM', g ? esc(v.renavam) : 'Restrito')}
+        ${campo('Marca', esc(v.marca))}
+        ${campo('Modelo', esc(v.modelo))}
+        ${campo('Ano de fabricação', esc(v.ano_fabricacao))}
+        ${campo('Ano do modelo', esc(v.ano_modelo))}
+        ${campo('Cor', esc(v.cor))}
+        ${campo('Quilometragem', v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString('pt-BR')} km` : '—')}
+        ${campo('Combustível', esc(v.combustivel))}
+        ${campo('Câmbio', esc(v.cambio))}
+      </div>`);
+
+      const sec2 = secao(2, 'Análise FIPE x Compra', g ? `<div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
+        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Diferença FIPE − compra</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 ${diffFipe >= 0 ? 'text-secondary' : 'text-error'}">${brl(diffFipe)}</div></div>
+        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Diferença percentual</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 text-on-surface">${pct(pFipe)}</div></div>
+        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Valor FIPE</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 text-on-surface">${brl(fipe)}</div></div>
+      </div>` : '<p class="text-sm text-on-surface-variant">Dados financeiros restritos ao seu perfil.</p>');
+
+      const sec3 = secao(3, 'Origem do capital', g ? `<div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+        ${campo('Origem', v.tipo_aquisicao === 'financiamento' ? 'Financiamento' : (v.tipo_aquisicao === 'capital_proprio' ? 'Capital próprio' : '—'))}
+        ${fin ? campo('Financiado', brl(fin.valor_financiado)) : ''}
+        ${fin ? campo('Taxa mensal', `${fin.taxa_juros_percentual}%`) : ''}
+        ${fin ? campo('Prazo', `${fin.quantidade_parcelas} meses`) : ''}
+        ${fin ? campo('Parcela', brl(fin.valor_parcela)) : ''}
+        ${fin ? campo('Total de juros', brl(fin.total_juros)) : ''}
+      </div>` : '<p class="text-sm text-on-surface-variant">Dados financeiros restritos ao seu perfil.</p>');
+
+      const sec4 = secao(4, 'Custos adicionais', g ? `<div class="rounded-xl border border-outline-variant/40 px-4">
+        ${custos.length ? custos.map(c => linha(esc(c.descricao), brl(c.valor))).join('') : '<p class="py-4 text-sm text-on-surface-variant">Nenhum custo cadastrado.</p>'}
+        ${linha('Total de custos', brl(totalCustos), 'text-secondary')}
+      </div>` : '<p class="text-sm text-on-surface-variant">Dados financeiros restritos ao seu perfil.</p>');
+
+      const sec5 = secao(5, 'Resultado da operação', g ? `<div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
+        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Investimento total</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1">${brl(investimento)}</div></div>
+        <div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Resultado parcial (venda pretendida)</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 ${parcial >= 0 ? 'text-secondary' : 'text-error'}">${brl(parcial)} <span class="text-sm">${pct(pParcial)}</span></div></div>
+        ${venda0 ? `<div class="rounded-xl bg-surface-container-low p-4"><div class="text-[11px] font-label uppercase tracking-wider text-on-surface-variant">Resultado final da venda</div><div class="font-headline font-extrabold text-xl tabular-nums mt-1 ${final >= 0 ? 'text-secondary' : 'text-error'}">${brl(final)} <span class="text-sm">${pct(pFinal)}</span></div></div>` : ''}
+      </div>` : '<p class="text-sm text-on-surface-variant">Dados financeiros restritos ao seu perfil.</p>');
+
+      const sec6 = secao('', 'Fotos', `${fotos.length ? `<div class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+        ${fotos.map((f, i) => f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener" class="block rounded-xl overflow-hidden border border-outline-variant/40 aspect-[4/3] bg-surface-container hover:shadow-md transition"><img src="${esc(f.url)}" alt="Foto ${i + 1}" class="w-full h-full object-cover"></a>` : '').join('')}
+      </div>` : '<p class="text-sm text-on-surface-variant">Nenhuma foto cadastrada.</p>'}`);
+
+      const itensCk = (D.itensChecklist || []);
+      const sec7 = secao('', 'Checklist do veículo', ck ? `<div class="grid gap-x-8 grid-cols-1 sm:grid-cols-2">
+        ${itensCk.map(([k, rot]) => linha(rot, ck[k] === true ? 'Sim' : (ck[k] === false ? 'Não' : 'Não informado'), ck[k] === true ? 'text-secondary' : (ck[k] === false ? 'text-error' : ''))).join('')}
+        ${linha('Documentação', (D.docLabels || {})[ck.documentacao_status] || 'Não informado')}
+      </div>${ck.observacoes ? `<p class="mt-4 text-sm text-on-surface-variant">Observações: ${esc(ck.observacoes)}</p>` : ''}` : '<p class="text-sm text-on-surface-variant">Checklist não preenchido.</p>');
+
+      app.innerHTML = [topo, sec1, sec2, sec3, sec4, sec5, sec6, sec7].map(s => `<div class="min-w-0">${s}</div>`).join('');
+      $('btn-voltar').addEventListener('click', () => post('voltar'));
+      $('btn-export-pdf').addEventListener('click', () => post('pdf'));
+      if ($('btn-completo')) $('btn-completo').addEventListener('click', () => post('completo'));
+      if ($('btn-excluir-veiculo')) $('btn-excluir-veiculo').addEventListener('click', () => post('excluir'));
+    }
+
+    window.addEventListener('message', (e) => {
+      if (e.source !== window.parent) return;
+      const d = e.data || {};
+      if (d.type === 'dados') { D = d; render(); }
+    });
+    window.parent && window.parent.postMessage({ type: 'pronto' }, window.location.origin);
+</script>
+</body>
+</html>
