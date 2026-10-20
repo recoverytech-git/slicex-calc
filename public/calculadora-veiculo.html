@@ -86,10 +86,17 @@
     transform: none !important;
   }
 }
-</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-dim": "#cbdbf5", "on-tertiary-fixed-variant": "#3f465c", "on-secondary": "#ffffff", "on-primary-fixed-variant": "#003ea8", "background": "#f8f9ff", "error": "#ba1a1a", "inverse-surface": "#213145", "surface-container": "#e5eeff", "tertiary-fixed": "#dae2fd", "on-secondary-fixed-variant": "#005236", "surface": "#f8f9ff", "secondary-container": "#6cf8bb", "secondary": "#006c49", "secondary-fixed": "#6ffbbe", "on-tertiary": "#ffffff", "on-secondary-container": "#00714d", "primary-fixed": "#dbe1ff", "on-surface-variant": "#434655", "surface-variant": "#d3e4fe", "on-error": "#ffffff", "outline": "#737686", "primary": "#004ac6", "on-primary": "#ffffff", "error-container": "#ffdad6", "outline-variant": "#c3c6d7", "surface-container-highest": "#d3e4fe", "on-primary-fixed": "#00174b", "on-primary-container": "#eeefff", "on-tertiary-container": "#eef0ff", "primary-container": "#2563eb", "on-surface": "#0b1c30", "inverse-primary": "#b4c5ff", "surface-tint": "#0053db", "secondary-fixed-dim": "#4edea3", "on-error-container": "#93000a", "surface-container-lowest": "#ffffff", "surface-bright": "#f8f9ff", "primary-fixed-dim": "#b4c5ff", "tertiary": "#4d556b", "surface-container-low": "#eff4ff", "on-tertiary-fixed": "#131b2e", "tertiary-container": "#656d84", "tertiary-fixed-dim": "#bec6e0", "inverse-on-surface": "#eaf1ff", "surface-container-high": "#dce9ff", "on-background": "#0b1c30", "on-secondary-fixed": "#002113" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": {}, "fontFamily": { "headline": [ "Plus Jakarta Sans" ], "display": [ "Plus Jakarta Sans" ], "body": [ "Plus Jakarta Sans" ], "label": [ "Inter" ] }, "fontSize": {} } } }</script><style id="sistema-veiculo">
+</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-dim": "#cbdbf5", "on-tertiary-fixed-variant": "#3f465c", "on-secondary": "#ffffff", "on-primary-fixed-variant": "#003ea8", "background": "#f8f9ff", "error": "#ba1a1a", "inverse-surface": "#213145", "surface-container": "#e5eeff", "tertiary-fixed": "#dae2fd", "on-secondary-fixed-variant": "#005236", "surface": "#f8f9ff", "secondary-container": "#6cf8bb", "secondary": "#006c49", "secondary-fixed": "#6ffbbe", "on-tertiary": "#ffffff", "on-secondary-container": "#00714d", "primary-fixed": "#dbe1ff", "on-surface-variant": "#434655", "surface-variant": "#d3e4fe", "on-error": "#ffffff", "outline": "#737686", "primary": "#004ac6", "on-primary": "#ffffff", "error-container": "#ffdad6", "outline-variant": "#c3c6d7", "surface-container-highest": "#d3e4fe", "on-primary-fixed": "#00174b", "on-primary-container": "#eeefff", "on-tertiary-container": "#eef0ff", "primary-container": "#2563eb", "on-surface": "#0b1c30", "inverse-primary": "#b4c5ff", "surface-tint": "#0053db", "secondary-fixed-dim": "#4edea3", "on-error-container": "#93000a", "surface-container-lowest": "#ffffff", "surface-bright": "#f8f9ff", "primary-fixed-dim": "#b4c5ff", "tertiary": "#4d556b", "surface-container-low": "#eff4ff", "on-tertiary-fixed": "#131b2e", "tertiary-container": "#656d84", "tertiary-fixed-dim": "#bec6e0", "inverse-on-surface": "#eaf1ff", "surface-container-high": "#dce9ff", "on-background": "#0b1c30", "on-secondary-fixed": "#002113" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": {}, "fontFamily": { "headline": [ "Plus Jakarta Sans" ], "display": [ "Plus Jakarta Sans" ], "body": [ "Plus Jakarta Sans" ], "label": [ "Inter" ] }, "fontSize": {} } } }</script><script>document.documentElement.classList.add('carregando');</script>
+<style id="sistema-veiculo">
   header { display: none !important; }
   main { padding-top: 0 !important; }
   body { overflow-x: clip !important; }
+  html.carregando body { opacity: 0; }
+  .ve-input { width: 100%; box-sizing: border-box; border-radius: 0.75rem; border: 1px solid #c3c6d7; background: #f8f9ff; padding: 0.55rem 0.75rem; font-size: 0.875rem; font-weight: 600; color: #0b1c30; }
+  .ve-btn { display: inline-flex; align-items: center; gap: 0.4rem; height: 2.25rem; padding: 0 0.9rem; border-radius: 0.75rem; font-size: 0.8rem; font-weight: 600; border: 1px solid #c3c6d7; background: #fff; color: #0b1c30; cursor: pointer; }
+  .ve-btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .ve-btn-danger { color: #ba1a1a; border-color: rgba(186,26,26,.4); }
+  .ve-label { font-size: 11px; font-weight: 600; color: #434655; text-transform: uppercase; letter-spacing: .05em; }
 </style></head><body class="bg-surface font-body text-on-surface min-h-screen relative overflow-x-hidden antialiased"><div class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.07),rgba(255,255,255,0))]"></div><header class="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(11,28,48,0.03)]"><div class="h-20 max-w-[1440px] mx-auto px-6 lg:px-8 flex items-center justify-between gap-6"><div class="flex items-center gap-10"><div class="flex items-center gap-2 group cursor-pointer"><span class="text-2xl font-headline font-extrabold tracking-tight text-on-surface">Calcula<span class="text-primary-container inline-block font-black">.</span>car</span></div><nav class="hidden xl:flex items-center gap-7" data-active-classes="text-primary font-bold"><a class="text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-path="overview-geral" href="#">Visão Geral</a><a class="text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-path="simulador-financiamento" href="#">Simulador de Financiamento</a><a aria-current="page" class="transition-colors text-primary font-bold" data-path="tabela-fipe-estoque" href="#">Precificação &amp; FIPE</a><a class="text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-path="analise-margem-lucro" href="#">Margem &amp; Retorno</a><a class="text-sm font-label font-medium text-on-surface-variant hover:text-on-surface transition-colors" data-path="propostas-credito" href="#">Propostas de Crédito</a></nav></div><div class="flex items-center gap-4 sm:gap-6"><div class="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container-low shadow-[0_1px_4px_rgba(0,108,73,0.06)]"><span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-fixed-dim opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary"></span></span><span class="text-xs font-label font-semibold text-secondary tracking-tight">Operador F&amp;I Online • Conectado</span></div><button aria-label="Notificações" class="relative p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-container ring-2 ring-surface-container-lowest"></span></button><div class="flex items-center gap-3 pl-2 sm:pl-3 border-l-0"><div class="text-right hidden sm:block"></div></div></div></div></header><main class="w-full pt-20 bg-surface"><div class="flex flex-col w-full relative">
 <!-- ATMOSPHERE & AMBIENT GLOW SYSTEM: Floating Multi-Layered Orbs -->
 <div class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
@@ -492,26 +499,25 @@
 <script id="sistema-veiculo-dados">
 (function () {
   let D = null;
+  let prontoPrimeiro = false;
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const brl = v => (v == null || !isFinite(v)) ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const pctF = v => (v == null || !isFinite(v)) ? '—' : v.toFixed(2).replace('.', ',') + '%';
   const dataBR = d => d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
-  const post = acao => window.parent && window.parent.postMessage({ type: 'acao', acao }, window.location.origin);
+  const dataISO = d => d ? String(d).slice(0, 10) : '';
   const ROT = { em_preparacao: 'Em preparação', disponivel: 'Disponível', reservado: 'Reservado', vendido: 'Vendido', retirado: 'Retirado' };
   const secao = titulo => $$('h2').find(h => h.textContent.trim().startsWith(titulo))?.closest('section') || null;
   const folha = (pred, raiz) => $$('*', raiz || document).find(e => e.children.length === 0 && pred(e.textContent.trim())) || null;
   const linha = (rot, val, cls) => `<div class="flex items-center justify-between py-2 border-b border-outline-variant/30"><span class="text-outline font-medium">${esc(rot)}</span><span class="${cls || 'text-on-surface font-semibold'} tabular-nums">${esc(val)}</span></div>`;
   const total = (rot, val, cls) => `<div class="flex items-center justify-between py-2.5 bg-surface-container-low px-4 rounded-xl mt-2"><span class="text-outline font-semibold">${esc(rot)}</span><span class="${cls || 'text-primary font-bold'} tabular-nums text-base">${esc(val)}</span></div>`;
+  const post = (acao, dados) => window.parent && window.parent.postMessage({ type: 'acao', acao, dados }, window.location.origin);
+  const mostrarPagina = () => document.documentElement.classList.remove('carregando');
 
   function render() {
     if (!D) return;
-    if (D.erro) {
-      const main = $('main');
-      if (main) main.innerHTML = '<div class="p-6 text-sm font-semibold text-on-surface">' + esc(D.erro) + '</div>';
-      return;
-    }
+    if (D.erro) { const m = $('main'); if (m) m.innerHTML = '<div class="p-6 text-sm font-semibold">' + esc(D.erro) + '</div>'; mostrarPagina(); return; }
     const v = D.veiculo, g = D.gestao, fin = D.financiamento, custos = D.custos || [], vendas = D.vendas || [], ck = D.checklist, fotos = D.fotos || [];
     const compra = Number(v.preco_compra || 0), fipe = Number(v.valor_fipe || 0), venda = Number(v.preco_venda_pretendido || 0);
     const totalCustos = custos.reduce((s, c) => s + Number(c.valor || 0), 0);
@@ -526,29 +532,28 @@
     const pF = fipe > 0 ? (diffF / fipe) * 100 : null;
     const km = v.quilometragem != null ? Number(v.quilometragem).toLocaleString('pt-BR') + ' km' : '—';
 
-    // Banner do veiculo
+    // Banner
     const h1 = $('h1'); if (h1) h1.textContent = (v.modelo || '').toUpperCase();
     const status = folha(t => t === 'Disponível para Venda' || Object.values(ROT).includes(t));
     if (status) status.textContent = ROT[v.status] || v.status;
-    const placaTopo = folha(t => t === 'RBV6F64');
+    const placaTopo = folha(t => /^[A-Z0-9]{6,8}$/.test(t) && t !== 'PAY7C93');
     if (placaTopo) placaTopo.textContent = g ? (v.placa || '—') : 'Restrito';
     const precoTopo = $$('div.text-2xl').find(e => /R\$/.test(e.textContent));
     if (precoTopo) precoTopo.textContent = brl(venda);
-    const sub = folha(t => t.startsWith('• Volkswagen') || t.startsWith('• '));
+    const sub = folha(t => t.startsWith('• '));
     if (sub) sub.textContent = '• ' + (v.marca || '') + ' ' + (v.ano_fabricacao || '') + '/' + (v.ano_modelo || '') + ' ' + (v.combustivel || '');
 
     // 1. Identificacao
     const s1 = secao('1. Identificação');
     if (s1) {
       const grade = $('.grid', s1);
-      const campos = [
+      grade.innerHTML = [
         ['Data de aquisição', dataBR(v.data_aquisicao)], ['Placa', g ? (v.placa || '—') : 'Restrito'],
         ['RENAVAM', g ? (v.renavam || '—') : 'Restrito'], ['Chassi', g ? (v.chassi || '—') : 'Restrito'],
         ['Marca', v.marca || '—'], ['Ano de fabricação', v.ano_fabricacao ?? '—'], ['Ano do modelo', v.ano_modelo ?? '—'],
         ['Quilometragem', km], ['Cor', v.cor || '—'], ['Combustível', v.combustivel || '—'], ['Câmbio', v.cambio || '—'],
-        ['Categoria / Carroceria', v.categoria || '—'],
-      ];
-      grade.innerHTML = campos.map(([l, x]) => linha(l, x)).join('') + total('Valor de venda pretendido', brl(venda));
+        ['Categoria / Carroceria', '—'],
+      ].map(([l, x]) => linha(l, x)).join('') + total('Valor de venda pretendido', brl(venda));
     }
 
     // 2. Analise FIPE x Compra
@@ -560,8 +565,6 @@
       if (lista) lista.innerHTML = linha('Valor FIPE', brl(fipe)) + linha('Valor de compra', brl(compra)) + linha('Diferença em reais', brl(diffF), diffF >= 0 ? 'text-secondary font-bold tabular-nums' : 'text-error font-bold tabular-nums');
       const margem = $('.text-lg.font-headline', s2);
       if (margem) margem.textContent = pctF(pF);
-      const rotMargem = folha(t => t.startsWith('Margem Bruta'), s2);
-      if (rotMargem) rotMargem.textContent = 'Margem Bruta disponível.';
     }
 
     // 3. Origem do capital
@@ -571,51 +574,46 @@
       const badge3 = folha(t => t === 'Tabela Price' || t === 'SAC', s3);
       if (badge3) badge3.textContent = modo === 'SAC' ? 'SAC' : 'Tabela Price';
       const lista = $('.flex.flex-col.gap-3', s3);
-      if (lista) {
-        if (!g) lista.innerHTML = '<p class="py-2 text-sm text-on-surface-variant">Restrito ao seu perfil.</p>';
-        else lista.innerHTML =
-          linha('Origem do capital', v.tipo_aquisicao === 'financiamento' ? 'Financiamento' : (v.tipo_aquisicao === 'capital_proprio' ? 'Capital próprio' : '—')) +
-          linha('Modo de financiamento', modo || '—') +
-          linha('Valor financiado', fin ? brl(fin.valor_financiado) : '—') +
-          linha('Taxa de juros', fin ? `${fin.taxa_juros_percentual}% mensal` : '—') +
-          linha('Prazo', fin ? `${fin.quantidade_parcelas} parcelas` : '—') +
-          linha('Valor da parcela', fin ? brl(fin.valor_parcela) : '—') +
-          total('Total de juros', brl(juros), 'text-error font-bold');
-      }
+      if (lista) lista.innerHTML = !g
+        ? '<p class="py-2 text-sm text-on-surface-variant">Restrito ao seu perfil.</p>'
+        : linha('Origem do capital', v.tipo_aquisicao === 'financiamento' ? 'Financiamento' : (v.tipo_aquisicao === 'capital_proprio' ? 'Capital próprio' : '—'))
+          + linha('Modo de financiamento', modo || '—')
+          + linha('Valor financiado', fin ? brl(fin.valor_financiado) : '—')
+          + linha('Taxa de juros', fin ? `${fin.taxa_juros_percentual}% mensal` : '—')
+          + linha('Prazo', fin ? `${fin.quantidade_parcelas} parcelas` : '—')
+          + linha('Valor da parcela', fin ? brl(fin.valor_parcela) : '—')
+          + total('Total de juros', brl(juros), 'text-error font-bold');
     }
 
     // 4. Custos adicionais
     const s4 = secao('4. Custos Adicionais');
     if (s4) {
       const lista = $('.flex.flex-col.gap-1', s4);
-      if (lista) {
-        if (!g) lista.innerHTML = '<p class="py-2 text-sm text-on-surface-variant">Restrito ao seu perfil.</p>';
-        else lista.innerHTML = (custos.length ? custos.map(c => linha(c.descricao, brl(c.valor))).join('') : linha('Nenhum custo cadastrado', '—')) + total('Total Custos Adicionais', brl(totalCustos));
-      }
+      if (lista) lista.innerHTML = !g
+        ? '<p class="py-2 text-sm text-on-surface-variant">Restrito ao seu perfil.</p>'
+        : (custos.length ? custos.map(c => linha(c.descricao, brl(c.valor))).join('') : linha('Nenhum custo cadastrado', '—'))
+          + total('Total Custos Adicionais', brl(totalCustos));
     }
 
-    // 5. Resultado da operacao
+    // 5. Resultado
     const s5 = secao('5. Resultado da Operação');
     if (s5) {
       const sel = folha(t => t === 'Operação Rentável' || t === 'Operação com Prejuízo', s5);
       if (sel) sel.textContent = parcial >= 0 ? 'Operação Rentável' : 'Operação com Prejuízo';
       const grade = $('.grid', s5);
-      if (grade) {
-        if (!g) grade.innerHTML = '<p class="text-sm text-on-surface-variant">Restrito ao seu perfil.</p>';
-        else grade.innerHTML =
-          `<div class="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-outline">Investimento Total</span><span class="text-[11px] font-label text-tertiary">Compra + Juros + Custos</span></div><div class="text-xl sm:text-2xl font-headline font-extrabold text-on-surface tabular-nums">${brl(invest)}</div></div>` +
-          `<div class="p-4 rounded-xl bg-secondary-container/30 border border-secondary/25 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-on-secondary-container font-bold">Resultado Parcial</span><span class="text-[11px] font-label text-secondary font-semibold">Venda pretendida</span></div><div class="text-right"><div class="text-xl sm:text-2xl font-headline font-extrabold tabular-nums ${parcial >= 0 ? 'text-secondary' : 'text-error'}">${brl(parcial)}</div><div class="text-xs font-label font-bold ${parcial >= 0 ? 'text-secondary' : 'text-error'}">${pctF(pParc)} de margem</div></div></div>` +
-          (v0 ? `<div class="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-outline">Resultado Final da Venda</span><span class="text-[11px] font-label text-tertiary">Venda − despesas − descontos − investimento</span></div><div class="text-right"><div class="text-xl sm:text-2xl font-headline font-extrabold tabular-nums ${final >= 0 ? 'text-secondary' : 'text-error'}">${brl(final)}</div><div class="text-xs font-label font-bold">${pctF(pFinal)}</div></div></div>` : '');
-      }
+      if (grade) grade.innerHTML = !g
+        ? '<p class="text-sm text-on-surface-variant">Restrito ao seu perfil.</p>'
+        : `<div class="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-outline">Investimento Total</span><span class="text-[11px] font-label text-tertiary">Compra + Juros + Custos</span></div><div class="text-xl sm:text-2xl font-headline font-extrabold text-on-surface tabular-nums">${brl(invest)}</div></div>`
+          + `<div class="p-4 rounded-xl bg-secondary-container/30 border border-secondary/25 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-on-secondary-container font-bold">Resultado Parcial</span><span class="text-[11px] font-label text-secondary font-semibold">Venda pretendida</span></div><div class="text-right"><div class="text-xl sm:text-2xl font-headline font-extrabold tabular-nums ${parcial >= 0 ? 'text-secondary' : 'text-error'}">${brl(parcial)}</div><div class="text-xs font-label font-bold ${parcial >= 0 ? 'text-secondary' : 'text-error'}">${pctF(pParc)} de margem</div></div></div>`
+          + (v0 ? `<div class="p-4 rounded-xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex items-center justify-between"><div class="flex flex-col"><span class="text-xs font-label uppercase tracking-wider text-outline">Resultado Final da Venda</span><span class="text-[11px] font-label text-tertiary">Venda − despesas − descontos − investimento</span></div><div class="text-right"><div class="text-xl sm:text-2xl font-headline font-extrabold tabular-nums ${final >= 0 ? 'text-secondary' : 'text-error'}">${brl(final)}</div><div class="text-xs font-label font-bold">${pctF(pFinal)}</div></div></div>` : '');
     }
 
     // Fotos
     const grade = $$('div.grid').find(d => d.querySelector('img[data-alt]'));
     if (grade) {
       const slot = grade.lastElementChild ? grade.lastElementChild.outerHTML : '';
-      const urls = fotos.filter(f => f.url);
-      grade.innerHTML = urls.map((f, i) =>
-        `<a href="${esc(f.url)}" target="_blank" rel="noopener" class="group relative block aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"><img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" src="${esc(f.url)}" alt="Foto ${i + 1}" loading="lazy"></a>`
+      grade.innerHTML = fotos.filter(f => f.url).map((f, i) =>
+        `<div class="group relative aspect-[4/3] rounded-xl overflow-hidden bg-surface-container-high border border-outline-variant/30 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"><a href="${esc(f.url)}" target="_blank" rel="noopener" class="block w-full h-full"><img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" src="${esc(f.url)}" alt="Foto ${i + 1}" loading="lazy"></a>${g ? `<button type="button" data-del-foto="${esc(f.id)}" data-caminho="${esc(f.caminho)}" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-error text-white flex items-center justify-center shadow" aria-label="Excluir foto"><span class="material-symbols-outlined text-[15px]">delete</span></button>` : ''}</div>`
       ).join('') + slot;
     }
     const contFotos = folha(t => /^\(\d+\) • /.test(t));
@@ -625,46 +623,165 @@
     const s7 = secao('Checklist do Veículo');
     if (s7) {
       const grade7 = $('.grid', s7);
-      const itens = D.itensChecklist || [];
       const docs = D.docLabels || {};
-      if (grade7) {
-        if (!ck) grade7.innerHTML = '<p class="py-2 text-sm text-on-surface-variant">Checklist não preenchido.</p>';
-        else grade7.innerHTML = itens.map(([k, rot]) => {
-          const val = ck[k];
-          const st = val === true ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span>'
-            : (val === false ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-outline"><span class="material-symbols-outlined text-[16px]">cancel</span>Não</span>'
-            : '<span class="text-xs font-medium text-outline">Não informado</span>');
-          return `<div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">${esc(rot)}</span>${st}</div>`;
-        }).join('') + `<div class="flex items-center justify-between py-3 border-b border-outline-variant/30 bg-surface-container-low px-3 rounded-lg"><span class="text-on-surface-variant font-medium">Documentação</span><span class="text-xs font-bold text-secondary inline-flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">verified</span>${esc(docs[ck.documentacao_status] || 'Não informado')}</span></div>`;
-      }
+      if (grade7) grade7.innerHTML = !ck
+        ? '<p class="py-2 text-sm text-on-surface-variant">Checklist não preenchido.</p>'
+        : (D.itensChecklist || []).map(([k, rot]) => {
+            const val = ck[k];
+            const st = val === true ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-primary"><span class="material-symbols-outlined text-[16px]">check_circle</span>Sim</span>'
+              : (val === false ? '<span class="inline-flex items-center gap-1 text-xs font-bold text-outline"><span class="material-symbols-outlined text-[16px]">cancel</span>Não</span>'
+              : '<span class="text-xs font-medium text-outline">Não informado</span>');
+            return `<div class="flex items-center justify-between py-3 border-b border-outline-variant/30"><span class="text-on-surface-variant">${esc(rot)}</span>${st}</div>`;
+          }).join('') + `<div class="flex items-center justify-between py-3 border-b border-outline-variant/30 bg-surface-container-low px-3 rounded-lg"><span class="text-on-surface-variant font-medium">Documentação</span><span class="text-xs font-bold text-secondary inline-flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">verified</span>${esc(docs[ck.documentacao_status] || 'Não informado')}</span></div>`;
       const obsRot = folha(t => t === 'Observações', s7);
       if (obsRot && obsRot.nextElementSibling) obsRot.nextElementSibling.textContent = ck ? (ck.observacoes || '—') : '—';
     }
 
-    // Acoes e links
+    // Esconde os botoes de edicao para quem nao pode editar
+    $$('button').forEach(b => { if (/Editar/.test(b.textContent) && !g) b.style.display = 'none'; });
+    if (!g) { const b = $('#btn-registrar-venda'); if (b) b.style.display = 'none'; const x = $('#btn-excluir-veiculo'); if (x) x.style.display = 'none'; }
+
     const sup = $('a[data-path="suporte-especializado"]');
     if (sup) { sup.setAttribute('href', 'https://wa.me/5561991432700?text=Preciso%20de%20ajuda%20para%20acessar%20a%20plataforma%20CALCULA.CAR%20'); sup.setAttribute('target', '_blank'); sup.setAttribute('rel', 'noopener noreferrer'); }
+    mostrarPagina();
   }
 
-  // Acoes: voltar, editar, venda, fotos, excluir e PDF passam pelo sistema
-  document.addEventListener('click', e => {
-    const el = e.target.closest('button, a');
-    if (!el) return;
-    if (el.dataset.path === 'todas-as-calculadoras') { e.preventDefault(); return post('voltar'); }
-    if (el.id === 'btn-export-pdf') { e.preventDefault(); return post('pdf'); }
-    if (el.id === 'btn-excluir-veiculo') { e.preventDefault(); return post('excluir'); }
-    if (el.id === 'btn-registrar-venda') { e.preventDefault(); return post('completo'); }
-    const t = el.textContent.trim();
-    if (el.tagName === 'BUTTON' && (t.includes('Editar') || t.includes('Escolher fotos') || t.includes('Baixar todas') || t.includes('Compartilhar todas'))) {
-      e.preventDefault(); return post('completo');
+  /* ----- Edicao dentro do design ----- */
+  function editarSecao1() {
+    const s = secao('1. Identificação'); if (!s || !D) return;
+    const v = D.veiculo;
+    const campos = [
+      ['data_aquisicao', 'Data de aquisição', 'date', dataISO(v.data_aquisicao)], ['placa', 'Placa', 'text', v.placa || ''],
+      ['renavam', 'RENAVAM', 'text', v.renavam || ''], ['chassi', 'Chassi', 'text', v.chassi || ''],
+      ['marca', 'Marca', 'text', v.marca || ''], ['modelo', 'Modelo', 'text', v.modelo || ''],
+      ['ano_fabricacao', 'Ano de fabricação', 'text', v.ano_fabricacao ?? ''], ['ano_modelo', 'Ano do modelo', 'text', v.ano_modelo ?? ''],
+      ['cor', 'Cor', 'text', v.cor || ''], ['quilometragem', 'Quilometragem (km)', 'text', v.quilometragem ?? ''],
+      ['combustivel', 'Combustível', 'text', v.combustivel || ''], ['cambio', 'Câmbio', 'text', v.cambio || ''],
+      ['preco_compra', 'Valor de compra (R$)', 'text', v.preco_compra ?? ''], ['valor_fipe', 'Valor FIPE (R$)', 'text', v.valor_fipe ?? ''],
+      ['preco_venda_pretendido', 'Valor de venda pretendido (R$)', 'text', v.preco_venda_pretendido ?? ''],
+    ];
+    const grade = $('.grid', s);
+    grade.innerHTML = campos.map(([k, l, t, val]) => `<div class="space-y-1 min-w-0"><div class="ve-label">${l}</div><input class="ve-input" data-k="${k}" type="${t}" value="${esc(val)}"></div>`).join('')
+      + `<div class="md:col-span-2 lg:col-span-3 flex justify-end gap-2 mt-2"><button type="button" class="ve-btn" data-cancel>Cancelar</button><button type="button" class="ve-btn ve-btn-primary" data-save>Salvar alterações</button></div>`;
+  }
+  function salvarSecao1() {
+    const dados = {};
+    document.querySelectorAll('[data-k]').forEach(el => { dados[el.dataset.k] = el.value; });
+    post('salvar-dados', dados);
+  }
+
+  function editarCustos() {
+    const s = secao('4. Custos Adicionais'); if (!s || !D) return;
+    const lista = $('.flex.flex-col.gap-1', s);
+    lista.innerHTML = (D.custos || []).map(c => `<div class="flex items-center justify-between gap-3 py-2 border-b border-outline-variant/30"><span class="text-sm text-on-surface">${esc(c.descricao)}</span><span class="flex items-center gap-3"><span class="text-sm font-semibold tabular-nums">${brl(c.valor)}</span><button type="button" class="ve-btn ve-btn-danger" data-del-custo="${esc(c.id)}">Excluir</button></span></div>`).join('')
+      + `<div class="grid grid-cols-1 sm:grid-cols-[1fr_140px_auto] gap-2 pt-3"><input class="ve-input" data-novo="descricao" placeholder="Descrição"><input class="ve-input" data-novo="valor" placeholder="Valor (R$)"><button type="button" class="ve-btn ve-btn-primary" data-add-custo>Adicionar</button></div>`
+      + `<div class="flex justify-end pt-3"><button type="button" class="ve-btn" data-cancel>Concluir</button></div>`;
+  }
+
+  function editarChecklist() {
+    const s = secao('Checklist do Veículo'); if (!s || !D) return;
+    const ck = D.checklist || {};
+    const docs = D.docLabels || {};
+    const sel = (k, val) => `<select class="ve-input" style="width:auto" data-ck="${k}"><option value="">Não informado</option><option value="true" ${val === true ? 'selected' : ''}>Sim</option><option value="false" ${val === false ? 'selected' : ''}>Não</option></select>`;
+    const grade = $('.grid', s);
+    grade.innerHTML = (D.itensChecklist || []).map(([k, rot]) => `<div class="flex items-center justify-between py-2.5 border-b border-outline-variant/30 gap-3"><span class="text-on-surface-variant text-sm">${esc(rot)}</span>${sel(k, ck[k] ?? null)}</div>`).join('')
+      + `<div class="flex items-center justify-between py-2.5 border-b border-outline-variant/30 gap-3"><span class="text-on-surface-variant text-sm">Documentação</span><select class="ve-input" style="width:auto" data-ck="documentacao_status">${Object.entries(docs).map(([k, l]) => `<option value="${k}" ${ck.documentacao_status === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`
+      + `<div class="md:col-span-2 pt-3"><div class="ve-label mb-1">Observações</div><textarea class="ve-input" data-ck="observacoes" rows="2">${esc(ck.observacoes || '')}</textarea></div>`
+      + `<div class="md:col-span-2 flex justify-end gap-2 pt-3"><button type="button" class="ve-btn" data-cancel>Cancelar</button><button type="button" class="ve-btn ve-btn-primary" data-save-ck>Salvar checklist</button></div>`;
+  }
+  function salvarChecklist() {
+    const dados = {};
+    document.querySelectorAll('[data-ck]').forEach(el => {
+      const k = el.dataset.ck; const val = el.value;
+      if (k === 'observacoes') dados[k] = val.trim() || null;
+      else if (k === 'documentacao_status') dados[k] = val || 'nao_informado';
+      else dados[k] = val === '' ? null : val === 'true';
+    });
+    post('salvar-checklist', dados);
+  }
+
+  function escolherFotos() {
+    let inp = document.getElementById('input-fotos');
+    if (!inp) {
+      inp = document.createElement('input');
+      inp.type = 'file'; inp.id = 'input-fotos'; inp.multiple = true;
+      inp.accept = 'image/jpeg,image/png,image/webp';
+      inp.style.display = 'none';
+      inp.addEventListener('change', () => {
+        const arquivos = Array.from(inp.files || []);
+        inp.value = '';
+        if (arquivos.length) post('upload-fotos', { arquivos });
+      });
+      document.body.appendChild(inp);
     }
-  }, true);
+    inp.click();
+  }
+
+  /* Venda: formulario inline acima do botao */
+  function abrirVenda() {
+    if (document.getElementById('form-venda')) return;
+    const btn = document.getElementById('btn-registrar-venda');
+    if (!btn) return;
+    const hoje = new Date().toISOString().slice(0, 10);
+    const f = document.createElement('div');
+    f.id = 'form-venda';
+    f.className = 'rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4 grid grid-cols-1 sm:grid-cols-4 gap-3';
+    f.innerHTML = `<div class="space-y-1"><div class="ve-label">Data da venda</div><input class="ve-input" type="date" data-v="data_venda" value="${hoje}"></div>
+      <div class="space-y-1"><div class="ve-label">Valor de venda (R$)</div><input class="ve-input" data-v="valor_venda" placeholder="0,00"></div>
+      <div class="space-y-1"><div class="ve-label">Despesas (R$)</div><input class="ve-input" data-v="despesas_venda" placeholder="0,00"></div>
+      <div class="space-y-1"><div class="ve-label">Descontos (R$)</div><input class="ve-input" data-v="descontos" placeholder="0,00"></div>
+      <div class="sm:col-span-4 flex justify-end gap-2"><button type="button" class="ve-btn" data-cancel-venda>Cancelar</button><button type="button" class="ve-btn ve-btn-primary" data-confirmar-venda>Confirmar venda</button></div>`;
+    btn.parentElement.parentElement.insertBefore(f, btn.parentElement);
+  }
+  function confirmarVenda() {
+    const dados = {};
+    document.querySelectorAll('[data-v]').forEach(el => { dados[el.dataset.v] = el.value; });
+    post('registrar-venda', dados);
+  }
+
+  /* Delegacao unica de cliques */
+  document.addEventListener('click', e => {
+    const t = e.target;
+    const hit = sel => t.closest(sel);
+    let b;
+    if ((b = hit('[data-del-custo]'))) { e.preventDefault(); return post('del-custo', { id: b.dataset.delCusto }); }
+    if (hit('[data-add-custo]')) {
+      e.preventDefault();
+      return post('add-custo', { descricao: document.querySelector('[data-novo="descricao"]')?.value, valor: document.querySelector('[data-novo="valor"]')?.value });
+    }
+    if ((b = hit('[data-del-foto]'))) { e.preventDefault(); return post('del-foto', { id: b.dataset.delFoto, caminho: b.dataset.caminho }); }
+    if (hit('[data-save]')) { e.preventDefault(); return salvarSecao1(); }
+    if (hit('[data-save-ck]')) { e.preventDefault(); return salvarChecklist(); }
+    if (hit('[data-confirmar-venda]')) { e.preventDefault(); return confirmarVenda(); }
+    if (hit('[data-cancel-venda]')) { e.preventDefault(); const f = document.getElementById('form-venda'); if (f) f.remove(); return; }
+    if (hit('[data-cancel]')) { e.preventDefault(); return render(); }
+    if (hit('#btn-export-pdf')) { e.preventDefault(); return post('pdf'); }
+    if (hit('#btn-excluir-veiculo')) { e.preventDefault(); return post('excluir'); }
+    if (hit('#btn-registrar-venda')) { e.preventDefault(); return abrirVenda(); }
+    if (hit('a[data-path="todas-as-calculadoras"]')) { e.preventDefault(); return post('voltar'); }
+    const btn = hit('button'); if (!btn) return;
+    const txt = btn.textContent.trim();
+    const sec = btn.closest('section');
+    const titulo = sec ? (sec.querySelector('h2')?.textContent || '').trim() : '';
+    if (txt.includes('Editar') && titulo.startsWith('1.')) { e.preventDefault(); return editarSecao1(); }
+    if (txt.includes('Editar') && titulo.startsWith('4.')) { e.preventDefault(); return editarCustos(); }
+    if (txt.includes('Editar') && titulo.startsWith('Checklist')) { e.preventDefault(); return editarChecklist(); }
+    if (txt.includes('Escolher fotos') || (txt.includes('Editar') && titulo.startsWith('Fotos'))) { e.preventDefault(); return escolherFotos(); }
+    if (txt.includes('Baixar todas')) { e.preventDefault(); return (D?.fotos || []).forEach(f => f.url && window.open(f.url, '_blank')); }
+    if (txt.includes('Compartilhar todas')) {
+      e.preventDefault();
+      const links = (D?.fotos || []).map(f => f.url).filter(Boolean).join('\n');
+      if (navigator.clipboard && links) navigator.clipboard.writeText(links).then(() => alert('Links das fotos copiados.'));
+      return;
+    }
+  });
 
   window.addEventListener('message', e => {
     if (e.source !== window.parent) return;
     const d = e.data || {};
-    if (d.type === 'dados') { D = d; try { render(); } catch (err) { console.error(err); } }
+    if (d.type === 'dados') { D = d; prontoPrimeiro = true; try { render(); } catch (err) { console.error(err); mostrarPagina(); } }
   });
+  setTimeout(() => { if (!prontoPrimeiro) mostrarPagina(); }, 2500);
   window.parent && window.parent.postMessage({ type: 'pronto' }, window.location.origin);
 })();
 </script></body></html>
