@@ -230,17 +230,16 @@ export default function CalculaCar() {
           {/* 1. Dados do Veículo */}
           <div style={{ ...card, padding: 22, marginTop: 16, boxShadow: "var(--shadow-md)" }}>
             <SectionTitle icon={Car} n={1}>Dados do Veículo</SectionTitle>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(175px,1fr))", gap: 14 }}>
-              <Field label="Marca" val={marca} set={setMarca} hint="Ex: Volkswagen" />
-
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 14 }}>
               <div>
                 <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Data de aquisição *</label>
                 <input type="date" value={dataAquisicao} onChange={(e) => setDataAquisicao(e.target.value)} style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 }} />
               </div>
-              <Field label="Modelo do veículo" val={modelo} set={setModelo} hint="Ex: Toyota Corolla XEi 2.0" />
               <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" />
-              <Field label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
               <Field label="Chassi" val={chassi} set={setChassi} hint="17 caracteres" />
+              <Field label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
+              <Field label="Marca" val={marca} set={setMarca} hint="Ex: Volkswagen" />
+              <Field label="Modelo do veículo" val={modelo} set={setModelo} hint="Ex: Toyota Corolla XEi 2.0" />
               <Field label="Ano de fabricação" val={anoFab} set={setAnoFab} hint="Ex: 2020" />
               <Field label="Ano do modelo" val={anoMod} set={setAnoMod} hint="Ex: 2021" />
               <Field label="Cor" val={cor} set={setCor} hint="Ex: Prata" />

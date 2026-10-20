@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PageTransition from "../components/PageTransition";
 import Header from "../components/Header";
-import BackLink from "../components/BackLink";
 import Sino from "../components/Sino";
 import { useMarca } from "../lib/marca";
 
@@ -38,7 +37,6 @@ export default function Amortizacao() {
     <PageTransition>
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Simulador de Amortização Extraordinária" />
-        <BackLink />
         <iframe
           ref={frame}
           src="/calculadora-amortizacao.html"
