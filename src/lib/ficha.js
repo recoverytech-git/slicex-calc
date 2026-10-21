@@ -62,12 +62,12 @@ export function gerarPdf(registros, jsPDF, autoTable) {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   registros.forEach((r, idx) => {
     if (idx > 0) doc.addPage();
-    doc.setFillColor(10, 10, 10);
+    doc.setFillColor(14, 26, 46);
     doc.rect(0, 0, 210, 26, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(15);
-    doc.text("SliceX.calc · Ficha financeira", 14, 12);
+    doc.text("CALCULA.CAR · Ficha financeira", 14, 12);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.text(`${r.nome || ""}  ·  CPF ${r.cpf ? formatarCPF(r.cpf) : "—"}  ·  ${new Date().toLocaleDateString("pt-BR")}`, 14, 20);
@@ -100,11 +100,11 @@ export function gerarPngBlob(registro) {
   c.width = W;
   c.height = H;
   const g = c.getContext("2d");
-  g.fillStyle = "#0a0a0a";
+  g.fillStyle = "#0E1A2E";
   g.fillRect(0, 0, W, H);
   g.fillStyle = "#ffffff";
   g.font = "bold 30px sans-serif";
-  g.fillText("SliceX.calc · Ficha financeira", pad, 64);
+  g.fillText("CALCULA.CAR · Ficha financeira", pad, 64);
   g.fillStyle = "#9198A1";
   g.font = "18px sans-serif";
   g.fillText(`${registro.nome || ""}  ·  CPF ${registro.cpf ? formatarCPF(registro.cpf) : "—"}`, pad, 100);

@@ -18,7 +18,7 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   const final = venda ? Number(venda.valor_venda) - Number(venda.despesas_venda ?? 0) - Number(venda.descontos ?? 0) - investimento : null;
   const pct = (r) => (r == null || !investimento ? "—" : `${((r / investimento) * 100).toFixed(2)}%`);
 
-  doc.setFillColor(10, 10, 10);
+  doc.setFillColor(14, 26, 46);
   doc.rect(0, 0, W, 26, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -26,7 +26,7 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   doc.text(`${v.modelo || "Veículo"}`, M, 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(`SliceX.calc · Ficha do veículo · Gerado em ${new Date().toLocaleString("pt-BR")}`, M, 20);
+  doc.text(`CALCULA.CAR · Ficha do veículo · Gerado em ${new Date().toLocaleString("pt-BR")}`, M, 20);
 
   const titulo = (t) => {
     if (y > 262) { doc.addPage(); y = 16; }
@@ -124,7 +124,7 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
     doc.setPage(p);
     doc.setFontSize(7);
     doc.setTextColor(150, 150, 150);
-    doc.text(`SliceX.calc · Página ${p}/${paginas}`, M, 292);
+    doc.text(`CALCULA.CAR · Página ${p}/${paginas}`, M, 292);
   }
   return doc;
 }

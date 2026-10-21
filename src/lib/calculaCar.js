@@ -162,14 +162,14 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data }) {
   const PAGE_W = 210;
 
   // Header
-  doc.setFillColor(0, 0, 0);
+  doc.setFillColor(14, 26, 46);
   doc.rect(0, 0, PAGE_W, 26, "F");
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 26, PAGE_W, 0.6, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(15);
-  doc.text("SliceX.calc  ·  Calcula-Car", 14, 12);
+  doc.text("CALCULA.CAR  ·  Calcula-Car", 14, 12);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(`Análise de Compra e Venda Veicular · Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, 20);

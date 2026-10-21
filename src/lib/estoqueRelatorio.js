@@ -3,12 +3,12 @@ export function buildEstoquePDF({ jsPDF, autoTable, itens, rotulos }) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const fmt = (v) => (v == null ? "—" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }));
 
-  doc.setFillColor(0, 0, 0);
+  doc.setFillColor(14, 26, 46);
   doc.rect(0, 0, 297, 22, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
-  doc.text("SliceX.calc · Estoque de veículos", 14, 10);
+  doc.text("CALCULA.CAR · Estoque de veículos", 14, 10);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")} · ${itens.length} veículo(s)`, 14, 17);

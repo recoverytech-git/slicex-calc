@@ -6,7 +6,9 @@ import Header from "../components/Header";
 import { ITENS, DOCUMENTACAO } from "../components/ChecklistVeiculo";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
-import { BUCKET_FOTOS } from "../lib/fotos";
+import { BUCKET_FOTOS, enviarFotos } from "../lib/fotos";
+import { criarZip } from "../lib/zip";
+import { baixarBlob, gerarGaleriaHtml, slug } from "../lib/galeriaFotos";
 import { gerarPdfVeiculo } from "../lib/veiculoPdf";
 import { excluirVeiculo } from "../lib/estoque";
 
@@ -170,23 +172,40 @@ export default function VeiculoDetalheVisual() {
             break;
           }
           case "upload-fotos": {
-            const arquivos = x.arquivos || [];
             const atuais = cache.current?.fotos?.length || 0;
-            if (atuais + arquivos.length > MAX_FOTOS) { alert(`Limite de ${MAX_FOTOS} fotos por veículo.`); return; }
-            for (const f of arquivos) {
-              if (!TIPOS_FOTO.includes(f.type)) { alert("Use fotos JPG, PNG ou WebP."); return; }
-              if (f.size > MAX_BYTES) { alert("Foto acima de 8 MB."); return; }
-            }
-            for (let i = 0; i < arquivos.length; i++) {
-              const f = arquivos[i];
-              const ext = (f.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
-              const caminho = `${id}/${Date.now()}-${i}.${ext}`;
-              const { error: eu } = await supabase.storage.from(BUCKET_FOTOS).upload(caminho, f, { contentType: f.type, upsert: false });
-              if (eu) { alert(eu.message); return; }
-              const { error: ei } = await supabase.from("veiculo_fotos").insert({ veiculo_id: id, caminho_storage: caminho, ordem_exibicao: atuais + i + 1, criado_por: uid });
-              if (ei) { alert(ei.message); return; }
-            }
+            const { error: eUp } = await enviarFotos({ organizacaoId: perfil?.organizacao_id, veiculoId: id, userId: uid, arquivos: x.arquivos || [], jaEnviadas: atuais });
+            if (eUp) { alert(eUp.message); return; }
             await carregar();
+            break;
+          }
+          case "baixar-fotos": {
+            const lista = (cache.current?.fotos || []).filter((f) => f.url);
+            if (!lista.length) { alert("Não há fotos para baixar."); return; }
+            const arquivos = [];
+            for (let k = 0; k < lista.length; k++) {
+              const r = await fetch(lista[k].url);
+              const ext = (lista[k].caminho.split(".").pop() || "jpg").toLowerCase();
+              arquivos.push({ name: `foto-${String(k + 1).padStart(2, "0")}.${ext}`, data: new Uint8Array(await r.arrayBuffer()) });
+            }
+            baixarBlob(criarZip(arquivos), `fotos-${slug(cache.current.veiculo.modelo)}.zip`);
+            break;
+          }
+          case "compartilhar-fotos": {
+            const c = cache.current;
+            const lista = (c?.fotos || []).filter((f) => f.url);
+            if (!lista.length) { alert("Não há fotos para compartilhar."); return; }
+            const imagens = (await Promise.all(lista.map((f) => urlParaDataUrl(f.url)))).filter(Boolean);
+            const titulo = `Fotos - ${c.veiculo.modelo || "Veículo"}`;
+            const html = gerarGaleriaHtml({ titulo, subtitulo: [c.veiculo.marca, c.veiculo.ano_modelo].filter(Boolean).join(" · "), imagens });
+            const nome = `galeria-${slug(c.veiculo.modelo)}.html`;
+            const arquivo = new Blob([html], { type: "text/html" });
+            const file = new File([arquivo], nome, { type: "text/html" });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              try { await navigator.share({ files: [file], title: titulo }); }
+              catch (err) { if (err?.name !== "AbortError") baixarBlob(arquivo, nome); }
+            } else {
+              baixarBlob(arquivo, nome);
+            }
             break;
           }
           case "del-foto": {
