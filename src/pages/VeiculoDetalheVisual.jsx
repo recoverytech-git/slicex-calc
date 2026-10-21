@@ -216,6 +216,20 @@ export default function VeiculoDetalheVisual() {
             }
             break;
           }
+          case "del-foto": {
+            const { error: eSt } = await supabase.storage.from(BUCKET_FOTOS).remove([x.caminho]);
+            if (eSt) { alert(`Não foi possível remover o arquivo: ${eSt.message}`); return; }
+            const { error } = await supabase.from("veiculo_fotos").delete().eq("id", x.id);
+            if (error) { alert(`Não foi possível excluir a foto: ${error.message}`); return; }
+            await carregar();
+            break;
+          }
+          case "mudar-status": {
+            const { error } = await supabase.from("veiculos").update({ status: x.status }).eq("id", id);
+            if (error) { alert(`Não foi possível mudar o status: ${error.message}`); return; }
+            await carregar();
+            break;
+          }
           case "registrar-venda": {
             const valor = numero(x.valor_venda);
             if (valor == null || valor <= 0) { alert("Informe o valor de venda."); return; }

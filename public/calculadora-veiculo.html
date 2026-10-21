@@ -98,6 +98,9 @@
   .ve-btn-danger { color: #ba1a1a; border-color: rgba(186,26,26,.4); }
   .ve-label { font-size: 11px; font-weight: 600; color: #434655; text-transform: uppercase; letter-spacing: .05em; }
 </style><style id="sistema-veiculo-extra">
+  .status-pill { padding: 6px 12px; border-radius: 999px; border: 1px solid #c3c6d7; background: #fff; color: #434655; font: 600 12px Inter, sans-serif; cursor: pointer; transition: all .2s; }
+  .status-pill:hover { background: #eff4ff; }
+  .status-pill.on { background: #2563eb; color: #fff; border-color: #2563eb; }
   .ck-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 14px; background: #eff4ff; border: 1px solid #d3e4fe; }
   .ck-seg button { padding: 6px 12px; border-radius: 10px; border: 0; background: transparent; color: #434655; font: 600 12px Inter, sans-serif; cursor: pointer; transition: all .2s; }
   .ck-seg button:hover { background: #e0e9ff; }
@@ -620,6 +623,14 @@
       if (obsRot && obsRot.nextElementSibling) obsRot.nextElementSibling.textContent = ck ? (ck.observacoes || '—') : '—';
     }
 
+    // Status do veiculo (mudanca direta para quem pode gerir)
+    const colBanner = h1 ? h1.parentElement : null;
+    if (colBanner && g) {
+      let ctl = document.getElementById('status-controle');
+      if (!ctl) { ctl = document.createElement('div'); ctl.id = 'status-controle'; ctl.className = 'flex flex-wrap items-center gap-2 pt-2'; colBanner.appendChild(ctl); }
+      ctl.innerHTML = '<span class="ve-label mr-1">Status</span>' + Object.entries(ROT).map(([k, r]) => `<button type="button" data-status-set="${k}" class="status-pill ${v.status === k ? 'on' : ''}">${r}</button>`).join('');
+    }
+
     // Esconde os botoes de edicao para quem nao pode editar
     $$('button').forEach(b => { if (/Editar/.test(b.textContent) && !g) b.style.display = 'none'; });
     if (!g) { const b = $('#btn-registrar-venda'); if (b) b.style.display = 'none'; const x = $('#btn-excluir-veiculo'); if (x) x.style.display = 'none'; }
@@ -740,7 +751,7 @@
       e.preventDefault();
       return post('add-custo', { descricao: document.querySelector('[data-novo="descricao"]')?.value, valor: document.querySelector('[data-novo="valor"]')?.value });
     }
-    if ((b = hit('[data-del-foto]'))) { e.preventDefault(); if (!window.confirm('Excluir esta foto? Esta ação não pode ser desfeita.')) return; return post('del-foto', { id: b.dataset.delFoto, caminho: b.dataset.caminho }); }
+    if ((b = hit('[data-del-foto]'))) { e.preventDefault(); return abrirConfirmacao({ titulo: 'Excluir esta foto?', texto: 'A foto será removida do veículo. Esta ação não pode ser desfeita.', rotuloOk: 'Excluir foto', onOk: () => post('del-foto', { id: b.dataset.delFoto, caminho: b.dataset.caminho }) }); }
     if (hit('[data-save]')) { e.preventDefault(); return salvarSecao1(); }
     if (hit('[data-save-ck]')) { e.preventDefault(); return salvarChecklist(); }
     if (hit('[data-confirmar-venda]')) { e.preventDefault(); return confirmarVenda(); }
@@ -750,6 +761,7 @@
     if (hit('#btn-excluir-veiculo')) { e.preventDefault(); return post('excluir'); }
     if (hit('#btn-registrar-venda')) { e.preventDefault(); return abrirVenda(); }
     if (hit('a[data-path="todas-as-calculadoras"]')) { e.preventDefault(); return post('voltar'); }
+    if ((b = hit('[data-status-set]'))) { e.preventDefault(); return post('mudar-status', { status: b.dataset.statusSet }); }
     if ((b = hit('[data-zoom]'))) { e.preventDefault(); return abrirZoom(Number(b.dataset.zoom)); }
     if ((b = hit('.ck-seg button'))) { e.preventDefault(); b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); return; }
     const slot = t.closest('div.cursor-pointer');
@@ -765,6 +777,24 @@
     if (txt.includes('Baixar todas')) { e.preventDefault(); return post('baixar-fotos'); }
     if (txt.includes('Compartilhar todas')) { e.preventDefault(); return post('compartilhar-fotos'); }
   }, true);
+
+  /* Confirmacao no padrao visual do sistema */
+  function abrirConfirmacao({ titulo, texto, rotuloOk, onOk }) {
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(11,28,48,.45);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.innerHTML = `<div style="width:100%;max-width:420px;background:#fff;border-radius:20px;border:1px solid rgba(226,232,240,.9);box-shadow:0 25px 50px -12px rgba(15,23,42,.25);padding:24px">`
+      + `<div style="display:flex;gap:14px;align-items:flex-start"><div style="width:44px;height:44px;border-radius:14px;background:#ffdad6;color:#ba1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-symbols-outlined">delete</span></div>`
+      + `<div><h3 style="margin:0;font:800 17px 'Plus Jakarta Sans',sans-serif;color:#0b1c30">${titulo}</h3><p style="margin:6px 0 0;font:500 13px Inter,sans-serif;color:#434655;line-height:1.5">${texto}</p></div></div>`
+      + `<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px"><button type="button" data-ok="nao" class="ve-btn">Cancelar</button>`
+      + `<button type="button" data-ok="sim" style="height:2.25rem;padding:0 1rem;border-radius:.75rem;border:0;background:#ba1a1a;color:#fff;font:700 13px Inter,sans-serif;cursor:pointer">${rotuloOk}</button></div></div>`;
+    ov.addEventListener('click', e => {
+      const b = e.target.closest('[data-ok]');
+      if (!b) { if (e.target === ov) ov.remove(); return; }
+      ov.remove();
+      if (b.dataset.ok === 'sim') onOk();
+    });
+    document.body.appendChild(ov);
+  }
 
   /* Visualizador de fotos dentro da tela */
   let lbIdx = 0;

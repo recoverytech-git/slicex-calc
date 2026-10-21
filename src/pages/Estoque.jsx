@@ -13,28 +13,47 @@ import { useMarca } from "../lib/marca";
 
 const ROTULO = { em_preparacao: "Em preparação", disponivel: "Disponível", reservado: "Reservado", vendido: "Vendido", retirado: "Retirado" };
 
-/** Regras do painel de estoque:
- * - Valor total em patio = soma dos precos de venda pretendidos (veiculos nao vendidos)
- * - Capital investido = soma dos valores de compra + custos adicionais
- * - Margem estimada = potencial de venda - capital investido; percentual sobre o potencial de venda
- * - Ticket medio = (menor preco + maior preco) / 2 */
+/** Regras do painel de estoque, com duas bases de venda (pela FIPE e pelo valor pretendido):
+ * - Potencial FIPE = soma dos valores FIPE dos veiculos do patio
+ * - Potencial acima da FIPE = soma dos valores pretendidos dos veiculos do patio
+ * - Capital investido = compra + custos adicionais
+ * - Lucro atual = potencial da base - capital investido
+ * - Margem estimada = lucro atual / potencial da base, em %
+ * - Ticket medio = (menor valor + maior valor) / 2, na mesma base */
 function calcularResumo(itens, extras, custos, checklists, vendedor) {
   const patio = itens.filter((v) => v.status !== "vendido");
   const total = patio.length;
-  const valorTotal = patio.reduce((s, v) => s + Number(v.preco || 0), 0);
-  const precos = patio.map((v) => Number(v.preco || 0)).filter((p) => p > 0);
-  const min = precos.length ? Math.min(...precos) : 0;
-  const max = precos.length ? Math.max(...precos) : 0;
-  const ticket = precos.length ? (min + max) / 2 : 0;
+  const fipeDe = (v) => Number(v.valor_fipe || 0);
+  const pretDe = (v) => Number(v.preco || 0);
+  const faixa = (lista) => {
+    const ok = lista.filter((x) => x > 0);
+    if (!ok.length) return { min: 0, max: 0, ticket: 0 };
+    const min = Math.min(...ok);
+    const max = Math.max(...ok);
+    return { min, max, ticket: (min + max) / 2 };
+  };
+  const potFipe = patio.reduce((s, v) => s + fipeDe(v), 0);
+  const potPret = patio.reduce((s, v) => s + pretDe(v), 0);
+  const fF = faixa(patio.map(fipeDe));
+  const fP = faixa(patio.map(pretDe));
   const checados = checklists ? patio.filter((v) => checklists.has(v.id)).length : null;
-  let lucro = null;
-  let margem = null;
+  let lucroFipe = null;
+  let lucroPret = null;
+  let margemFipe = null;
+  let margemPret = null;
   if (!vendedor) {
     const capital = patio.reduce((s, v) => s + Number(extras[v.id]?.preco_compra || 0) + Number(custos[v.id] || 0), 0);
-    lucro = valorTotal - capital;
-    margem = valorTotal > 0 ? (lucro / valorTotal) * 100 : 0;
+    lucroFipe = potFipe - capital;
+    lucroPret = potPret - capital;
+    margemFipe = potFipe > 0 ? (lucroFipe / potFipe) * 100 : 0;
+    margemPret = potPret > 0 ? (lucroPret / potPret) * 100 : 0;
   }
-  return { total, valorTotal, ticket, min, max, checados, lucro, margem };
+  return {
+    total, potFipe, potPret,
+    ticketFipe: fF.ticket, minFipe: fF.min, maxFipe: fF.max,
+    ticketPret: fP.ticket, minPret: fP.min, maxPret: fP.max,
+    checados, lucroFipe, lucroPret, margemFipe, margemPret,
+  };
 }
 
 export default function Estoque() {

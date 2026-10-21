@@ -308,7 +308,7 @@
 <button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 hover:bg-surface-container hover:scale-105 active:scale-95 border border-slate-200/50 bg-surface-container-low text-on-surface" data-filter="disponivel" type="button">
           Disponível <span class="ml-1 text-on-surface-variant font-medium">(3)</span>
 </button>
-<button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 bg-surface-container-low text-on-surface hover:bg-surface-container hover:scale-105 active:scale-95 border border-slate-200/50" data-filter="preparacao" type="button">
+<button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 bg-surface-container-low text-on-surface hover:bg-surface-container hover:scale-105 active:scale-95 border border-slate-200/50" data-filter="em_preparacao" type="button">
           Em preparação <span class="ml-1 text-on-surface-variant font-medium">(1)</span>
 </button>
 <button class="filter-pill px-4 py-1.5 rounded-full text-xs font-label font-semibold transition-all duration-200 bg-surface-container-low text-outline opacity-70 hover:opacity-100 hover:scale-105 active:scale-95 border border-slate-200/50 text-on-surface" data-filter="reservado" type="button">
@@ -460,6 +460,8 @@
 
     /* Cartoes de resumo com valores reais */
     function acharGradeResumo() {
+      const porId = document.getElementById('grade-resumo');
+      if (porId) return porId;
       const norm = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
       const folhas = Array.from(document.querySelectorAll('*')).filter(e => e.children.length === 0 && /TOTAL NO P/.test(norm(e.textContent)));
       for (const folha of folhas) {
@@ -467,7 +469,7 @@
         while (el && el.parentElement) {
           const pai = el.parentElement;
           const textos = norm(pai.textContent || '');
-          if (pai.children.length === 4 && /VALOR TOTAL/.test(textos) && /TICKET/.test(textos)) return pai;
+          if (pai.children.length === 4 && /VALOR TOTAL/.test(textos) && /TICKET/.test(textos)) { pai.id = 'grade-resumo'; return pai; }
           el = pai;
         }
       }
@@ -477,22 +479,27 @@
       const grade = acharGradeResumo();
       const s = dados.stats;
       if (!grade || !s) return;
-      const margemTxt = s.margem == null ? 'Restrito ao seu perfil' : `${s.margem >= 0 ? '+' : ''}${s.margem.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
-      const margemCor = s.margem == null ? '#64748b' : (s.margem >= 0 ? '#059669' : '#ba1a1a');
-      const lucroTxt = s.lucro == null ? 'Dados financeiros restritos' : `${fmtBRL(s.lucro)} · potencial − capital investido`;
-      const checkTxt = s.checados == null ? 'Checklist não disponível' : `${s.checados} de ${s.total} com checklist`;
+      grade.style.gridTemplateColumns = 'repeat(auto-fill, minmax(230px, 1fr))';
+      const RESTRITO = 'Restrito ao seu perfil';
+      const pctTxt = v => v == null ? RESTRITO : `${v >= 0 ? '+' : ''}${v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
+      const brlTxt = v => v == null ? RESTRITO : fmtBRL(v);
+      const corLucro = v => v == null ? '#64748b' : (v >= 0 ? '#059669' : '#ba1a1a');
       const cartoes = [
-        { rot: 'TOTAL NO PÁTIO', ico: 'inventory_2', val: String(s.total), sub: 'unidades físicas', rod: checkTxt },
-        { rot: 'VALOR TOTAL EM PÁTIO', ico: 'payments', val: fmtBRL(s.valorTotal), sub: 'Soma dos preços de venda', rod: '' },
-        { rot: 'TICKET MÉDIO', ico: 'bar_chart', val: fmtBRL(s.ticket), sub: `Faixa ${fmtBRL(s.min)} – ${fmtBRL(s.max)}`, rod: '' },
-        { rot: 'MARGEM ESTIMADA', ico: 'trending_up', val: margemTxt, sub: lucroTxt, rod: '', cor: margemCor },
+        { rot: 'TOTAL NO PÁTIO', ico: 'inventory_2', val: String(s.total), sub: 'unidades não vendidas' + (s.checados == null ? '' : ` · ${s.checados} com checklist`) },
+        { rot: 'VALOR DE VENDA PELA FIPE', ico: 'account_balance', val: fmtBRL(s.potFipe), sub: 'Potencial somando os valores FIPE' },
+        { rot: 'VALOR DE VENDA ACIMA DA FIPE', ico: 'trending_up', val: fmtBRL(s.potPret), sub: 'Potencial somando os valores pretendidos' },
+        { rot: 'TICKET MÉDIO FIPE', ico: 'bar_chart', val: fmtBRL(s.ticketFipe), sub: `Faixa ${fmtBRL(s.minFipe)} – ${fmtBRL(s.maxFipe)}` },
+        { rot: 'TICKET MÉDIO ACIMA DA FIPE', ico: 'bar_chart', val: fmtBRL(s.ticketPret), sub: `Faixa ${fmtBRL(s.minPret)} – ${fmtBRL(s.maxPret)}` },
+        { rot: 'LUCRO ATUAL NA FIPE', ico: 'payments', val: brlTxt(s.lucroFipe), sub: 'Potencial FIPE − capital investido', cor: corLucro(s.lucroFipe) },
+        { rot: 'LUCRO ATUAL ACIMA DA FIPE', ico: 'payments', val: brlTxt(s.lucroPret), sub: 'Potencial pretendido − capital investido', cor: corLucro(s.lucroPret) },
+        { rot: 'MARGEM ESTIMADA NA FIPE', ico: 'percent', val: pctTxt(s.margemFipe), sub: 'Lucro FIPE ÷ potencial FIPE', cor: corLucro(s.margemFipe) },
+        { rot: 'MARGEM ESTIMADA ACIMA DA FIPE', ico: 'percent', val: pctTxt(s.margemPret), sub: 'Lucro pretendido ÷ potencial pretendido', cor: corLucro(s.margemPret) },
       ];
       grade.innerHTML = cartoes.map(c => `
         <div class="stat-card">
           <div class="stat-top"><span class="stat-label">${c.rot}</span><span class="stat-ico"><span class="material-symbols-outlined" style="font-size:18px">${c.ico}</span></span></div>
           <div class="stat-value" style="${c.cor ? 'color:' + c.cor : ''}">${esc(c.val)}</div>
           <div class="stat-sub">${esc(c.sub)}</div>
-          ${c.rod ? `<div class="stat-sub" style="color:#059669;font-weight:600">${esc(c.rod)}</div>` : ''}
         </div>`).join('');
     }
 

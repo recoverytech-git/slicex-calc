@@ -6,7 +6,7 @@ import { supabase, supabaseConfigurado } from "./supabase";
  * Sem Supabase configurado, nada é gravado e a função devolve erro claro.
  */
 const SEM_BANCO = { error: { message: "Banco de dados não configurado. Nada foi salvo." } };
-const COLUNAS_GESTAO = "id, modelo, placa, renavam, chassi, ano_fabricacao, ano_modelo, cor, quilometragem, status, preco_venda_pretendido, criado_em";
+const COLUNAS_GESTAO = "id, modelo, placa, renavam, chassi, ano_fabricacao, ano_modelo, cor, quilometragem, status, preco_venda_pretendido, criado_em, valor_fipe";
 const COLUNAS_VENDEDOR = "id, modelo, ano_modelo, quilometragem, status, preco_venda_pretendido";
 
 export const normalizar = (s) => String(s ?? "").replace(/[\s.-]/g, "").toUpperCase();
