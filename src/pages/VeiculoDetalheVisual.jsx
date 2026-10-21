@@ -8,7 +8,8 @@ import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 import { BUCKET_FOTOS, enviarFotos } from "../lib/fotos";
 import { criarZip } from "../lib/zip";
-import { baixarBlob, gerarGaleriaHtml, slug } from "../lib/galeriaFotos";
+import { baixarBlob, slug } from "../lib/galeriaFotos";
+import { URL_PUBLICA } from "../lib/urls";
 import { gerarPdfVeiculo } from "../lib/veiculoPdf";
 import { excluirVeiculo } from "../lib/estoque";
 
@@ -192,27 +193,27 @@ export default function VeiculoDetalheVisual() {
           }
           case "compartilhar-fotos": {
             const c = cache.current;
-            const lista = (c?.fotos || []).filter((f) => f.url);
-            if (!lista.length) { alert("Não há fotos para compartilhar."); return; }
-            const imagens = (await Promise.all(lista.map((f) => urlParaDataUrl(f.url)))).filter(Boolean);
-            const titulo = `Fotos - ${c.veiculo.modelo || "Veículo"}`;
-            const html = gerarGaleriaHtml({ titulo, subtitulo: [c.veiculo.marca, c.veiculo.ano_modelo].filter(Boolean).join(" · "), imagens });
-            const nome = `galeria-${slug(c.veiculo.modelo)}.html`;
-            const arquivo = new Blob([html], { type: "text/html" });
-            const file = new File([arquivo], nome, { type: "text/html" });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              try { await navigator.share({ files: [file], title: titulo }); }
-              catch (err) { if (err?.name !== "AbortError") baixarBlob(arquivo, nome); }
-            } else {
-              baixarBlob(arquivo, nome);
+            const caminhos = (c?.fotos || []).map((f) => f.caminho);
+            if (!caminhos.length) { alert("Não há fotos para compartilhar."); return; }
+            const { data: assinadas, error: eSig } = await supabase.storage.from(BUCKET_FOTOS).createSignedUrls(caminhos, 86400);
+            if (eSig) { alert(eSig.message); return; }
+            const urls = (assinadas ?? []).map((s) => s.signedUrl).filter(Boolean);
+            const { data: linha, error: eIns } = await supabase.from("compartilhamentos_fotos").insert({
+              veiculo_id: id,
+              organizacao_id: perfil?.organizacao_id ?? null,
+              criado_por: uid,
+              titulo: `Fotos - ${c.veiculo.modelo || "Veículo"}`,
+              urls,
+              expira_em: new Date(Date.now() + 86400 * 1000).toISOString(),
+            }).select("token").single();
+            if (eIns) { alert(`Não foi possível gerar o link: ${eIns.message}`); return; }
+            const link = `${URL_PUBLICA}/galeria/${linha.token}`;
+            try {
+              await navigator.clipboard.writeText(link);
+              alert(`Link copiado. Ele fica disponível por 24 horas:\n${link}`);
+            } catch {
+              window.prompt("Copie o link (válido por 24 horas):", link);
             }
-            break;
-          }
-          case "del-foto": {
-            await supabase.storage.from(BUCKET_FOTOS).remove([x.caminho]);
-            const { error } = await supabase.from("veiculo_fotos").delete().eq("id", x.id);
-            if (error) { alert(error.message); return; }
-            await carregar();
             break;
           }
           case "registrar-venda": {

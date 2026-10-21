@@ -1,3 +1,4 @@
+import { URL_PUBLICA } from "../lib/urls";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { FileText, Save, Check, Image as ImageIcon, FileDown } from "lucide-react";
@@ -42,7 +43,7 @@ export default function Ficha() {
     setMsg(null);
     const { data, error } = await supabase.rpc("gerar_link_ficha", { p_dias: 7 });
     if (error) { setMsg({ tipo: "erro", texto: `Link não gerado: ${error.message}` }); return; }
-    setLinkGerado(`${window.location.origin}/preencher/${data}`);
+    setLinkGerado(`${URL_PUBLICA}/preencher/${data}`);
   };
 
   const registro = () => ({ nome: form.nome, cpf: soDigitos(form.cpf), telefone: soDigitos(form.telefone), dados: form });

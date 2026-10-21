@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import RotaPrivada from "./components/RotaPrivada";
+import GaleriaPublica from "./pages/GaleriaPublica";
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
 import { AuthProvider, useAuth } from "./lib/auth";
@@ -60,6 +61,7 @@ function AnimatedRoutes() {
           <Route path="/vendas" element={<RotaPrivada papeis={["admin_master","proprietario","gerente"]}><Vendas /></RotaPrivada>} />
           <Route path="/admin/usuarios" element={<RotaPrivada><AdminUsuarios /></RotaPrivada>} />
           <Route path="/preencher/:token" element={<PreencherFicha />} />
+          <Route path="/galeria/:token" element={<GaleriaPublica />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
@@ -78,7 +80,7 @@ function Shell() {
     if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
     link.href = marca.favicon;
   }, [marca.favicon]);
-  const publico = pathname === "/" || pathname === "/login" || pathname.startsWith("/preencher/");
+  const publico = pathname === "/" || pathname === "/login" || pathname.startsWith("/preencher/") || pathname.startsWith("/galeria/");
   const comNav = Boolean(sessao) && !publico;
   const classes = ["app-shell", comNav && "com-nav", comNav && !menuAberto && "menu-fechado"].filter(Boolean).join(" ");
 
