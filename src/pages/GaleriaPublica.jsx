@@ -38,7 +38,7 @@ export default function GaleriaPublica() {
     <div style={{ minHeight: "100vh", background: "#f5f7fb", fontFamily: "system-ui, sans-serif" }}>
       <header style={{ background: "#0E1A2E", color: "#fff", padding: "22px 24px" }}>
         <div style={{ fontWeight: 800, fontSize: 20 }}>{dados.titulo || "Fotos do veículo"}</div>
-        <div style={{ color: "#94a3b8", fontSize: 13, marginTop: 6 }}>{dados.urls.length} foto(s) · link válido até {new Date(dados.expira_em).toLocaleString("pt-BR")}</div>
+        <div style={{ color: "#94a3b8", fontSize: 13, marginTop: 6 }}>{dados.detalhes?.numero_motor ? `Motor ${dados.detalhes.numero_motor} · ` : ""}{dados.urls.length} foto(s) · link válido até {new Date(dados.expira_em).toLocaleString("pt-BR")}</div>
       </header>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14, padding: 20, maxWidth: 1280, margin: "0 auto" }}>
         {dados.urls.map((src, i) => (

@@ -533,7 +533,7 @@
         ['RENAVAM', g ? (v.renavam || '—') : 'Restrito'], ['Chassi', g ? (v.chassi || '—') : 'Restrito'],
         ['Marca', v.marca || '—'], ['Ano de fabricação', v.ano_fabricacao ?? '—'], ['Ano do modelo', v.ano_modelo ?? '—'],
         ['Quilometragem', km], ['Cor', v.cor || '—'], ['Combustível', v.combustivel || '—'], ['Câmbio', v.cambio || '—'],
-        ['Categoria / Carroceria', '—'],
+        ['Número do motor', v.numero_motor || '—'], ['Categoria / Carroceria', v.categoria || '—'],
       ].map(([l, x]) => linha(l, x)).join('') + total('Valor de venda pretendido', brl(venda));
     }
 
@@ -631,6 +631,15 @@
       ctl.innerHTML = '<span class="ve-label mr-1">Status</span>' + Object.entries(ROT).map(([k, r]) => `<button type="button" data-status-set="${k}" class="status-pill ${v.status === k ? 'on' : ''}">${r}</button>`).join('');
     }
 
+    // Alerta antes de publicar: fotos e checklist
+    const faltas = [!fotos.some(f => f.url) ? 'fotos' : null, !ck ? 'checklist' : null].filter(Boolean);
+    let al = document.getElementById('alerta-cadastro');
+    if (faltas.length) {
+      if (!al) { al = document.createElement('div'); al.id = 'alerta-cadastro'; const sec1 = secao('1. Identificação'); if (sec1) sec1.parentElement.insertBefore(al, sec1); }
+      al.style.cssText = 'padding:12px 16px;border-radius:14px;background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font:600 13px Inter,sans-serif';
+      al.textContent = 'Antes de publicar, complete: ' + faltas.join(' e ') + '.';
+    } else if (al) al.remove();
+
     // Esconde os botoes de edicao para quem nao pode editar
     $$('button').forEach(b => { if (/Editar/.test(b.textContent) && !g) b.style.display = 'none'; });
     if (!g) { const b = $('#btn-registrar-venda'); if (b) b.style.display = 'none'; const x = $('#btn-excluir-veiculo'); if (x) x.style.display = 'none'; }
@@ -650,7 +659,7 @@
       ['marca', 'Marca', 'text', v.marca || ''], ['modelo', 'Modelo', 'text', v.modelo || ''],
       ['ano_fabricacao', 'Ano de fabricação', 'text', v.ano_fabricacao ?? ''], ['ano_modelo', 'Ano do modelo', 'text', v.ano_modelo ?? ''],
       ['cor', 'Cor', 'text', v.cor || ''], ['quilometragem', 'Quilometragem (km)', 'text', v.quilometragem ?? ''],
-      ['combustivel', 'Combustível', 'text', v.combustivel || ''], ['cambio', 'Câmbio', 'text', v.cambio || ''],
+      ['combustivel', 'Combustível', 'text', v.combustivel || ''], ['cambio', 'Câmbio', 'text', v.cambio || ''], ['numero_motor', 'Número do motor', 'text', v.numero_motor || ''], ['categoria', 'Categoria / Carroceria', 'text', v.categoria || ''],
       ['preco_compra', 'Valor de compra (R$)', 'text', v.preco_compra ?? ''], ['valor_fipe', 'Valor FIPE (R$)', 'text', v.valor_fipe ?? ''],
       ['preco_venda_pretendido', 'Valor de venda pretendido (R$)', 'text', v.preco_venda_pretendido ?? ''],
     ];
@@ -761,7 +770,7 @@
     if (hit('#btn-excluir-veiculo')) { e.preventDefault(); return post('excluir'); }
     if (hit('#btn-registrar-venda')) { e.preventDefault(); return abrirVenda(); }
     if (hit('a[data-path="todas-as-calculadoras"]')) { e.preventDefault(); return post('voltar'); }
-    if ((b = hit('[data-status-set]'))) { e.preventDefault(); return post('mudar-status', { status: b.dataset.statusSet }); }
+    if ((b = hit('[data-status-set]'))) { e.preventDefault(); if (b.dataset.statusSet === 'vendido') return abrirVenda(); return post('mudar-status', { status: b.dataset.statusSet }); }
     if ((b = hit('[data-zoom]'))) { e.preventDefault(); return abrirZoom(Number(b.dataset.zoom)); }
     if ((b = hit('.ck-seg button'))) { e.preventDefault(); b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); return; }
     const slot = t.closest('div.cursor-pointer');

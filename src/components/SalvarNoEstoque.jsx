@@ -27,6 +27,7 @@ export default function SalvarNoEstoque({ dados, onConcluido }) {
         ano_fabricacao: dados.anoFab || null, ano_modelo: dados.anoMod || null, cor: dados.cor,
         quilometragem: dados.km || null, combustivel: dados.combustivel, cambio: dados.cambio,
         preco_compra: dados.compra, valor_fipe: dados.fipe, preco_venda_pretendido: dados.valorVenda,
+        numero_motor: dados.numeroMotor?.trim() || null, categoria: dados.categoria?.trim() || null,
         tipo_aquisicao: dados.tipoCapital === "Financiamento" ? "financiamento" : "capital_proprio",
       },
       p_custos: (dados.custos ?? []).map((c) => ({ descricao: c.descricao, valor: c.valor })),
@@ -45,6 +46,8 @@ export default function SalvarNoEstoque({ dados, onConcluido }) {
     setEstado(null);
     if (!dados.modelo?.trim()) { setEstado({ tipo: "erro", texto: "Informe o modelo do veículo antes de salvar." }); return; }
     if (!dados.dataAquisicao) { setEstado({ tipo: "erro", texto: "Informe a data de aquisição do veículo antes de salvar." }); return; }
+    if (!(dados.fipe > 0)) { setEstado({ tipo: "erro", texto: "Informe o valor FIPE do veículo antes de salvar." }); return; }
+    if (!(dados.valorVenda > 0)) { setEstado({ tipo: "erro", texto: "Informe o valor de venda pretendido antes de salvar." }); return; }
     setSalvando(true);
     const { data: id, error } = await supabase.rpc("cadastrar_veiculo", montarPacote());
     setSalvando(false);

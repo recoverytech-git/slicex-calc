@@ -66,11 +66,14 @@ export default function CalculaCar() {
   const [custos, setCustos] = useRascunho("cc.custos", []);
   const [marca, setMarca] = useRascunho("cc.marca", "");
   const [dataAquisicao, setDataAquisicao] = useRascunho("cc.dataAquisicao", "");
+  const [numeroMotor, setNumeroMotor] = useRascunho("cc.numeroMotor", "");
+  const [categoria, setCategoria] = useRascunho("cc.categoria", "");
+  const [vendaStr, setVendaStr] = useRascunho("cc.vendaStr", "");
   const [checklist, setChecklist] = useRascunho("cc.checklist", CHECKLIST_INICIAL);
   const resetarCalcula = () => {
     limparRascunho(["cc.modelo","cc.placa","cc.fipeStr","cc.compraStr","cc.renavam","cc.chassi","cc.anoFab","cc.anoMod",
       "cc.cor","cc.km","cc.combustivel","cc.cambio","cc.tipoCapital","cc.valorBemStr","cc.entradaStr","cc.taxaStr",
-      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist","cc.marca","cc.dataAquisicao"]);
+      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist","cc.marca","cc.dataAquisicao","cc.numeroMotor","cc.categoria","cc.vendaStr"]);
     setModelo(""); setPlaca(""); setFipeStr("75000"); setCompraStr("50000"); setRenavam(""); setChassi("");
     setAnoFab(""); setAnoMod(""); setCor(""); setKm(""); setCombustivel(""); setCambio("");
     setTipoCapital("Próprio"); setValorBemStr("50000"); setEntradaStr("0"); setTaxaStr("3.9"); setMesesStr("48");
@@ -110,13 +113,19 @@ export default function CalculaCar() {
 
   const custoFinanceiro = financiamento ? financiamento.totalJuros : 0;
   const totalCustosAdicionais = custos.reduce((s, c) => s + c.valor, 0);
-  const valorVenda = fipe; // referência de venda = FIPE (padrão da análise)
+  const valorVenda = fipe; // venda pela FIPE
+  const valorVendaPretendida = toF(vendaStr); // venda pelo valor pretendido
 
   const resultado = useMemo(() => {
     if (!veiculoValido) return null;
     return calcResultado({ fipe, compra, custos, custoFinanceiro, valorVenda });
   }, [veiculoValido, fipe, compra, custos, custoFinanceiro, valorVenda]);
 
+  const resultadoPretendido = useMemo(() => {
+    if (!veiculoValido || !(valorVendaPretendida > 0)) return null;
+    return calcResultado({ fipe, compra, custos, custoFinanceiro, valorVenda: valorVendaPretendida });
+  }, [veiculoValido, fipe, compra, custos, custoFinanceiro, valorVendaPretendida]);
+  const margemPretendidaPct = resultadoPretendido && valorVendaPretendida > 0 ? (resultadoPretendido.resultadoLiquido / valorVendaPretendida) * 100 : null;
   const margemFinalPct = resultado && fipe > 0 ? (resultado.resultadoLiquido / fipe) * 100 : null;
 
   const chartData = useMemo(() => {
@@ -246,8 +255,11 @@ export default function CalculaCar() {
               <Field label="Quilometragem (km)" val={km} set={setKm} hint="Ex: 45000" />
               <Field label="Combustível" val={combustivel} set={setCombustivel} hint="Ex: Flex" />
               <Field label="Câmbio" val={cambio} set={setCambio} hint="Ex: Automático" />
-              <MoneyField label="Valor FIPE (R$)" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
+              <Field label="Número do motor" val={numeroMotor} set={setNumeroMotor} hint="Ex: CHT1A2B3C" />
+              <Field label="Categoria / Carroceria" val={categoria} set={setCategoria} hint="Ex: Hatch, Sedan, SUV" />
+              <MoneyField label="Valor FIPE (R$) *" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
               <MoneyField label="Valor de compra (R$)" valor={parseMoeda(compraStr)} onChange={(n) => { setCompraStr(String(n)); reset?.(); }} />
+              <MoneyField label="Valor de venda pretendido (R$) *" valor={parseMoeda(vendaStr)} onChange={(n) => { setVendaStr(String(n)); reset?.(); }} />
             </div>
           </div>
 
@@ -493,8 +505,17 @@ export default function CalculaCar() {
                   <Kpi label="Resultado líquido" value={resultado.resultadoLiquido} format={fmt} color="var(--text)" icon={<CheckCircle2 size={18} />} index={3} />
                   <Kpi label="Margem final" value={margemFinalPct ?? 0} format={(v) => `${v.toFixed(2)}%`} color="var(--accent-soft)" icon={<Ruler size={18} />} index={4} />
                 </div>
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 8 }}>Comparação das duas formas de venda</div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 10 }}>
+                    <Kpi label="Venda pela FIPE: resultado líquido" value={resultado.resultadoLiquido} format={fmt} icon={<Coins size={18} />} index={0} />
+                    <Kpi label="Venda pela FIPE: margem" value={margemFinalPct ?? 0} format={(v) => `${v.toFixed(2)}%`} color="var(--accent-soft)" icon={<Ruler size={18} />} index={1} />
+                    <Kpi label="Venda pretendida: resultado líquido" value={resultadoPretendido ? resultadoPretendido.resultadoLiquido : 0} format={fmt} icon={<Coins size={18} />} index={2} />
+                    <Kpi label="Venda pretendida: margem" value={margemPretendidaPct ?? 0} format={(v) => `${v.toFixed(2)}%`} color="var(--accent-soft)" icon={<Ruler size={18} />} index={3} />
+                  </div>
+                </div>
                 <p style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 12, marginBottom: 0 }}>
-                  Valores baseados no valor FIPE como referência de venda ({fmt(valorVenda)}).
+                  Venda pela FIPE usa o valor FIPE ({fmt(valorVenda)}). Venda pretendida usa o valor informado ({fmt(valorVendaPretendida)}).
                 </p>
               </motion.div>
             )}
@@ -535,7 +556,7 @@ export default function CalculaCar() {
             )}
           </AnimatePresence>
 
-          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda, tipoCapital, custos, financiamento, checklist, marca, dataAquisicao }} onConcluido={resetarCalcula} />
+          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda: valorVendaPretendida, numeroMotor, categoria, tipoCapital, custos, financiamento, checklist, marca, dataAquisicao }} onConcluido={resetarCalcula} />
           <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
             Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional
           </p>

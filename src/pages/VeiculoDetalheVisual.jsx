@@ -11,7 +11,7 @@ import { criarZip } from "../lib/zip";
 import { baixarBlob, slug } from "../lib/galeriaFotos";
 import { URL_PUBLICA } from "../lib/urls";
 import { gerarPdfVeiculo } from "../lib/veiculoPdf";
-import { excluirVeiculo } from "../lib/estoque";
+import { excluirVeiculo, buscarDuplicado } from "../lib/estoque";
 
 const ITENS_CK = ITENS.map(([k, rot]) => [k, rot]);
 const DOC_LABELS = Object.fromEntries(DOCUMENTACAO.map(([k, rot]) => [k, rot]));
@@ -140,8 +140,11 @@ export default function VeiculoDetalheVisual() {
               quilometragem: numero(x.quilometragem), combustivel: texto(x.combustivel), cambio: texto(x.cambio),
               preco_compra: numero(x.preco_compra), valor_fipe: numero(x.valor_fipe),
               preco_venda_pretendido: numero(x.preco_venda_pretendido),
+              numero_motor: texto(x.numero_motor), categoria: texto(x.categoria),
             };
             if (!payload.modelo) { alert("Informe o modelo do veículo."); return; }
+            const { data: dup } = await buscarDuplicado({ placa: payload.placa, renavam: payload.renavam, chassi: payload.chassi });
+            if (dup && dup.id !== id) { alert("Já existe um veículo com esta placa, RENAVAM ou chassi."); return; }
             const { error } = await supabase.from("veiculos").update(payload).eq("id", id);
             if (error) { alert(`Não foi salvo: ${error.message}`); return; }
             await carregar();
@@ -204,6 +207,7 @@ export default function VeiculoDetalheVisual() {
               criado_por: uid,
               titulo: `Fotos - ${c.veiculo.modelo || "Veículo"}`,
               urls,
+              detalhes: { numero_motor: c.veiculo.numero_motor || null, ano: c.veiculo.ano_modelo || null },
               expira_em: new Date(Date.now() + 86400 * 1000).toISOString(),
             }).select("token").single();
             if (eIns) { alert(`Não foi possível gerar o link: ${eIns.message}`); return; }
