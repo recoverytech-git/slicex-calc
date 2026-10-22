@@ -54,12 +54,12 @@ export default function SalvarNoEstoque({ dados, onConcluido }) {
     setSalvando(false);
     if (error) { setEstado({ tipo: "erro", texto: error.message }); return; }
     setVeiculoId(id);
+    onConcluido?.();
   };
 
   const concluir = () => {
     setVeiculoId(null);
     setEstado(null);
-    onConcluido?.();
   };
 
   return (
@@ -75,7 +75,7 @@ export default function SalvarNoEstoque({ dados, onConcluido }) {
         </div>
       )}
       <Modal open={Boolean(veiculoId)} onClose={concluir} title="Veículo salvo"
-        footer={<PrimaryButton onClick={concluir} style={{ width: "100%" }}>Concluir e limpar formulário</PrimaryButton>}>
+        footer={<PrimaryButton onClick={concluir} style={{ width: "100%" }}>Entendi</PrimaryButton>}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 14, color: "var(--text)" }}>
             <CheckCircle2 size={22} /> <span>Veículo salvo no estoque com sucesso.</span>
