@@ -669,7 +669,7 @@ export default function CalculaCarNovo() {
 <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="m4.9 4.9 14.2 14.2" /></svg>
 </div>
-<span className="text-[10px] text-brand-700 font-semibold">Venda pela FIPE: resultado líquido</span>
+<span className="text-[10px] text-brand-700 font-semibold">Venda FIPE LIQUIDO</span>
 <p className="text-sm font-extrabold text-brand-600 tabular-numbers">{fmt(resultado.resultadoLiquido)}</p>
 </div>
 
@@ -685,7 +685,7 @@ export default function CalculaCarNovo() {
 <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 14 14" /></svg>
 </div>
-<span className="text-[10px] text-brand-700 font-semibold">Venda pretendida: resultado líquido</span>
+<span className="text-[10px] text-brand-700 font-semibold">Venda PRETENDIDA LIQUIDO</span>
 <p className="text-sm font-extrabold text-brand-600 tabular-numbers">{fmt(resultadoPretendido ? resultadoPretendido.resultadoLiquido : 0)}</p>
 </div>
 

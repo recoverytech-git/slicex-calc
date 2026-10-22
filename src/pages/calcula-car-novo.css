@@ -136,3 +136,9 @@
   
 .cc-novo { font-family: "Plus Jakarta Sans", "Inter", sans-serif; }
 .cc-novo input, .cc-novo select, .cc-novo textarea { font-family: inherit; }
+
+/* Base de estilos da rota (sem o preflight global, para nao alterar o restante do sistema) */
+.cc-novo button { background-color: transparent; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; text-align: inherit; }
+.cc-novo input, .cc-novo select, .cc-novo textarea { border-width: 1px; border-style: solid; border-color: #e2e8f0; margin: 0; }
+.cc-novo h1, .cc-novo h2, .cc-novo h3, .cc-novo p { margin: 0; }
+.cc-novo svg { display: inline-block; vertical-align: middle; }
