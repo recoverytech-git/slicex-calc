@@ -20,6 +20,7 @@ import { calcPrice, calcSAC, downloadXLSX, MIME } from "../lib/financiamento";
 import { calcDiferenca, calcResultado, buildCalculaCarXLSX, buildCalculaCarPDF, MARGEM_REFERENCIA_PCT } from "../lib/calculaCar";
 import SalvarNoEstoque from "../components/SalvarNoEstoque";
 import ChecklistVeiculo, { CHECKLIST_INICIAL } from "../components/ChecklistVeiculo";
+import { buscarDuplicado } from "../lib/estoque";
 
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)" };
 
@@ -40,8 +41,8 @@ export default function CalculaCar() {
   // Bloco 1 — veículo
   const [modelo, setModelo] = useRascunho("cc.modelo", "");
   const [placa, setPlaca] = useRascunho("cc.placa", "");
-  const [fipeStr, setFipeStr] = useRascunho("cc.fipeStr", "75000");
-  const [compraStr, setCompraStr] = useRascunho("cc.compraStr", "50000");
+  const [fipeStr, setFipeStr] = useRascunho("cc.fipeStr", "");
+  const [compraStr, setCompraStr] = useRascunho("cc.compraStr", "");
   const [renavam, setRenavam] = useRascunho("cc.renavam", "");
   const [chassi, setChassi] = useRascunho("cc.chassi", "");
   const [anoFab, setAnoFab] = useRascunho("cc.anoFab", "");
@@ -55,10 +56,10 @@ export default function CalculaCar() {
   const [tipoCapital, setTipoCapital] = useRascunho("cc.tipoCapital", "Próprio");
 
   // Bloco 4 — financiamento (reaproveita exatamente os campos/lógica da calculadora existente)
-  const [valorBemStr, setValorBemStr] = useRascunho("cc.valorBemStr", "50000");
-  const [entradaStr, setEntradaStr] = useRascunho("cc.entradaStr", "0");
-  const [taxaStr, setTaxaStr] = useRascunho("cc.taxaStr", "3.9");
-  const [mesesStr, setMesesStr] = useRascunho("cc.mesesStr", "48");
+  const [valorBemStr, setValorBemStr] = useRascunho("cc.valorBemStr", "");
+  const [entradaStr, setEntradaStr] = useRascunho("cc.entradaStr", "");
+  const [taxaStr, setTaxaStr] = useRascunho("cc.taxaStr", "");
+  const [mesesStr, setMesesStr] = useRascunho("cc.mesesStr", "");
   const [sistema, setSistema] = useRascunho("cc.sistema", "Price");
   const [tab, setTab] = useState("grafico");
 
@@ -72,6 +73,13 @@ export default function CalculaCar() {
   const [portas, setPortas] = useRascunho("cc.portas", "");
   const [lugares, setLugares] = useRascunho("cc.lugares", "");
   const [vendaStr, setVendaStr] = useRascunho("cc.vendaStr", "");
+  const [avisoPlaca, setAvisoPlaca] = useState(null);
+  async function verificarPlaca(valor) {
+    const p = String(valor || "").trim();
+    if (!p) { setAvisoPlaca(null); return; }
+    const { data } = await buscarDuplicado({ placa: p });
+    setAvisoPlaca(data && data.id ? `Já existe um veículo com esta placa${data.modelo ? ` (${data.modelo})` : ""}.` : null);
+  }
   const [checklist, setChecklist] = useRascunho("cc.checklist", CHECKLIST_INICIAL);
   const resetarCalcula = () => {
     limparRascunho(["cc.modelo","cc.placa","cc.fipeStr","cc.compraStr","cc.renavam","cc.chassi","cc.anoFab","cc.anoMod",
@@ -247,7 +255,7 @@ export default function CalculaCar() {
                 <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Data de aquisição *</label>
                 <input type="date" value={dataAquisicao} onChange={(e) => setDataAquisicao(e.target.value)} style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 }} />
               </div>
-              <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" />
+              <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" aviso={avisoPlaca} onBlurExtra={verificarPlaca} />
               <Field label="Chassi" val={chassi} set={setChassi} hint="17 caracteres" />
               <Field label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
               <Field label="Marca" val={marca} set={setMarca} hint="Ex: Volkswagen" />

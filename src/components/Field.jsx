@@ -1,4 +1,4 @@
-export default function Field({ label, val, set, hint, onChange, suffix }) {
+export default function Field({ label, val, set, hint, onChange, suffix, aviso, onBlurExtra }) {
   return (
     <div>
       <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>
@@ -32,6 +32,7 @@ export default function Field({ label, val, set, hint, onChange, suffix }) {
           onBlur={(e) => {
             e.target.style.borderColor = "var(--border-strong)";
             e.target.style.background = "var(--surface)";
+            onBlurExtra && onBlurExtra(e.target.value);
           }}
         />
         {suffix && (
@@ -45,6 +46,7 @@ export default function Field({ label, val, set, hint, onChange, suffix }) {
           </span>
         )}
       </div>
+      {aviso && <p style={{ fontSize: 12, color: "var(--danger)", margin: "6px 0 0", fontWeight: 600 }}>{aviso}</p>}
     </div>
   );
 }

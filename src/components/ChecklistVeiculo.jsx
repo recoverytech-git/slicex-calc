@@ -30,16 +30,19 @@ const rotuloDoc = (v) => DOCUMENTACAO.find(([k]) => k === v)?.[1] ?? "Não infor
 
 function Tri({ valor, onChange }) {
   return (
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-      {[[true, "Sim"], [false, "Não"], [null, "Não informado"]].map(([v, rotulo]) => (
-        <button key={String(v)} type="button" onClick={() => onChange(v)}
-          style={{ padding: "6px 10px", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 600, cursor: "pointer",
-            border: "1px solid var(--border-strong)", transition: "all 0.2s ease",
-            background: valor === v ? "rgba(68,147,248,0.16)" : "transparent",
-            color: valor === v ? "var(--text)" : "var(--text-mute)" }}>
-          {rotulo}
-        </button>
-      ))}
+    <div style={{ display: "inline-flex", flexWrap: "wrap", gap: 4, padding: 4, borderRadius: 14, background: "#eff4ff", border: "1px solid #d3e4fe" }}>
+      {[[true, "Sim", "#10b981"], [false, "Não", "#ba1a1a"], [null, "Não informado", null]].map(([v, rotulo, cor]) => {
+        const ativo = valor === v;
+        return (
+          <button key={String(v)} type="button" onClick={() => onChange(v)}
+            style={{ padding: "6px 12px", borderRadius: 10, border: 0, fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all .2s ease",
+              background: ativo ? (cor || "#fff") : "transparent",
+              color: ativo ? (cor ? "#fff" : "#0b1c30") : "#434655",
+              boxShadow: ativo ? (cor ? `0 2px 6px ${cor}55` : "0 1px 3px rgba(11,28,48,.12), inset 0 0 0 1px #c3c6d7") : "none" }}>
+            {rotulo}
+          </button>
+        );
+      })}
     </div>
   );
 }
