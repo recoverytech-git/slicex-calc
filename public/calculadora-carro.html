@@ -1,0 +1,1156 @@
+<!DOCTYPE html><html class="h-full bg-slate-50 font-sans" lang="pt-BR" style="width: 1280px; height: 4171px; overflow: hidden; position: relative;"><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Calcula.car — Inteligência Financeira e Automotiva</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Plus Jakarta Sans & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Inter"', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb', // Electric blue primary
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            emerald: {
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+            }
+          },
+          boxShadow: {
+            'glow-sm': '0 4px 20px -2px rgba(37, 99, 235, 0.15)',
+            'glow-md': '0 8px 30px -4px rgba(37, 99, 235, 0.2)',
+            'glow-lg': '0 12px 40px -6px rgba(37, 99, 235, 0.25)',
+            'layered': '0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 16px 32px -6px rgba(15, 23, 42, 0.06)',
+            'layered-hover': '0 2px 4px rgba(15, 23, 42, 0.04), 0 12px 24px -4px rgba(37, 99, 235, 0.08), 0 24px 48px -10px rgba(15, 23, 42, 0.12)',
+            'card': '0 1px 3px rgba(0,0,0,0.02), 0 10px 25px -5px rgba(15, 23, 42, 0.04)',
+            'card-hover': '0 20px 35px -8px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0,0,0,0.02)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="ambient-background">
+    /* Subtle background grid and ambient lighting with 3D depth */
+    .bg-grid-pattern {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(203, 213, 225, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(203, 213, 225, 0.35) 1px, transparent 1px);
+    }
+    
+    @keyframes pulse-glow-1 {
+      0%, 100% { opacity: 0.38; transform: translate3d(0, 0, 0) scale(1); }
+      50% { opacity: 0.65; transform: translate3d(25px, -20px, 0) scale(1.12); }
+    }
+    @keyframes pulse-glow-2 {
+      0%, 100% { opacity: 0.3; transform: translate3d(0, 0, 0) scale(1); }
+      50% { opacity: 0.58; transform: translate3d(-30px, 25px, 0) scale(1.08); }
+    }
+    @keyframes pulse-glow-3 {
+      0%, 100% { opacity: 0.25; transform: translate3d(0, 0, 0) scale(1); }
+      50% { opacity: 0.45; transform: translate3d(20px, 20px, 0) scale(1.15); }
+    }
+    
+    .glow-orb-1 {
+      animation: pulse-glow-1 12s ease-in-out infinite;
+      filter: blur(90px);
+    }
+    .glow-orb-2 {
+      animation: pulse-glow-2 15s ease-in-out infinite;
+      filter: blur(95px);
+    }
+    .glow-orb-3 {
+      animation: pulse-glow-3 18s ease-in-out infinite;
+      filter: blur(85px);
+    }
+    
+    .tabular-numbers {
+      font-feature-settings: "tnum" 1, "cv02" 1, "cv03" 1, "cv04" 1;
+    }
+
+    /* 3D Elevation tactile card */
+    .depth-card {
+      transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 380ms cubic-bezier(0.16, 1, 0.3, 1), border-color 380ms ease;
+      will-change: transform, box-shadow;
+    }
+    .depth-card:hover {
+      transform: translateY(-4px);
+    }
+  </style>
+<style data-purpose="component-effects">
+    /* Refined sweep sheen for buttons */
+    .shimmer-btn {
+      position: relative;
+      overflow: hidden;
+      transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 250ms ease, background 250ms ease;
+    }
+    .shimmer-btn::after {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: -60%;
+      width: 220%;
+      height: 220%;
+      background: linear-gradient(
+        75deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.28) 45%,
+        rgba(255, 255, 255, 0.35) 50%,
+        rgba(255, 255, 255, 0.28) 55%,
+        transparent 80%
+      );
+      transform: translateX(-100%) rotate(25deg);
+      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .shimmer-btn:hover::after {
+      transform: translateX(100%) rotate(25deg);
+    }
+    .shimmer-btn:active {
+      transform: scale(0.985);
+    }
+
+    /* Input focus glow ring */
+    .tactile-input {
+      transition: all 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tactile-input:focus {
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14), 0 1px 3px rgba(37, 99, 235, 0.08);
+      border-color: #2563eb;
+      background-color: #ffffff;
+    }
+
+    /* Live status badge ping halo */
+    @keyframes ring-halo {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .status-halo {
+      animation: ring-halo 2.4s infinite;
+    }
+
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Accessibility: Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      .glow-orb-1, .glow-orb-2, .glow-orb-3, .status-halo, .animate-ping {
+        animation: none !important;
+        transform: none !important;
+      }
+      .depth-card, .shimmer-btn, .tactile-input {
+        transition: none !important;
+        transform: none !important;
+      }
+      .shimmer-btn::after {
+        display: none !important;
+      }
+    }
+  </style>
+<!-- END: Custom Styles -->
+<style id="sistema-carro">
+  header { display: none !important; }
+  body { overflow-x: clip !important; }
+</style></head>
+<body class="min-h-full bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white relative overflow-x-hidden">
+<!-- Ambient 3D Light Orbs -->
+<div aria-hidden="true" class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
+<div class="glow-orb-1 absolute -top-40 left-1/4 h-[560px] w-[560px] rounded-full bg-blue-300/35"></div>
+<div class="glow-orb-2 absolute top-[38%] -right-20 h-[640px] w-[640px] rounded-full bg-cyan-200/30"></div>
+<div class="glow-orb-3 absolute bottom-16 -left-24 h-[540px] w-[540px] rounded-full bg-blue-400/20"></div>
+</div>
+<!-- Background Mesh Pattern -->
+<div aria-hidden="true" class="fixed inset-0 bg-grid-pattern opacity-60 pointer-events-none -z-10"></div>
+<!-- BEGIN: TopBar -->
+<header class="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/85 backdrop-blur-md shadow-sm transition-all duration-300">
+<div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+<!-- Brand Logo & Subtitle -->
+<div class="flex items-center gap-3">
+<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-brand-600 to-blue-400 text-white shadow-md shadow-brand-500/25 transition-transform duration-300 hover:scale-105">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.9 2 11.1 2 11.4V16c0 .6.4 1 1 1h2"></path>
+<circle cx="7" cy="17" r="2"></circle>
+<path d="M9 17h6"></path>
+<circle cx="17" cy="17" r="2"></circle>
+</svg>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="text-xl font-extrabold tracking-tight text-slate-900">Calcula<span class="text-brand-600">.car</span></span>
+
+</div>
+
+</div>
+</div>
+<!-- Live Sync & User Status -->
+<div class="flex items-center gap-4">
+<!-- Live status badge with refined glowing halo -->
+
+<!-- Notification Bell -->
+<button aria-label="Notificações" class="relative rounded-xl border border-slate-200/90 bg-white/90 p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition duration-200 shadow-sm hover:shadow" type="button">
+<span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-brand-600 ring-2 ring-white"></span>
+<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+</svg>
+</button>
+</div>
+</div>
+</header>
+<!-- END: TopBar -->
+<main class="mx-auto max-w-5xl px-4 py-8 sm:px-6 space-y-6">
+<!-- BEGIN: BackButtonAndHeading -->
+<section class="space-y-4" data-purpose="page-header">
+<!-- Return Pill Button -->
+<div>
+<a class="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white/90 px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:shadow" href="#">
+<svg class="h-3.5 w-3.5 text-slate-500 transition-transform duration-200 group-hover:-translate-x-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M19 12H5M12 19l-7-7 7-7"></path>
+</svg>
+          Voltar para todas as calculadoras
+        </a>
+</div>
+<!-- Title & Subtitle Card Header -->
+<div class="flex items-start gap-4 pt-1">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 ring-1 ring-brand-500/20 shadow-sm shadow-brand-500/10">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 10.9 2 11.1 2 11.4V16c0 .6.4 1 1 1h2"></path>
+<circle cx="7" cy="17" r="2"></circle>
+<path d="M9 17h6"></path>
+<circle cx="17" cy="17" r="2"></circle>
+</svg>
+</div>
+<div>
+<h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">Calcula-Car</h1>
+<p class="text-sm sm:text-base text-slate-500 mt-0.5">Informe os dados do veículo e descubra quanto realmente sobra para você no final da operação.</p>
+</div>
+</div>
+</section>
+<!-- END: BackButtonAndHeading -->
+<!-- BEGIN: Section1_VehicleData -->
+<section class="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300" data-purpose="vehicle-information">
+<!-- Section Header -->
+<div class="flex items-center gap-2.5 border-b border-slate-100 pb-4 mb-6">
+<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-600/10 shadow-sm">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<rect height="14" rx="2" width="20" x="2" y="3"></rect>
+<line x1="8" x2="16" y1="21" y2="21"></line>
+<line x1="12" x2="12" y1="17" y2="21"></line>
+</svg>
+</span>
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-800">1. DADOS DO VEÍCULO</h2>
+</div>
+<!-- Vehicle Inputs Grid -->
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<!-- Row 1 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Data de aquisição *</label>
+<div class="relative">
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" type="text" value="dd / mm / aaaa">
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="18" rx="2" ry="2" width="18" x="3" y="4"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Placa do veículo</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 uppercase focus:outline-none" placeholder="Ex: ABC1D23" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Chassi</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 uppercase focus:outline-none" placeholder="17 caracteres" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">RENAVAM</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: 00123456789" type="text">
+</div>
+</div>
+<!-- Row 2 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Marca</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: Volkswagen" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Modelo do veículo</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: Toyota Corolla XEi 2.0" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Ano de fabricação</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: 2020" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Ano do modelo</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: 2021" type="text">
+</div>
+</div>
+<!-- Row 3 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Cor</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: Prata" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Quilometragem (km)</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 tabular-numbers focus:outline-none" placeholder="Ex: 45000" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Combustível</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: Flex" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Câmbio</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: Automático" type="text">
+</div>
+</div>
+<!-- Row 4 -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Número do motor</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: CHT1A2B3C" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Categoria / Carroceria</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: Hatch, Sedan, SUV" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Potência do motor</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Ex: 1.0, 1.6, 1.8" type="text">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Portas</label>
+<select class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none">
+<option value="">Selecione</option>
+<option value="2">2 Portas</option>
+<option selected="" value="4">4 Portas</option>
+</select>
+</div>
+</div>
+<!-- Row 5 (Values & Capacity) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Lugares</label>
+<select class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none">
+<option value="">Selecione</option>
+<option selected="" value="5">5 Lugares</option>
+<option value="7">7 Lugares</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Valor FIPE (R$) *</label>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-semibold text-slate-400">R$</span>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 pl-10 pr-3.5 py-2.5 text-xs font-semibold text-slate-800 tabular-numbers focus:outline-none" type="text" value="75.000,00">
+</div>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Valor de compra (R$) *</label>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-semibold text-slate-400">R$</span>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 pl-10 pr-3.5 py-2.5 text-xs font-semibold text-slate-800 tabular-numbers focus:outline-none" type="text" value="50.000,00">
+</div>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Valor de venda pretendido (R$) *</label>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-semibold text-slate-400">R$</span>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 pl-10 pr-3.5 py-2.5 text-xs font-semibold text-slate-800 tabular-numbers focus:outline-none" type="text" value="78.000,00">
+</div>
+</div>
+</div>
+</form>
+</section>
+<!-- END: Section1_VehicleData -->
+<!-- BEGIN: Section2_FipeAnalysis -->
+<section class="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-4" data-purpose="fipe-comparison-analysis">
+<!-- Section Header -->
+<div class="flex items-center gap-2.5 border-b border-slate-100 pb-4">
+<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-600/10 shadow-sm">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+</svg>
+</span>
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-800">2. ANÁLISE FIPE X COMPRA</h2>
+</div>
+<!-- 3 Analytical KPI Cards with subtle 3D lift -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<!-- KPI 1 -->
+<div class="group rounded-xl border border-slate-100 bg-slate-50/70 p-4 text-center transition-all duration-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5">
+<div class="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100/70 text-brand-600 shadow-sm transition-transform duration-300 group-hover:scale-110">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="12" rx="2" width="20" x="2" y="6"></rect>
+<circle cx="12" cy="12" r="2"></circle>
+<path d="M6 12h.01M18 12h.01"></path>
+</svg>
+</div>
+<span class="text-xs font-medium text-slate-500">Diferença em reais</span>
+<p class="mt-1 text-xl font-bold tracking-tight text-slate-900 tabular-numbers">R$ 25.000,00</p>
+</div>
+<!-- KPI 2 -->
+<div class="group rounded-xl border border-blue-200/70 bg-gradient-to-b from-blue-50/70 to-blue-50/30 p-4 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-300 hover:-translate-y-0.5">
+<div class="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm transition-transform duration-300 group-hover:scale-110">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<line x1="18" x2="18" y1="20" y2="10"></line>
+<line x1="12" x2="12" y1="20" y2="4"></line>
+<line x1="6" x2="6" y1="20" y2="14"></line>
+</svg>
+</div>
+<span class="text-xs font-medium text-slate-500">Diferença percentual</span>
+<p class="mt-1 text-xl font-extrabold tracking-tight text-brand-600 tabular-numbers">33.33%</p>
+</div>
+<!-- KPI 3 -->
+<div class="group rounded-xl border border-slate-100 bg-slate-50/70 p-4 text-center transition-all duration-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5">
+<div class="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-slate-200/80 text-slate-700 shadow-sm transition-transform duration-300 group-hover:scale-110">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<circle cx="12" cy="12" r="6"></circle>
+<circle cx="12" cy="12" r="2"></circle>
+</svg>
+</div>
+<span class="text-xs font-medium text-slate-500">Margem de referência</span>
+<p class="mt-1 text-xl font-bold tracking-tight text-slate-800 tabular-numbers">15%</p>
+</div>
+</div>
+<!-- Positive Status Banner -->
+<div class="flex items-center gap-3 rounded-xl border border-emerald-200/90 bg-emerald-50/80 px-4 py-3 text-xs sm:text-sm text-emerald-900 shadow-sm">
+<div class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewBox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</div>
+<p class="font-medium">
+          Este veículo está <span class="font-bold underline decoration-emerald-500 decoration-2 underline-offset-2">dentro ou acima da margem de referência de 15%</span>.
+        </p>
+</div>
+</section>
+<!-- END: Section2_FipeAnalysis -->
+<!-- BEGIN: Section3_CapitalSource -->
+<section class="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-4" data-purpose="capital-source-selector">
+<!-- Section Header -->
+<div class="flex items-center gap-2.5 border-b border-slate-100 pb-4">
+<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-600/10 shadow-sm">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="16" rx="2" width="20" x="2" y="4"></rect>
+<path d="M7 15h0M2 9.5h20"></path>
+</svg>
+</span>
+<div>
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-800">3. ORIGEM DO CAPITAL</h2>
+<p class="text-xs text-slate-500">Selecione a origem do capital para a compra do veículo</p>
+</div>
+</div>
+<!-- Two Capital Origin Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- Capital Próprio (Inactive) -->
+<button class="group relative flex items-center gap-4 rounded-xl border border-slate-200/90 p-4 text-left transition-all duration-300 hover:border-slate-300 hover:bg-slate-50/70 hover:shadow-sm hover:-translate-y-0.5 focus:outline-none" type="button">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 group-hover:bg-slate-200/70 shadow-sm transition-transform duration-200 group-hover:scale-105">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
+<path d="M4 6v12a2 2 0 0 0 2 2h14v-4"></path>
+<path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-700">Capital Próprio</h3>
+<p class="text-xs text-slate-500">Compra realizada com recursos próprios</p>
+</div>
+</button>
+<!-- Financiamento (Active) -->
+<button class="group relative flex items-center gap-4 rounded-xl border-2 border-brand-600 bg-gradient-to-br from-brand-50/60 to-blue-50/30 p-4 text-left shadow-sm shadow-brand-500/10 focus:outline-none ring-2 ring-brand-500/20 hover:-translate-y-0.5 transition-all duration-300" type="button">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white shadow-md shadow-brand-600/30">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<line x1="3" x2="21" y1="21" y2="21"></line>
+<line x1="3" x2="21" y1="10" y2="10"></line>
+<polyline points="5 6 12 3 19 6"></polyline>
+<line x1="4" x2="4" y1="10" y2="21"></line>
+<line x1="20" x2="20" y1="10" y2="21"></line>
+<line x1="8" x2="8" y1="14" y2="17"></line>
+<line x1="12" x2="12" y1="14" y2="17"></line>
+<line x1="16" x2="16" y1="14" y2="17"></line>
+</svg>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<h3 class="text-sm font-bold text-brand-900">Financiamento</h3>
+<span class="flex h-5 w-5 items-center justify-center rounded-full bg-brand-600 text-white shadow-sm shadow-brand-600/40">
+<svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+<polyline points="20 6 9 17 4 12"></polyline>
+</svg>
+</span>
+</div>
+<p class="text-xs text-brand-700 font-medium">Compra realizada com financiamento</p>
+</div>
+</button>
+</div>
+</section>
+<!-- END: Section3_CapitalSource -->
+<!-- BEGIN: Section4_FinancingSimulator -->
+<section class="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-6" data-purpose="financing-details-and-chart">
+<!-- Section Header with Price/SAC Badge -->
+<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+<div class="flex items-center gap-2.5">
+<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-600/10 shadow-sm">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="14" rx="2" ry="2" width="20" x="2" y="7"></rect>
+<path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+</svg>
+</span>
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-800">4. FINANCIAMENTO</h2>
+</div>
+<span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold tracking-wider uppercase text-slate-600 ring-1 ring-inset ring-slate-200 shadow-sm">
+          CALCULADORA INTEGRADA • PRICE E SAC
+        </span>
+</div>
+<!-- Price / SAC Switcher Tabs -->
+<div class="grid grid-cols-2 gap-2 rounded-xl bg-slate-100/90 p-1 text-center font-medium shadow-inner">
+<button class="rounded-lg bg-white py-2 text-xs font-bold text-brand-700 shadow-sm transition-all duration-200" type="button">
+          Sistema Price
+        </button>
+<button class="rounded-lg py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all duration-200" type="button">
+          Sistema SAC
+        </button>
+</div>
+<!-- Financing Form Inputs -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Valor financiado (R$)</label>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-semibold text-slate-400">R$</span>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 pl-10 pr-3.5 py-2.5 text-xs font-bold text-slate-800 tabular-numbers focus:outline-none" type="text" value="50.000,00">
+</div>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Entrada (R$)</label>
+<div class="relative">
+<span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-semibold text-slate-400">R$</span>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 pl-10 pr-3.5 py-2.5 text-xs font-bold text-slate-800 tabular-numbers focus:outline-none" type="text" value="0,00">
+</div>
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Taxa de juros mensal (%)</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs font-bold text-slate-800 tabular-numbers focus:outline-none" type="text" value="3.9">
+</div>
+<div>
+<label class="block text-xs font-semibold text-slate-600 mb-1.5">Prazo (meses)</label>
+<input class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-xs font-bold text-slate-800 tabular-numbers focus:outline-none" type="text" value="2">
+</div>
+</div>
+<!-- 4 Financing Metrics -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2"><!-- Parcela -->
+<div class="rounded-xl border border-brand-200/80 bg-brand-50/40 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="18" rx="2" width="18" x="3" y="4"></rect>
+<line x1="16" x2="16" y1="2" y2="6"></line>
+<line x1="8" x2="8" y1="2" y2="6"></line>
+<line x1="3" x2="21" y1="10" y2="10"></line>
+</svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Parcela</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">R$ 26.471,82</p>
+</div>
+<!-- Total de Juros -->
+<div class="rounded-xl border border-brand-200/80 bg-brand-50/40 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+<polyline points="17 6 23 6 23 12"></polyline>
+</svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Total de juros</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">R$ 2.943,65</p>
+</div>
+<!-- Total Pago -->
+<div class="rounded-xl border border-brand-200/80 bg-brand-50/40 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<rect height="16" rx="2" width="22" x="1" y="4"></rect>
+<line x1="1" x2="23" y1="10" y2="10"></line>
+</svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Total pago</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">R$ 52.943,65</p>
+</div>
+<!-- Total Financiado -->
+<div class="rounded-xl border border-brand-200/80 bg-brand-50/40 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2l10 5H2l10-5z"></path>
+</svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Total financiado</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">R$ 50.000,00</p>
+</div></div>
+<!-- Chart Subheader & Tab Switcher -->
+<div class="pt-2 border-t border-slate-100 space-y-3">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1 text-xs shadow-inner">
+<button class="inline-flex items-center gap-1 rounded-md bg-white px-2.5 py-1 font-bold text-brand-700 shadow-sm transition" type="button">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              Evolução
+            </button>
+<button class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 font-medium text-slate-600 hover:text-slate-900 transition" type="button">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="7" width="7" x="3" y="3"></rect><rect height="7" width="7" x="14" y="3"></rect><rect height="7" width="7" x="14" y="14"></rect><rect height="7" width="7" x="3" y="14"></rect></svg>
+              Composição
+            </button>
+<button class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 font-medium text-slate-600 hover:text-slate-900 transition" type="button">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" x2="21" y1="6" y2="6"></line><line x1="3" x2="21" y1="12" y2="12"></line><line x1="3" x2="21" y1="18" y2="18"></line></svg>
+              Tabela completa
+            </button>
+</div>
+<span class="text-[11px] font-medium text-slate-400">Curva de amortização do saldo</span>
+</div>
+<!-- SVG Amortization Graph with 3D Depth & Halos -->
+<div class="relative w-full rounded-xl border border-slate-100 bg-gradient-to-b from-slate-50/70 to-slate-50/20 p-4 shadow-inner">
+<div class="h-44 w-full">
+<svg class="h-full w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 700 160">
+<defs>
+<linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#3b82f6" stop-opacity="0.32"></stop>
+<stop offset="70%" stop-color="#3b82f6" stop-opacity="0.08"></stop>
+<stop offset="100%" stop-color="#3b82f6" stop-opacity="0.0"></stop>
+</linearGradient>
+<filter height="200%" id="pointGlow" width="200%" x="-50%" y="-50%">
+<feGaussianBlur in="SourceGraphic" stdDeviation="3"></feGaussianBlur>
+</filter>
+</defs>
+<!-- Horizontal dashed reference lines & labels -->
+<line stroke="#cbd5e1" stroke-dasharray="3 3" stroke-width="1" x1="50" x2="680" y1="15" y2="15"></line>
+<text fill="#64748b" font-family="monospace" font-size="11" font-weight="600" x="10" y="18">R$25k</text>
+<line stroke="#cbd5e1" stroke-dasharray="3 3" stroke-width="1" x1="50" x2="680" y1="48" y2="48"></line>
+<text fill="#64748b" font-family="monospace" font-size="11" font-weight="600" x="10" y="52">R$19k</text>
+<line stroke="#cbd5e1" stroke-dasharray="3 3" stroke-width="1" x1="50" x2="680" y1="82" y2="82"></line>
+<text fill="#64748b" font-family="monospace" font-size="11" font-weight="600" x="10" y="86">R$13k</text>
+<line stroke="#cbd5e1" stroke-dasharray="3 3" stroke-width="1" x1="50" x2="680" y1="116" y2="116"></line>
+<text fill="#64748b" font-family="monospace" font-size="11" font-weight="600" x="10" y="120">R$6k</text>
+<line stroke="#cbd5e1" stroke-dasharray="3 3" stroke-width="1" x1="50" x2="680" y1="145" y2="145"></line>
+<text fill="#64748b" font-family="monospace" font-size="11" font-weight="600" x="10" y="148">R$0</text>
+<!-- Descending Curve Shadow Area -->
+<polygon fill="url(#chartGradient)" points="60,15 670,145 670,145 60,145"></polygon>
+<!-- Amortization Trend Line -->
+<line stroke="#94a3b8" stroke-linecap="round" stroke-width="2.5" x1="60" x2="670" y1="15" y2="145"></line>
+<!-- Glowing Halo underneath Points -->
+<circle cx="60" cy="15" fill="#3b82f6" filter="url(#pointGlow)" opacity="0.35" r="9"></circle>
+<circle cx="670" cy="145" fill="#3b82f6" filter="url(#pointGlow)" opacity="0.35" r="9"></circle>
+<!-- Points with Crisp Border -->
+<circle cx="60" cy="15" fill="#2563eb" r="5" stroke="#ffffff" stroke-width="2.5"></circle>
+<circle cx="670" cy="145" fill="#2563eb" r="5" stroke="#ffffff" stroke-width="2.5"></circle>
+</svg>
+</div>
+<!-- X-Axis Labels -->
+<div class="mt-2 flex justify-between px-12 text-xs font-bold text-slate-500 font-mono">
+<span class="">1</span>
+<span class="">2</span>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Section4_FinancingSimulator -->
+<!-- BEGIN: Section5_AdditionalCosts -->
+<section class="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-4" data-purpose="additional-costs-calculator">
+<!-- Section Header with Subtotal Badge -->
+<div class="flex items-center justify-between border-b border-slate-100 pb-4">
+<div class="flex items-center gap-2.5">
+<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-600/10 shadow-sm">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<line x1="12" x2="12" y1="5" y2="19"></line>
+<line x1="5" x2="19" y1="12" y2="12"></line>
+</svg>
+</span>
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-800">5. CUSTOS ADICIONAIS</h2>
+</div>
+<span class="text-sm font-extrabold text-slate-900 tabular-numbers">R$ 1.000,00</span>
+</div>
+<!-- Add Cost Button -->
+<div>
+<button class="shimmer-btn flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-brand-500/25 transition duration-200 hover:bg-brand-700" type="button">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<line x1="12" x2="12" y1="5" y2="19"></line>
+<line x1="5" x2="19" y1="12" y2="12"></line>
+</svg>
+          Adicionar custo
+        </button>
+</div>
+<!-- Added Costs List -->
+<div class="pt-2">
+<span class="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">CUSTOS ADICIONADOS</span>
+<div class="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-3 text-xs sm:text-sm shadow-sm transition hover:bg-slate-50">
+<div class="flex items-center gap-2.5 text-slate-700 font-semibold">
+<svg class="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polyline points="16 12 12 8 8 12"></polyline>
+<line x1="12" x2="12" y1="16" y2="8"></line>
+</svg>
+<span class="">04-PNEUS</span>
+</div>
+<span class="font-bold text-slate-900 tabular-numbers">R$ 1.000,00</span>
+</div>
+</div>
+<!-- Total Row -->
+<div class="flex items-center justify-between border-t border-slate-100 pt-3 text-xs sm:text-sm">
+<span class="font-extrabold text-slate-900 uppercase">TOTAL DOS CUSTOS</span>
+<span class="text-base font-extrabold text-slate-900 tabular-numbers">R$ 1.000,00</span>
+</div>
+</section>
+<!-- END: Section5_AdditionalCosts -->
+<!-- BEGIN: Section6_OperationalResult -->
+<section class="depth-card rounded-2xl border-2 border-brand-300/80 bg-gradient-to-b from-blue-50/50 via-white to-white p-6 shadow-glow-md hover:shadow-glow-lg space-y-6" data-purpose="final-deal-outcome-summary">
+<!-- Section Header -->
+<div class="flex items-center gap-2.5 border-b border-brand-100/90 pb-4">
+<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-600 text-white shadow-md shadow-brand-600/30">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+</span>
+<h2 class="text-sm font-extrabold uppercase tracking-wider text-slate-900">6. RESULTADO DA OPERAÇÃO</h2>
+</div>
+<!-- Top 5 Primary Analytical Metrics with 3D elevation -->
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"><!-- Investimento Total -->
+<div class="group rounded-xl border border-brand-200/90 bg-white/80 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-400 hover:-translate-y-1">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm transition-transform duration-200 group-hover:scale-110">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2l10 5H2l10-5z"></path></svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Investimento total</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">R$ 53.943,65</p>
+</div>
+<!-- Margem Potencial -->
+<div class="group rounded-xl border border-brand-200/90 bg-white/80 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-400 hover:-translate-y-1">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm transition-transform duration-200 group-hover:scale-110">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Margem potencial</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">R$ 25.000,00</p>
+</div>
+<!-- Custos Totais -->
+<div class="group rounded-xl border border-brand-200/90 bg-white/80 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-400 hover:-translate-y-1">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm transition-transform duration-200 group-hover:scale-110">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Custos totais</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">R$ 3.943,65</p>
+</div>
+<!-- Resultado Líquido -->
+<div class="group rounded-xl border border-brand-200/90 bg-white/80 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-400 hover:-translate-y-1">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm transition-transform duration-200 group-hover:scale-110">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Resultado líquido</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">R$ 21.056,35</p>
+</div>
+<!-- Margem Final -->
+<div class="group col-span-2 sm:col-span-1 rounded-xl border border-brand-200/90 bg-white/80 p-3.5 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-brand-400 hover:-translate-y-1">
+<div class="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-brand-100 text-brand-600 shadow-sm transition-transform duration-200 group-hover:scale-110">
+<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg>
+</div>
+<span class="text-[11px] font-semibold text-brand-700">Margem final</span>
+<p class="mt-0.5 text-sm sm:text-base font-extrabold text-brand-600 tabular-numbers">28.08%</p>
+</div></div>
+<!-- Sub-panel: COMPARAÇÃO DAS DUAS FORMAS DE VENDA -->
+<div class="rounded-xl border border-slate-200/90 bg-white/90 p-4 space-y-3 shadow-sm backdrop-blur-sm"><div class="flex items-center justify-between">
+<span class="block text-[11px] font-bold uppercase tracking-wider text-slate-600">
+  COMPARAÇÃO DAS DUAS FORMAS DE VENDA
+</span>
+<span class="text-[10px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shadow-inner">Cenários de Saída</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"><!-- Box 1: Venda pela FIPE (Resultado) -->
+<div class="rounded-xl border border-blue-100/90 bg-gradient-to-b from-blue-50/50 to-blue-50/20 p-3 text-center transition-all duration-200 hover:bg-blue-50/70 hover:shadow-sm hover:-translate-y-0.5">
+<div class="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg>
+</div>
+<span class="text-[10px] text-brand-700 font-semibold">Venda pela FIPE: resultado líquido</span>
+<p class="text-sm font-extrabold text-brand-600 tabular-numbers">R$ 21.056,35</p>
+</div>
+<!-- Box 2: Venda pela FIPE (Margem) -->
+<div class="rounded-xl border border-blue-100/90 bg-gradient-to-b from-blue-50/50 to-blue-50/20 p-3 text-center transition-all duration-200 hover:bg-blue-50/70 hover:shadow-sm hover:-translate-y-0.5">
+<div class="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg>
+</div>
+<span class="text-[10px] text-brand-700 font-semibold">Venda pela FIPE: margem</span>
+<p class="text-sm font-extrabold text-brand-600 tabular-numbers">28.08%</p>
+</div>
+<!-- Box 3: Venda pretendida (Resultado) -->
+<div class="rounded-xl border border-blue-100/90 bg-gradient-to-b from-blue-50/50 to-blue-50/20 p-3 text-center transition-all duration-200 hover:bg-blue-50/70 hover:shadow-sm hover:-translate-y-0.5">
+<div class="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+</div>
+<span class="text-[10px] text-brand-700 font-semibold">Venda pretendida: resultado líquido</span>
+<p class="text-sm font-extrabold text-brand-600 tabular-numbers">R$ 24.056,35</p>
+</div>
+<!-- Box 4: Venda pretendida (Margem) -->
+<div class="rounded-xl border border-blue-100/90 bg-gradient-to-b from-blue-50/50 to-blue-50/20 p-3 text-center transition-all duration-200 hover:bg-blue-50/70 hover:shadow-sm hover:-translate-y-0.5">
+<div class="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg>
+</div>
+<span class="text-[10px] text-brand-700 font-semibold">Venda pretendida: margem</span>
+<p class="text-sm font-extrabold text-brand-600 tabular-numbers">30.84%</p>
+</div></div>
+<p class="text-[11px] text-slate-400 text-center pt-1 font-medium">
+  Venda pela FIPE usa o valor FIPE (R$ 75.000,00). Venda pretendida usa o valor informado (R$ 78.000,00).
+</p></div>
+</section>
+<!-- END: Section6_OperationalResult -->
+<!-- BEGIN: Section7_VehicleChecklist -->
+<section class="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-6" data-purpose="vehicle-inspection-checklist">
+<!-- Section Header -->
+<div class="flex items-center gap-2.5 border-b border-slate-100 pb-4">
+<span class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-50 text-brand-600 ring-1 ring-brand-600/10 shadow-sm">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+<polyline points="14 2 14 8 20 8"></polyline>
+<line x1="16" x2="8" y1="13" y2="13"></line>
+<line x1="16" x2="8" y1="17" y2="17"></line>
+<polyline points="10 9 9 9 8 9"></polyline>
+</svg>
+</span>
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-800">7. CHECKLIST DO VEÍCULO</h2>
+</div>
+<!-- Checklist 15 Items -->
+<div class="space-y-2.5 divide-y divide-slate-100" id="checklist-container">
+<!-- Row 1 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Direção hidráulica/elétrica</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Vidros elétricos</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Travas elétricas</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Ar condicionado</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 5 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Rodas de liga leve</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 6 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Multimídia</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 7 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Bancos em couro</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 8 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Airbag</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 9 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">IPVA pago</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 10 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Licenciamento em dia</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 11 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Multas verificadas</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 12 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Pneus em boas condições</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 13 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Manual do proprietário</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 14 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Chave reserva</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Row 15 -->
+<div class="pt-2 flex items-center justify-between gap-4">
+<span class="text-xs sm:text-sm font-medium text-slate-700">Histórico de manutenção</span>
+<div class="flex items-center gap-1">
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Sim</button>
+<button class="check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition" type="button">Não</button>
+<button class="check-pill-active rounded-md bg-slate-200/80 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+</div>
+<!-- Documentação Sub-section -->
+<div class="border-t border-slate-100 pt-4 space-y-2">
+<label class="block text-xs font-semibold text-slate-600">Documentação</label>
+<div class="flex items-center gap-1.5">
+<button class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" type="button">Conferida</button>
+<button class="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition" type="button">Pendente</button>
+<button class="rounded-lg bg-slate-200/80 px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm transition" type="button">Não informado</button>
+</div>
+</div>
+<!-- Observações Textarea -->
+<div class="space-y-2">
+<label class="block text-xs font-semibold text-slate-600">Observações</label>
+<textarea class="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 p-3 text-xs text-slate-700 placeholder-slate-400 focus:outline-none" placeholder="Insira detalhes adicionais sobre o estado do veículo, avarias de funilaria, pendências mecânicas ou histórico..." rows="3"></textarea>
+</div>
+</section>
+<!-- END: Section7_VehicleChecklist -->
+<!-- BEGIN: PrimaryActionButtons -->
+<section class="space-y-3 pt-2" data-purpose="export-and-save-actions">
+<!-- 2 Export Buttons -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<!-- Export Excel -->
+<button class="shimmer-btn flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-3 text-sm font-bold text-white shadow-md shadow-brand-500/20 transition duration-200 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-500/25" type="button">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+<polyline points="7 10 12 15 17 10"></polyline>
+<line x1="12" x2="12" y1="15" y2="3"></line>
+</svg>
+          Exportar Excel
+        </button>
+<!-- Export PDF -->
+<button class="shimmer-btn flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-3 text-sm font-bold text-white shadow-md shadow-brand-500/20 transition duration-200 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-500/25" type="button">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+<polyline points="14 2 14 8 20 8"></polyline>
+<line x1="12" x2="12" y1="18" y2="12"></line>
+<line x1="9" x2="15" y1="15" y2="15"></line>
+</svg>
+          Exportar PDF
+        </button>
+</div>
+<!-- Dominant Main CTA: Salvar no estoque with 3D sheen -->
+<button class="shimmer-btn flex w-full items-center justify-center gap-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 px-6 py-3.5 text-sm sm:text-base font-extrabold text-white shadow-md shadow-brand-500/25 transition duration-200 hover:shadow-lg hover:shadow-brand-500/30 hover:-translate-y-0.5 active:translate-y-0" type="button">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+<polyline points="17 21 17 13 7 13 7 21"></polyline>
+<polyline points="7 3 7 8 15 8"></polyline>
+</svg>
+        Salvar no estoque
+      </button>
+<!-- Legal & Technical Notice -->
+<p class="text-center text-xs text-slate-400 font-medium pt-2">
+        Simulação estimada • Margem de 15% é uma referência, não uma regra obrigatória • Não substitui avaliação profissional
+      </p>
+</section>
+<!-- END: PrimaryActionButtons -->
+<!-- BEGIN: SecurityAndTrustFooter -->
+<footer class="border-t border-slate-200/80 pt-8 pb-12 mt-12 space-y-6" data-purpose="institutional-footer">
+<!-- Trust badges -->
+<div class="flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400">
+<div class="flex items-center gap-1.5 transition-colors hover:text-slate-600">
+<svg class="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+<span class="">Criptografia SSL 256-bit</span>
+</div>
+<span class="text-slate-300">•</span>
+<div class="flex items-center gap-1.5 transition-colors hover:text-slate-600">
+<svg class="h-4 w-4 text-brand-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+<span class="">Ambiente Seguro</span>
+</div>
+<span class="text-slate-300">•</span>
+<div class="flex items-center gap-1.5 transition-colors hover:text-slate-600">
+<svg class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+<span class="">Conformidade LGPD &amp; BACEN</span>
+</div>
+</div>
+<!-- Copyright -->
+<div class="text-center">
+<p class="text-xs text-slate-400">
+          © 2025 Calcula.car Tecnologia Automotiva S.A. Todos os direitos reservados.
+        </p>
+</div>
+</footer>
+<!-- END: SecurityAndTrustFooter -->
+</main>
+<!-- BEGIN: InteractiveScripts -->
+<script data-purpose="checklist-toggle-interaction">
+    // Make checklist buttons interactive
+    document.querySelectorAll('#checklist-container > div').forEach(row => {
+      const buttons = row.querySelectorAll('button');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => {
+            b.className = 'check-pill rounded-md px-2.5 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition';
+          });
+          btn.className = 'check-pill-active rounded-md bg-brand-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm transition';
+        });
+      });
+    });
+  </script>
+<script data-purpose="price-sac-tab-toggle">
+    // Interactive feedback for Price and SAC tab selector
+    const priceBtn = document.querySelector('[data-purpose="financing-details-and-chart"] .grid button:nth-child(1)');
+    const sacBtn = document.querySelector('[data-purpose="financing-details-and-chart"] .grid button:nth-child(2)');
+
+    if (priceBtn && sacBtn) {
+      priceBtn.addEventListener('click', () => {
+        priceBtn.className = 'rounded-lg bg-white py-2 text-xs font-bold text-brand-700 shadow-sm transition-all duration-200';
+        sacBtn.className = 'rounded-lg py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all duration-200';
+      });
+
+      sacBtn.addEventListener('click', () => {
+        sacBtn.className = 'rounded-lg bg-white py-2 text-xs font-bold text-brand-700 shadow-sm transition-all duration-200';
+        priceBtn.className = 'rounded-lg py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-all duration-200';
+      });
+    }
+  </script>
+<!-- END: InteractiveScripts -->
+
+<script id="sistema-carro-ponte">
+(function () {
+  const POST = (m) => window.parent && window.parent.postMessage(m, window.location.origin);
+  const PH = { 'Ex: ABC1D23': 'placa', '17 caracteres': 'chassi', 'Ex: 00123456789': 'renavam', 'Ex: Volkswagen': 'marca',
+    'Ex: Toyota Corolla XEi 2.0': 'modelo', 'Ex: 2020': 'anoFab', 'Ex: 2021': 'anoMod', 'Ex: Prata': 'cor', 'Ex: 45000': 'km',
+    'Ex: Flex': 'combustivel', 'Ex: Automático': 'cambio', 'Ex: CHT1A2B3C': 'numeroMotor', 'Ex: Hatch, Sedan, SUV': 'categoria',
+    'Ex: 1.0, 1.6, 1.8': 'potenciaMotor' };
+  const RT = { 'Data de aquisição': 'dataAquisicao', 'Portas': 'portas', 'Lugares': 'lugares',
+    'Valor FIPE (R$)': 'fipeStr', 'Valor de compra (R$)': 'compraStr', 'Valor de venda pretendido (R$)': 'vendaStr' };
+  const limpa = (t) => String(t || '').replace(/\*/g, '').replace(/\s+/g, ' ').trim();
+  function rotuloDe(el) {
+    const c = el.closest('div');
+    const l = c && c.querySelector('label');
+    return l ? limpa(l.textContent) : '';
+  }
+  document.querySelectorAll('input, select').forEach((el) => {
+    const k = el.tagName === 'INPUT' && el.placeholder ? PH[el.placeholder] : null;
+    if (k) el.dataset.k = k;
+  });
+  let rotuloPendente = null;
+  document.querySelectorAll('input, select, label').forEach((el) => {
+    if (el.tagName === 'LABEL') { rotuloPendente = limpa(el.textContent); return; }
+    if (rotuloPendente && !el.dataset.k && RT[rotuloPendente]) el.dataset.k = RT[rotuloPendente];
+    rotuloPendente = null;
+  });
+  document.addEventListener('input', (e) => {
+    const el = e.target;
+    if (el.dataset && el.dataset.k && el.tagName === 'INPUT') POST({ type: 'campo', k: el.dataset.k, v: el.value });
+  });
+  document.addEventListener('change', (e) => {
+    const el = e.target;
+    if (el.dataset && el.dataset.k && el.tagName === 'SELECT') POST({ type: 'campo', k: el.dataset.k, v: el.value });
+  });
+  function setValorRotulo(rot, txt) {
+    if (txt == null) return;
+    const el = Array.from(document.querySelectorAll('*')).find((e) => e.children.length === 0 && limpa(e.textContent) === rot);
+    if (!el) return;
+    const v = el.nextElementSibling || (el.parentElement && el.parentElement.lastElementChild);
+    if (v && v !== el) v.textContent = txt;
+  }
+  window.addEventListener('message', (e) => {
+    if (e.source !== window.parent) return;
+    const d = e.data || {};
+    if (d.type !== 'estado') return;
+    Object.entries(d.campos || {}).forEach(([k, v]) => {
+      const txt = v == null ? '' : String(v);
+      document.querySelectorAll('[data-k="' + k + '"]').forEach((el) => {
+        if (document.activeElement !== el && el.value !== txt) el.value = txt;
+      });
+    });
+    const a = d.analise || {};
+    setValorRotulo('Diferença em reais', a.diferencaReais);
+    setValorRotulo('Diferença percentual', a.diferencaPct);
+    setValorRotulo('Margem de referência', a.margemRef);
+  });
+  POST({ type: 'pronto' });
+})();
+</script></body></html>

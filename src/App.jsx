@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import RotaPrivada from "./components/RotaPrivada";
+import CalculaCarNovo from "./pages/CalculaCarNovo";
 import GaleriaPublica from "./pages/GaleriaPublica";
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
@@ -50,6 +51,7 @@ function AnimatedRoutes() {
           <Route path="/percentual" element={<RotaPrivada><Percentual /></RotaPrivada>} />
           <Route path="/amortizacao" element={<RotaPrivada><Amortizacao /></RotaPrivada>} />
           <Route path="/calcula-car" element={<RotaPrivada><CalculaCar /></RotaPrivada>} />
+          <Route path="/calcula-car-novo" element={<RotaPrivada><CalculaCarNovo /></RotaPrivada>} />
           <Route path="/estoque" element={<RotaPrivada><Estoque /></RotaPrivada>} />
           <Route path="/estoque/:id" element={<RotaPrivada><VeiculoDetalheVisual /></RotaPrivada>} />
           <Route path="/estoque/:id/completo" element={<RotaPrivada><VeiculoDetalheCompleto /></RotaPrivada>} />
