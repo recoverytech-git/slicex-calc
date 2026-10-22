@@ -1,0 +1,35 @@
+/* Visual do design do Calcula-Car, aplicado somente dentro de /calcula-car-novo */
+.cc-novo {
+  --cn-primary: #2563eb;
+  --cn-primary-600: #1d4ed8;
+  --cn-ink: #0f172a;
+  --cn-muted: #64748b;
+  --cn-border: #e2e8f0;
+}
+.cc-novo section {
+  border-radius: 20px !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 10px 25px -5px rgba(15, 23, 42, 0.04) !important;
+  transition: box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease !important;
+}
+.cc-novo section:hover {
+  border-color: rgba(37, 99, 235, 0.18) !important;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.04), 0 20px 30px -8px rgba(15, 23, 42, 0.08) !important;
+}
+.cc-novo h2 { letter-spacing: -0.015em; }
+.cc-novo button { transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease; }
+.cc-novo button:hover:not(:disabled) { box-shadow: 0 6px 14px -6px rgba(37, 99, 235, 0.35); }
+.cc-novo button:active:not(:disabled) { transform: scale(0.98); }
+.cc-novo input,
+.cc-novo select,
+.cc-novo textarea { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.cc-novo input:focus,
+.cc-novo select:focus,
+.cc-novo textarea:focus {
+  border-color: var(--cn-primary) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+  outline: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cc-novo * { transition: none !important; animation: none !important; }
+}
