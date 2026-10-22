@@ -534,7 +534,7 @@
         ['Marca', v.marca || '—'], ['Ano de fabricação', v.ano_fabricacao ?? '—'], ['Ano do modelo', v.ano_modelo ?? '—'],
         ['Quilometragem', km], ['Cor', v.cor || '—'], ['Combustível', v.combustivel || '—'], ['Câmbio', v.cambio || '—'],
         ['Número do motor', v.numero_motor || '—'], ['Potência do motor', v.potencia_motor || '—'], ['Portas', v.portas ?? '—'], ['Lugares', v.lugares ?? '—'], ['Categoria / Carroceria', v.categoria || '—'],
-      ].map(([l, x]) => linha(l, x)).join('') + total('Valor de venda pretendido', brl(venda));
+      ].map(([l, x]) => linha(l, x)).join('') + `<div class="md:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2"><div class="flex items-center justify-between py-2.5 bg-surface-container-low px-4 rounded-xl"><span class="text-outline font-semibold">Valor FIPE</span><span class="text-primary font-bold tabular-nums text-base">${brl(fipe)}</span></div><div class="flex items-center justify-between py-2.5 bg-surface-container-low px-4 rounded-xl"><span class="text-outline font-semibold">Valor de venda pretendido</span><span class="text-primary font-bold tabular-nums text-base">${brl(venda)}</span></div></div>`;
     }
 
     // 2. Analise FIPE x Compra
