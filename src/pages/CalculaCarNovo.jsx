@@ -1,3 +1,4 @@
+import "./calcula-car-novo.css";
 import { ENTRADA, FADE } from "../lib/motion";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -258,20 +259,20 @@ export default function CalculaCarNovo() {
                 <label className={labelCls}>Data de aquisição *</label>
                 <input type="date" className={inputCls} value={dataAquisicao} onChange={(e) => setDataAquisicao(e.target.value)} />
               </div>
-              <Field label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" aviso={avisoPlaca} onBlurExtra={verificarPlaca} />
-              <Field label="Chassi" val={chassi} set={setChassi} hint="17 caracteres" />
-              <Field label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
-              <Field label="Marca" val={marca} set={setMarca} hint="Ex: Volkswagen" />
-              <Field label="Modelo do veículo" val={modelo} set={setModelo} hint="Ex: Toyota Corolla XEi 2.0" />
-              <Field label="Ano de fabricação" val={anoFab} set={setAnoFab} hint="Ex: 2020" />
-              <Field label="Ano do modelo" val={anoMod} set={setAnoMod} hint="Ex: 2021" />
-              <Field label="Cor" val={cor} set={setCor} hint="Ex: Prata" />
-              <Field label="Quilometragem (km)" val={km} set={setKm} hint="Ex: 45000" />
-              <Field label="Combustível" val={combustivel} set={setCombustivel} hint="Ex: Flex" />
-              <Field label="Câmbio" val={cambio} set={setCambio} hint="Ex: Automático" />
-              <Field label="Número do motor" val={numeroMotor} set={setNumeroMotor} hint="Ex: CHT1A2B3C" />
-              <Field label="Categoria / Carroceria" val={categoria} set={setCategoria} hint="Ex: Hatch, Sedan, SUV" />
-              <Field label="Potência do motor" val={potenciaMotor} set={setPotenciaMotor} hint="Ex: 1.0, 1.6, 1.8" />
+              <CnField label="Placa do veículo" val={placa} set={setPlaca} hint="Ex: ABC1D23" aviso={avisoPlaca} onBlurExtra={verificarPlaca} />
+              <CnField label="Chassi" val={chassi} set={setChassi} hint="17 caracteres" />
+              <CnField label="RENAVAM" val={renavam} set={setRenavam} hint="Ex: 00123456789" />
+              <CnField label="Marca" val={marca} set={setMarca} hint="Ex: Volkswagen" />
+              <CnField label="Modelo do veículo" val={modelo} set={setModelo} hint="Ex: Toyota Corolla XEi 2.0" />
+              <CnField label="Ano de fabricação" val={anoFab} set={setAnoFab} hint="Ex: 2020" />
+              <CnField label="Ano do modelo" val={anoMod} set={setAnoMod} hint="Ex: 2021" />
+              <CnField label="Cor" val={cor} set={setCor} hint="Ex: Prata" />
+              <CnField label="Quilometragem (km)" val={km} set={setKm} hint="Ex: 45000" />
+              <CnField label="Combustível" val={combustivel} set={setCombustivel} hint="Ex: Flex" />
+              <CnField label="Câmbio" val={cambio} set={setCambio} hint="Ex: Automático" />
+              <CnField label="Número do motor" val={numeroMotor} set={setNumeroMotor} hint="Ex: CHT1A2B3C" />
+              <CnField label="Categoria / Carroceria" val={categoria} set={setCategoria} hint="Ex: Hatch, Sedan, SUV" />
+              <CnField label="Potência do motor" val={potenciaMotor} set={setPotenciaMotor} hint="Ex: 1.0, 1.6, 1.8" />
               <div>
                 <label className={labelCls}>Portas</label>
                 <select className={inputCls} value={portas} onChange={(e) => setPortas(e.target.value)}>
@@ -288,9 +289,9 @@ export default function CalculaCarNovo() {
                   <option value="7">7 ou mais lugares</option>
                 </select>
               </div>
-              <MoneyField label="Valor FIPE (R$) *" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
-              <MoneyField label="Valor de compra (R$)" valor={parseMoeda(compraStr)} onChange={(n) => { setCompraStr(String(n)); reset?.(); }} />
-              <MoneyField label="Valor de venda pretendido (R$) *" valor={parseMoeda(vendaStr)} onChange={(n) => { setVendaStr(String(n)); reset?.(); }} />
+              <CnMoney label="Valor FIPE (R$) *" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
+              <CnMoney label="Valor de compra (R$)" valor={parseMoeda(compraStr)} onChange={(n) => { setCompraStr(String(n)); reset?.(); }} />
+              <CnMoney label="Valor de venda pretendido (R$) *" valor={parseMoeda(vendaStr)} onChange={(n) => { setVendaStr(String(n)); reset?.(); }} />
             </div>
           </CnCard>
 
@@ -368,10 +369,10 @@ export default function CalculaCarNovo() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <MoneyField label="Valor financiado (R$)" valor={parseMoeda(valorBemStr)} onChange={(n) => { setValorBemStr(String(n)); reset?.(); }} />
-                    <MoneyField label="Entrada (R$)" valor={parseMoeda(entradaStr)} onChange={(n) => { setEntradaStr(String(n)); reset?.(); }} />
-                    <Field label="Taxa de juros mensal (%)" val={taxaStr} set={setTaxaStr} hint="Ex: 3.9" />
-                    <Field label="Prazo (meses)" val={mesesStr} set={setMesesStr} hint="Ex: 48" />
+                    <CnMoney label="Valor financiado (R$)" valor={parseMoeda(valorBemStr)} onChange={(n) => { setValorBemStr(String(n)); reset?.(); }} />
+                    <CnMoney label="Entrada (R$)" valor={parseMoeda(entradaStr)} onChange={(n) => { setEntradaStr(String(n)); reset?.(); }} />
+                    <CnField label="Taxa de juros mensal (%)" val={taxaStr} set={setTaxaStr} hint="Ex: 3.9" />
+                    <CnField label="Prazo (meses)" val={mesesStr} set={setMesesStr} hint="Ex: 48" />
                   </div>
 
                   {financiamento && (
@@ -480,7 +481,7 @@ export default function CalculaCarNovo() {
                     footer={<PrimaryButton onClick={closeModal} style={{ width: "100%" }}>Concluir</PrimaryButton>}
                   >
                     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                      <Field label="Descrição do custo" val={draftDesc} set={setDraftDesc} hint="Ex.: Pneus, Revisão, Documentação…" />
+                      <CnField label="Descrição do custo" val={draftDesc} set={setDraftDesc} hint="Ex.: Pneus, Revisão, Documentação…" />
                       <CurrencyField label="Valor" cents={draftCents} setCents={setDraftCents} />
                       <PrimaryButton onClick={addOrUpdateCusto} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}>
                         <Plus size={16} /> {editingId ? "Salvar alteração" : "Adicionar"}
@@ -622,6 +623,44 @@ function CnMini({ label, value }) {
     <div className="rounded-xl border border-brand-200/80 bg-brand-50/40 p-3.5 text-center shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
       <span className="text-[11px] font-semibold text-brand-700">{label}</span>
       <p className="mt-0.5 text-sm font-extrabold tabular-nums text-brand-600 sm:text-base">{value}</p>
+    </div>
+  );
+}
+
+function CnField({ label, val, set, hint, aviso, onBlurExtra, upper }) {
+  return (
+    <div>
+      <label className={labelCls}>{label}</label>
+      <input
+        className={inputCls + (upper ? " uppercase" : "")}
+        placeholder={hint}
+        value={val ?? ""}
+        onChange={(e) => set(e.target.value)}
+        onBlur={(e) => onBlurExtra && onBlurExtra(e.target.value)}
+      />
+      {aviso && <p className="mt-1.5 text-xs font-semibold text-red-600">{aviso}</p>}
+    </div>
+  );
+}
+
+function CnMoney({ label, valor, onChange }) {
+  const texto = valor ? Number(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "";
+  return (
+    <div>
+      <label className={labelCls}>{label}</label>
+      <div className="relative">
+        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-semibold text-slate-400">R$</span>
+        <input
+          className={inputCls + " pl-10 font-semibold tabular-nums"}
+          inputMode="numeric"
+          placeholder="0,00"
+          value={texto}
+          onChange={(e) => {
+            const digitos = e.target.value.replace(/\D/g, "");
+            onChange(digitos ? Number(digitos) / 100 : 0);
+          }}
+        />
+      </div>
     </div>
   );
 }
