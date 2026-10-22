@@ -141,6 +141,7 @@ export default function VeiculoDetalheVisual() {
               preco_compra: numero(x.preco_compra), valor_fipe: numero(x.valor_fipe),
               preco_venda_pretendido: numero(x.preco_venda_pretendido),
               numero_motor: texto(x.numero_motor), categoria: texto(x.categoria),
+              potencia_motor: texto(x.potencia_motor), portas: numero(x.portas), lugares: numero(x.lugares),
             };
             if (!payload.modelo) { alert("Informe o modelo do veículo."); return; }
             const { data: dup } = await buscarDuplicado({ placa: payload.placa, renavam: payload.renavam, chassi: payload.chassi });

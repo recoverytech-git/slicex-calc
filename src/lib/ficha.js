@@ -8,6 +8,8 @@ export const SECOES = [
     ["email", "E-mail"], ["cep", "CEP"], ["endereco", "Endereço residencial"], ["numero", "Nº"],
     ["complemento", "Complemento"], ["bairro", "Bairro"], ["cidade", "Cidade"], ["uf", "UF"],
     ["tempo_residencia", "Tempo de residência"], ["cnh", "Possui CNH", "bool"],
+  ,
+    ["ref_pessoal_nome", "Referência pessoal — nome"], ["ref_pessoal_tel", "Referência pessoal — telefone / WhatsApp", "tel"]
   ]},
   { titulo: "2. Dados financeiros e ocupacionais", campos: [
     ["empresa", "Nome da empresa"], ["admissao", "Data de admissão"], ["profissao", "Profissão"],
@@ -18,6 +20,8 @@ export const SECOES = [
     ["placa", "Placa"], ["renavam", "RENAVAM"], ["modelo", "Modelo"], ["ano_modelo", "Ano/modelo"],
     ["cor", "Cor"], ["valor_veiculo", "Valor do veículo", "money"], ["valor_entrada", "Valor de entrada", "money"],
     ["valor_financiar", "Valor a financiar", "money"],
+  ,
+    ["ref_emp_nome", "Referência empresarial — nome"], ["ref_emp_tel", "Referência empresarial — telefone / WhatsApp", "tel"]
   ]},
 ];
 

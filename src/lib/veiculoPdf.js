@@ -51,7 +51,7 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
     ["Modelo", v.modelo || "—"], ["Marca", v.marca || "—"], ["Placa", v.placa || "—"], ["RENAVAM", v.renavam || "—"],
     ["Chassi", v.chassi || "—"], ["Data de aquisição", data(v.data_aquisicao)], ["Ano de fabricação", v.ano_fabricacao ?? "—"],
     ["Ano do modelo", v.ano_modelo ?? "—"], ["Quilometragem", v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString("pt-BR")} km` : "—"],
-    ["Nº do motor", v.numero_motor || "—"], ["Categoria / Carroceria", v.categoria || "—"], ["Cor", v.cor || "—"], ["Combustível", v.combustivel || "—"], ["Câmbio", v.cambio || "—"],
+    ["Nº do motor", v.numero_motor || "—"], ["Potência do motor", v.potencia_motor || "—"], ["Portas", v.portas ?? "—"], ["Lugares", v.lugares ?? "—"], ["Categoria / Carroceria", v.categoria || "—"], ["Cor", v.cor || "—"], ["Combustível", v.combustivel || "—"], ["Câmbio", v.cambio || "—"],
     ["Valor de venda pretendido", brl(v.preco_venda_pretendido)],
   ]);
 

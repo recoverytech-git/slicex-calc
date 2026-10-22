@@ -533,7 +533,7 @@
         ['RENAVAM', g ? (v.renavam || '—') : 'Restrito'], ['Chassi', g ? (v.chassi || '—') : 'Restrito'],
         ['Marca', v.marca || '—'], ['Ano de fabricação', v.ano_fabricacao ?? '—'], ['Ano do modelo', v.ano_modelo ?? '—'],
         ['Quilometragem', km], ['Cor', v.cor || '—'], ['Combustível', v.combustivel || '—'], ['Câmbio', v.cambio || '—'],
-        ['Número do motor', v.numero_motor || '—'], ['Categoria / Carroceria', v.categoria || '—'],
+        ['Número do motor', v.numero_motor || '—'], ['Potência do motor', v.potencia_motor || '—'], ['Portas', v.portas ?? '—'], ['Lugares', v.lugares ?? '—'], ['Categoria / Carroceria', v.categoria || '—'],
       ].map(([l, x]) => linha(l, x)).join('') + total('Valor de venda pretendido', brl(venda));
     }
 
@@ -659,7 +659,7 @@
       ['marca', 'Marca', 'text', v.marca || ''], ['modelo', 'Modelo', 'text', v.modelo || ''],
       ['ano_fabricacao', 'Ano de fabricação', 'text', v.ano_fabricacao ?? ''], ['ano_modelo', 'Ano do modelo', 'text', v.ano_modelo ?? ''],
       ['cor', 'Cor', 'text', v.cor || ''], ['quilometragem', 'Quilometragem (km)', 'text', v.quilometragem ?? ''],
-      ['combustivel', 'Combustível', 'text', v.combustivel || ''], ['cambio', 'Câmbio', 'text', v.cambio || ''], ['numero_motor', 'Número do motor', 'text', v.numero_motor || ''], ['categoria', 'Categoria / Carroceria', 'text', v.categoria || ''],
+      ['combustivel', 'Combustível', 'text', v.combustivel || ''], ['cambio', 'Câmbio', 'text', v.cambio || ''], ['numero_motor', 'Número do motor', 'text', v.numero_motor || ''], ['potencia_motor', 'Potência do motor', 'text', v.potencia_motor || ''], ['portas', 'Portas (2 ou 4)', 'text', v.portas ?? ''], ['lugares', 'Lugares (5 ou 7 = 7 ou mais)', 'text', v.lugares ?? ''], ['categoria', 'Categoria / Carroceria', 'text', v.categoria || ''],
       ['preco_compra', 'Valor de compra (R$)', 'text', v.preco_compra ?? ''], ['valor_fipe', 'Valor FIPE (R$)', 'text', v.valor_fipe ?? ''],
       ['preco_venda_pretendido', 'Valor de venda pretendido (R$)', 'text', v.preco_venda_pretendido ?? ''],
     ];

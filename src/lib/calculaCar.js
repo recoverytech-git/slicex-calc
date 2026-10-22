@@ -57,6 +57,7 @@ export function buildCalculaCarXLSX(XLSX, data) {
   const {
     modelo, placa, fipe, compra, valorVenda,
     diferencaReais, diferencaPercentual, abaixoDaMargem,
+    numeroMotor, categoria, potenciaMotor, portas, lugares,
     tipoCapital, financiamento, // { rows, pv, taxa, n, sistema, totalPago, totalJuros } | null
     custos, totalCustosAdicionais, custoFinanceiro,
     custosTotais, investimentoTotal, margemPotencial, resultadoLiquido,
@@ -72,6 +73,7 @@ export function buildCalculaCarXLSX(XLSX, data) {
     ["DADOS DO VEÍCULO"],
     ["Modelo", modelo || "—"],
     ["Placa", placa || "—"],
+    ["Número do motor", numeroMotor || "—"], ["Potência do motor", potenciaMotor || "—"], ["Portas", portas || "—"], ["Lugares", lugares || "—"], ["Categoria / Carroceria", categoria || "—"],
     ["Data de aquisição", data.dataAquisicao || "—"],
     ["Valor FIPE (R$)", fmtN(fipe)],
     ["Valor de compra (R$)", fmtN(compra)],
@@ -191,6 +193,9 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data }) {
     styles: { fontSize: 9, cellPadding: 1.5 },
     body: [
       ["Modelo", modelo || "—", "Placa", placa || "—"],
+      ["Motor", numeroMotor || "—", "Potência", potenciaMotor || "—"],
+      ["Portas", portas || "—", "Lugares", lugares || "—"],
+      ["Categoria", categoria || "—", "", ""],
       ["Valor FIPE", fmt(fipe), "Valor de compra", fmt(compra)],
       ["Data de aquisição", data.dataAquisicao || "—", "", ""],
     ],

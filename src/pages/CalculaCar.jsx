@@ -68,12 +68,15 @@ export default function CalculaCar() {
   const [dataAquisicao, setDataAquisicao] = useRascunho("cc.dataAquisicao", "");
   const [numeroMotor, setNumeroMotor] = useRascunho("cc.numeroMotor", "");
   const [categoria, setCategoria] = useRascunho("cc.categoria", "");
+  const [potenciaMotor, setPotenciaMotor] = useRascunho("cc.potenciaMotor", "");
+  const [portas, setPortas] = useRascunho("cc.portas", "");
+  const [lugares, setLugares] = useRascunho("cc.lugares", "");
   const [vendaStr, setVendaStr] = useRascunho("cc.vendaStr", "");
   const [checklist, setChecklist] = useRascunho("cc.checklist", CHECKLIST_INICIAL);
   const resetarCalcula = () => {
     limparRascunho(["cc.modelo","cc.placa","cc.fipeStr","cc.compraStr","cc.renavam","cc.chassi","cc.anoFab","cc.anoMod",
       "cc.cor","cc.km","cc.combustivel","cc.cambio","cc.tipoCapital","cc.valorBemStr","cc.entradaStr","cc.taxaStr",
-      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist","cc.marca","cc.dataAquisicao","cc.numeroMotor","cc.categoria","cc.vendaStr"]);
+      "cc.mesesStr","cc.sistema","cc.custos","cc.checklist","cc.marca","cc.dataAquisicao","cc.numeroMotor","cc.categoria","cc.vendaStr","cc.potenciaMotor","cc.portas","cc.lugares"]);
     setModelo(""); setPlaca(""); setFipeStr("75000"); setCompraStr("50000"); setRenavam(""); setChassi("");
     setAnoFab(""); setAnoMod(""); setCor(""); setKm(""); setCombustivel(""); setCambio("");
     setTipoCapital("Próprio"); setValorBemStr("50000"); setEntradaStr("0"); setTaxaStr("3.9"); setMesesStr("48");
@@ -155,7 +158,7 @@ export default function CalculaCar() {
   const removeCusto = (id) => setCustos((c) => c.filter((x) => x.id !== id));
 
   const exportData = resultado ? {
-    modelo, placa, fipe, compra, valorVenda, dataAquisicao: dataAquisicao ? new Date(dataAquisicao + "T12:00:00").toLocaleDateString("pt-BR") : "",
+    modelo, placa, fipe, compra, valorVenda, numeroMotor, categoria, potenciaMotor, portas, lugares, dataAquisicao: dataAquisicao ? new Date(dataAquisicao + "T12:00:00").toLocaleDateString("pt-BR") : "",
     ...diferenca,
     tipoCapital: tipoCapital === "Financiamento" ? "Financiamento" : "Capital Próprio",
     financiamento,
@@ -257,6 +260,23 @@ export default function CalculaCar() {
               <Field label="Câmbio" val={cambio} set={setCambio} hint="Ex: Automático" />
               <Field label="Número do motor" val={numeroMotor} set={setNumeroMotor} hint="Ex: CHT1A2B3C" />
               <Field label="Categoria / Carroceria" val={categoria} set={setCategoria} hint="Ex: Hatch, Sedan, SUV" />
+              <Field label="Potência do motor" val={potenciaMotor} set={setPotenciaMotor} hint="Ex: 1.0, 1.6, 1.8" />
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Portas</label>
+                <select value={portas} onChange={(e) => setPortas(e.target.value)} style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 }}>
+                  <option value="">Selecione</option>
+                  <option value="2">2 portas</option>
+                  <option value="4">4 portas</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: "var(--text-dim)", display: "block", marginBottom: 6, fontWeight: 500 }}>Lugares</label>
+                <select value={lugares} onChange={(e) => setLugares(e.target.value)} style={{ width: "100%", boxSizing: "border-box", background: "var(--surface)", border: "1.5px solid var(--border-strong)", borderRadius: "var(--r-sm)", padding: "11px 13px", color: "var(--text)", fontSize: 14, fontWeight: 600 }}>
+                  <option value="">Selecione</option>
+                  <option value="5">5 lugares</option>
+                  <option value="7">7 ou mais lugares</option>
+                </select>
+              </div>
               <MoneyField label="Valor FIPE (R$) *" valor={parseMoeda(fipeStr)} onChange={(n) => { setFipeStr(String(n)); reset?.(); }} />
               <MoneyField label="Valor de compra (R$)" valor={parseMoeda(compraStr)} onChange={(n) => { setCompraStr(String(n)); reset?.(); }} />
               <MoneyField label="Valor de venda pretendido (R$) *" valor={parseMoeda(vendaStr)} onChange={(n) => { setVendaStr(String(n)); reset?.(); }} />
@@ -556,7 +576,7 @@ export default function CalculaCar() {
             )}
           </AnimatePresence>
 
-          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda: valorVendaPretendida, numeroMotor, categoria, tipoCapital, custos, financiamento, checklist, marca, dataAquisicao }} onConcluido={resetarCalcula} />
+          <SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda: valorVendaPretendida, numeroMotor, categoria, potenciaMotor, portas, lugares, tipoCapital, custos, financiamento, checklist, marca, dataAquisicao }} onConcluido={resetarCalcula} />
           <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-faint)", marginTop: 30 }}>
             Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional
           </p>

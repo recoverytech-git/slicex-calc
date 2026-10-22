@@ -28,6 +28,7 @@ export default function SalvarNoEstoque({ dados, onConcluido }) {
         quilometragem: dados.km || null, combustivel: dados.combustivel, cambio: dados.cambio,
         preco_compra: dados.compra, valor_fipe: dados.fipe, preco_venda_pretendido: dados.valorVenda,
         numero_motor: dados.numeroMotor?.trim() || null, categoria: dados.categoria?.trim() || null,
+        potencia_motor: dados.potenciaMotor?.trim() || null, portas: dados.portas ? Number(dados.portas) : null, lugares: dados.lugares ? Number(dados.lugares) : null,
         tipo_aquisicao: dados.tipoCapital === "Financiamento" ? "financiamento" : "capital_proprio",
       },
       p_custos: (dados.custos ?? []).map((c) => ({ descricao: c.descricao, valor: c.valor })),
