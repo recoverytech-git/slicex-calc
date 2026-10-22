@@ -29,6 +29,12 @@ export default function CalculaCarNovo() {
   const [fipeStr, setFipeStr] = useRascunho("cc.fipeStr", "");
   const [compraStr, setCompraStr] = useRascunho("cc.compraStr", "");
   const [vendaStr, setVendaStr] = useRascunho("cc.vendaStr", "");
+  const [valorBemStr, setValorBemStr] = useRascunho("cc.valorBemStr", "");
+  const [entradaStr, setEntradaStr] = useRascunho("cc.entradaStr", "");
+  const [taxaStr, setTaxaStr] = useRascunho("cc.taxaStr", "");
+  const [mesesStr, setMesesStr] = useRascunho("cc.mesesStr", "");
+  const [tipoCapital, setTipoCapital] = useRascunho("cc.tipoCapital", "Próprio");
+  const [sistema, setSistema] = useRascunho("cc.sistema", "Price");
 
   const fipe = toF(fipeStr);
   const compra = toF(compraStr);
@@ -36,11 +42,13 @@ export default function CalculaCarNovo() {
   const diferenca = useMemo(() => (veiculoValido ? calcDiferenca(fipe, compra) : null), [veiculoValido, fipe, compra]);
 
   const valores = { modelo, placa, renavam, chassi, marca, anoFab, anoMod, cor, km, combustivel, cambio,
-    numeroMotor, categoria, potenciaMotor, portas, lugares, dataAquisicao, fipeStr, compraStr, vendaStr };
+    numeroMotor, categoria, potenciaMotor, portas, lugares, dataAquisicao, fipeStr, compraStr, vendaStr,
+    valorBemStr, entradaStr, taxaStr, mesesStr, tipoCapital, sistema };
   const setters = { modelo: setModelo, placa: setPlaca, renavam: setRenavam, chassi: setChassi, marca: setMarca,
     anoFab: setAnoFab, anoMod: setAnoMod, cor: setCor, km: setKm, combustivel: setCombustivel, cambio: setCambio,
     numeroMotor: setNumeroMotor, categoria: setCategoria, potenciaMotor: setPotenciaMotor, portas: setPortas,
-    lugares: setLugares, dataAquisicao: setDataAquisicao, fipeStr: setFipeStr, compraStr: setCompraStr, vendaStr: setVendaStr };
+    lugares: setLugares, dataAquisicao: setDataAquisicao, fipeStr: setFipeStr, compraStr: setCompraStr, vendaStr: setVendaStr,
+    valorBemStr: setValorBemStr, entradaStr: setEntradaStr, taxaStr: setTaxaStr, mesesStr: setMesesStr, tipoCapital: setTipoCapital, sistema: setSistema };
 
   function envia() {
     frame.current?.contentWindow?.postMessage({ type: "estado", campos: valores, analise: {
@@ -59,7 +67,8 @@ export default function CalculaCarNovo() {
       if (d.type === "pronto") envia();
       if (d.type === "campo" && setters[d.k]) {
         const v = String(d.v ?? "");
-        const valor = d.k.endsWith("Str") ? (v === "" ? "" : String(parseMoeda(v))) : v;
+        const DINHEIRO = ["fipeStr", "compraStr", "vendaStr", "valorBemStr", "entradaStr"];
+        const valor = DINHEIRO.includes(d.k) ? (v === "" ? "" : String(parseMoeda(v))) : v;
         setters[d.k](valor);
       }
     };

@@ -21,6 +21,10 @@ describe("ponte do design do Calcula-Car", () => {
     expect(w.document.querySelector('[data-k="placa"]').value).toBe("ABC1D23");
     expect(w.document.querySelector('[data-k="fipeStr"]').value).toBe("75000");
     expect(w.document.body.textContent).toContain("R$ 25.000,00");
+    expect(w.document.querySelector('[data-k="taxaStr"]')).not.toBeNull();
+    expect(w.document.querySelector('[data-k="valorBemStr"]')).not.toBeNull();
+    expect(w.document.querySelector('[data-k="entradaStr"]')).not.toBeNull();
+    expect(w.document.querySelector('[data-k="mesesStr"]')).not.toBeNull();
     expect(erros.filter((e) => /sistema-carro|ponte/.test(e))).toEqual([]);
   });
 });

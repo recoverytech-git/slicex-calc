@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="h-full bg-slate-50 font-sans" lang="pt-BR" style="width: 1280px; height: 4171px; overflow: hidden; position: relative;"><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head>
+<!DOCTYPE html><html class="h-full bg-slate-50 font-sans" lang="pt-BR" style="min-height: 100%; position: relative;"><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg><head>
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Calcula.car — Inteligência Financeira e Automotiva</title>
@@ -186,13 +186,18 @@
 <style id="sistema-carro">
   header { display: none !important; }
   body { overflow-x: clip !important; }
-</style></head>
+</style><style id="sistema-carro-layout">
+  html, body { max-width: 100% !important; overflow-x: clip !important; }
+  html { overflow-y: auto !important; }
+  [data-ativo="1"] { background: #2563eb !important; color: #fff !important; border-color: #2563eb !important; }
+</style>
+</head>
 <body class="min-h-full bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white relative overflow-x-hidden">
 <!-- Ambient 3D Light Orbs -->
 <div aria-hidden="true" class="pointer-events-none fixed inset-0 overflow-hidden -z-10">
-<div class="glow-orb-1 absolute -top-40 left-1/4 h-[560px] w-[560px] rounded-full bg-blue-300/35"></div>
-<div class="glow-orb-2 absolute top-[38%] -right-20 h-[640px] w-[640px] rounded-full bg-cyan-200/30"></div>
-<div class="glow-orb-3 absolute bottom-16 -left-24 h-[540px] w-[540px] rounded-full bg-blue-400/20"></div>
+<div class="glow-orb-1 absolute -top-40 left-1/4 h-[560px] w-full max-w-[560px] rounded-full bg-blue-300/35"></div>
+<div class="glow-orb-2 absolute top-[38%] -right-20 h-[640px] w-full max-w-[640px] rounded-full bg-cyan-200/30"></div>
+<div class="glow-orb-3 absolute bottom-16 -left-24 h-[540px] w-full max-w-[540px] rounded-full bg-blue-400/20"></div>
 </div>
 <!-- Background Mesh Pattern -->
 <div aria-hidden="true" class="fixed inset-0 bg-grid-pattern opacity-60 pointer-events-none -z-10"></div>
@@ -1104,7 +1109,7 @@
     'Ex: Flex': 'combustivel', 'Ex: Automático': 'cambio', 'Ex: CHT1A2B3C': 'numeroMotor', 'Ex: Hatch, Sedan, SUV': 'categoria',
     'Ex: 1.0, 1.6, 1.8': 'potenciaMotor' };
   const RT = { 'Data de aquisição': 'dataAquisicao', 'Portas': 'portas', 'Lugares': 'lugares',
-    'Valor FIPE (R$)': 'fipeStr', 'Valor de compra (R$)': 'compraStr', 'Valor de venda pretendido (R$)': 'vendaStr' };
+    'Valor FIPE (R$)': 'fipeStr', 'Valor de compra (R$)': 'compraStr', 'Valor de venda pretendido (R$)': 'vendaStr', 'Valor financiado (R$)': 'valorBemStr', 'Entrada (R$)': 'entradaStr', 'Taxa de juros mensal (%)': 'taxaStr', 'Prazo (meses)': 'mesesStr' };
   const limpa = (t) => String(t || '').replace(/\*/g, '').replace(/\s+/g, ' ').trim();
   function rotuloDe(el) {
     const c = el.closest('div');
@@ -1125,6 +1130,15 @@
     const el = e.target;
     if (el.dataset && el.dataset.k && el.tagName === 'INPUT') POST({ type: 'campo', k: el.dataset.k, v: el.value });
   });
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest && e.target.closest('button');
+    if (!b) return;
+    const t = (b.textContent || '').replace(/\s+/g, ' ').trim();
+    if (/Sistema Price/.test(t)) POST({ type: 'campo', k: 'sistema', v: 'Price' });
+    else if (/Sistema SAC/.test(t)) POST({ type: 'campo', k: 'sistema', v: 'SAC' });
+    else if (/^Capital próprio$|^Próprio$/i.test(t)) POST({ type: 'campo', k: 'tipoCapital', v: 'Próprio' });
+    else if (/^Financiamento$/i.test(t)) POST({ type: 'campo', k: 'tipoCapital', v: 'Financiamento' });
+  });
   document.addEventListener('change', (e) => {
     const el = e.target;
     if (el.dataset && el.dataset.k && el.tagName === 'SELECT') POST({ type: 'campo', k: el.dataset.k, v: el.value });
@@ -1140,6 +1154,15 @@
     if (e.source !== window.parent) return;
     const d = e.data || {};
     if (d.type !== 'estado') return;
+    document.querySelectorAll('button').forEach((b) => {
+      const t = (b.textContent || '').replace(/\s+/g, ' ').trim();
+      let ativo = null;
+      if (/Sistema Price/.test(t)) ativo = d.campos && d.campos.sistema === 'Price';
+      else if (/Sistema SAC/.test(t)) ativo = d.campos && d.campos.sistema === 'SAC';
+      else if (/^Capital próprio$|^Próprio$/i.test(t)) ativo = d.campos && d.campos.tipoCapital === 'Próprio';
+      else if (/^Financiamento$/i.test(t)) ativo = d.campos && d.campos.tipoCapital === 'Financiamento';
+      if (ativo !== null) b.dataset.ativo = ativo ? '1' : '0';
+    });
     Object.entries(d.campos || {}).forEach(([k, v]) => {
       const txt = v == null ? '' : String(v);
       document.querySelectorAll('[data-k="' + k + '"]').forEach((el) => {
