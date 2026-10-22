@@ -1,6 +1,6 @@
 import { URL_PUBLICA } from "../lib/urls";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FileText, Save, Check, Image as ImageIcon, FileDown } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
@@ -8,6 +8,7 @@ import PageTransition from "../components/PageTransition";
 import Field from "../components/Field";
 import MoneyField from "../components/MoneyField";
 import PrimaryButton from "../components/PrimaryButton";
+import Modal from "../components/Modal";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 import { useRascunho, limparRascunho } from "../lib/rascunho";
@@ -25,6 +26,13 @@ export default function Ficha() {
   const [form, setForm] = useRascunho("ficha.form", FICHA_VAZIA);
   const [lead, setLead] = useState(null);
   const [msg, setMsg] = useState(null);
+  const [popup, setPopup] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!popup) return undefined;
+    const t = setTimeout(() => navigate("/leads"), 2200);
+    return () => clearTimeout(t);
+  }, [popup, navigate]);
   const [salvando, setSalvando] = useState(false);
   const [linkGerado, setLinkGerado] = useState(null);
   const somenteLeitura = Boolean(id) && !EDITAM.includes(papel);
@@ -59,6 +67,8 @@ export default function Ficha() {
       setSalvando(false);
       if (error) { setMsg({ tipo: "erro", texto: `Não foi salvo: ${error.message}` }); return; }
       setMsg({ tipo: "ok", texto: "Ficha atualizada." });
+      limparRascunho(["ficha.form"]);
+      setPopup(true);
     } else {
       const { error } = await supabase.from("leads").insert({ ...dados, status: "completa", organizacao_id: perfil?.organizacao_id ?? null, criado_por: sessao?.user?.id });
       setSalvando(false);
@@ -66,6 +76,7 @@ export default function Ficha() {
       setForm(FICHA_VAZIA);
       limparRascunho(["ficha.form"]);
       setMsg({ tipo: "ok", texto: "Ficha salva em Leads." });
+      setPopup(true);
     }
   };
 
@@ -154,6 +165,10 @@ export default function Ficha() {
           </div>
         </div>
       </div>
-    </PageTransition>
+    <Modal open={popup} onClose={() => navigate("/leads")} title="Ficha salva"
+        footer={<PrimaryButton onClick={() => navigate("/leads")} style={{ width: "100%" }}>Ir para Leads</PrimaryButton>}>
+        <p style={{ margin: 0, fontSize: 14, color: "var(--text)" }}>A ficha foi salva com sucesso. Você será redirecionado para Leads.</p>
+      </Modal>
+      </PageTransition>
   );
 }

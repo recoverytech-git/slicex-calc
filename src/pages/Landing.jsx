@@ -8,7 +8,7 @@ import { CC_BASE_CSS } from "../components/ccPaleta";
 import { useMarca } from "../lib/marca";
 import { CADASTRO_WHATSAPP, SUPORTE_WHATSAPP } from "../lib/contato";
 
-const IMAGEM_HERO = "https://lh3.googleusercontent.com/aida/AEtjO1VaaOMujZEwacci69jAP5lLN-iMfA-m60WA28agPRbcLCMLpU2RcYdjicwUSiDVzlmazbaxQLZLGVNdEvfykZcUJE_rN2zalYw4gvHs6aSzohfntvwljlLaWjEEbpVm6l4MxIDKtn2t1jcS653fiSlwInWB8XATYf1F-Adw5xj3zen5Y_VqYViUagrjbbXhUOSh1Ygv5i3EgK7TlrVJyWb_03jyB2HLdI7oOGFZ2xlwXlwpIY1IPFZzHBvk";
+const IMAGEM_HERO = "/landing-dashboard.png";
 const TEXTO_HERO = "Saiba quanto sobra de VERDADE\nem cada compra e venda de veículo.";
 
 const RECURSOS = [
