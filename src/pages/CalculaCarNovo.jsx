@@ -1,3 +1,4 @@
+import { Component as ComponentCn } from "react";
 import { Gauge as GaugeCn, Percent as PercentCn, Lightbulb as LightbulbCn, SlidersHorizontal as SlidersCn, ArrowUpDown as ArrowUpDownCn, TrendingDown as TrendingDownCn } from "lucide-react";
 import { useEffect as useEffectCn, useRef as useRefCn } from "react";
 import { useState as useStateCn } from "react";
@@ -559,7 +560,7 @@ export default function CalculaCarNovo() {
 
 <div className="pt-2 border-t border-slate-100 space-y-3">
 <div className="flex flex-wrap items-center justify-between gap-2">
-<CnPainelFinanciamento pv={pv} taxa={taxaNum} n={n} sistema={sistema} /></div></div></section>)}
+<CnErroBoundary resetKey={`${pv}|${taxaNum}|${n}|${sistema}`}><CnPainelFinanciamento pv={pv} taxa={taxaNum} n={n} sistema={sistema} /></CnErroBoundary></div></div></section>)}
 {veiculoValido && (<section className="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-4" data-purpose="additional-costs-calculator">
 
 <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -1091,7 +1092,9 @@ function CnDemonstrativo({ rows, sistema, n }) {
 function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
   const [aba, setAba] = useStateCn("evolucao");
   const [sobre, setSobre] = useStateCn(null);
-  if (!(pv > 0 && taxa > 0 && n > 0)) return null;
+  useEffectCn(() => { setSobre(null); }, [n]);
+  if (!(Number.isFinite(pv) && pv > 0 && Number.isFinite(taxa) && taxa > 0 && Number.isFinite(n) && n >= 1)) return null;
+  n = Math.floor(n);
 
   const sac = calcSAC(pv, taxa, n);
   const price = calcPrice(pv, taxa, n);
@@ -1122,7 +1125,8 @@ function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
     for (let k = 0; k < n; k++) { const d = Math.abs(X(k) - px); if (d < dist) { dist = d; melhor = k; } }
     setSobre(melhor);
   };
-  const ponto = sobre !== null ? { mes: sobre + 1, sac: sac[sobre].saldo, price: price[sobre].saldo } : null;
+  const sobreOk = sobre !== null && sobre < n ? sobre : null;
+  const ponto = sobreOk !== null ? { mes: sobreOk + 1, sac: sac[sobreOk].saldo, price: price[sobreOk].saldo } : null;
   const circ = 2 * Math.PI * 80;
 
   const abas = [
@@ -1179,15 +1183,15 @@ function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
               ))}
               {ponto && (
                 <g>
-                  <line x1={X(sobre)} x2={X(sobre)} y1={pt} y2={Y(0)} stroke="#2563eb" strokeOpacity="0.3" />
-                  <circle cx={X(sobre)} cy={Y(ponto.price)} r="5" fill="#2563eb" stroke="#fff" strokeWidth="2" />
-                  <circle cx={X(sobre)} cy={Y(ponto.sac)} r="5" fill="#10b981" stroke="#fff" strokeWidth="2" />
+                  <line x1={X(sobreOk)} x2={X(sobreOk)} y1={pt} y2={Y(0)} stroke="#2563eb" strokeOpacity="0.3" />
+                  <circle cx={X(sobreOk)} cy={Y(ponto.price)} r="5" fill="#2563eb" stroke="#fff" strokeWidth="2" />
+                  <circle cx={X(sobreOk)} cy={Y(ponto.sac)} r="5" fill="#10b981" stroke="#fff" strokeWidth="2" />
                 </g>
               )}
             </svg>
             {ponto && (
               <div className="pointer-events-none absolute top-12 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md"
-                style={{ left: `calc(${(X(sobre) / W) * 100}% + 16px)` }}>
+                style={{ left: `calc(${(X(sobreOk) / W) * 100}% + 16px)` }}>
                 <div className="font-bold text-slate-700">Mês {ponto.mes}</div>
                 <div className="text-blue-700">Price: {fmt(ponto.price)}</div>
                 <div className="text-emerald-700">SAC: {fmt(ponto.sac)}</div>
@@ -1299,4 +1303,24 @@ function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
       {aba === "custo" && <CnDemonstrativo rows={rows} sistema={sistema} n={n} />}
     </div>
   );
+}
+
+
+class CnErroBoundary extends ComponentCn {
+  constructor(props) { super(props); this.state = { erro: false }; }
+  static getDerivedStateFromError() { return { erro: true }; }
+  componentDidCatch(err) { console.error("Painel de financiamento:", err); }
+  componentDidUpdate(prev) {
+    if (this.state.erro && prev.resetKey !== this.props.resetKey) this.setState({ erro: false });
+  }
+  render() {
+    if (this.state.erro) {
+      return (
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+          Não foi possível exibir o painel de financiamento com os valores informados. Confira valor financiado, taxa e prazo.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
