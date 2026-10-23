@@ -1716,7 +1716,25 @@ function calcSAC(pv, taxa, n) {
     return el;
   }
   function medir() { POST({ type: 'altura', h: document.documentElement.scrollHeight }); }
-  function montar() { painel = isolar(); medir(); POST({ type: 'pronto' }); }
+  function acabamento() {
+    if (!painel) return;
+    Array.from(painel.querySelectorAll('button'))
+      .filter((b) => /CSV|Excel|PDF/.test(b.textContent))
+      .forEach((b) => b.style.setProperty('display', 'none', 'important'));
+    const r = folha('Resumo da Operação Contratada');
+    if (r) {
+      let c = r;
+      while (c.parentElement && !c.parentElement.textContent.includes('Evolução da Dívida')) c = c.parentElement;
+      if (c !== painel) c.style.setProperty('display', 'none', 'important');
+    }
+    let n = painel.parentElement;
+    while (n && n !== document.documentElement) {
+      ['margin', 'padding', 'min-height'].forEach((p) => n.style.setProperty(p, p === 'min-height' ? '0' : '0', 'important'));
+      n = n.parentElement;
+    }
+    document.body.style.setProperty('margin', '0', 'important');
+  }
+  function montar() { painel = isolar(); acabamento(); medir(); POST({ type: 'pronto' }); }
   window.addEventListener('load', () => setTimeout(montar, 60));
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => medir()).observe(document.body);
   window.addEventListener('message', (e) => {
@@ -1729,11 +1747,11 @@ function calcSAC(pv, taxa, n) {
     if (!veiculo || !entrada || !taxa || !prazo) return;
     veiculo.value = fmt(d.veiculo, 2);
     entrada.value = fmt(d.entrada, 2);
-    taxa.value = fmt(d.taxa, 2);
+    taxa.value = Number(d.taxa || 0).toFixed(2);
     prazo.value = String(d.prazo);
     try { switchSystem(d.sistema === 'SAC' ? 'SAC' : 'PRICE'); } catch (err) {}
     try { triggerRecalculate(); } catch (err) {}
-    setTimeout(() => { if (!painel) painel = isolar(); medir(); }, 120);
+    setTimeout(() => { if (!painel) painel = isolar(); acabamento(); medir(); }, 120);
   });
 })();
 </script>
