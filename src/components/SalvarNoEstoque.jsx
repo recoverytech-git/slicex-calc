@@ -9,7 +9,7 @@ import { supabase } from "../lib/supabase";
 const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", padding: "16px 18px", marginTop: 14 };
 const PAPEIS_CADASTRO = ["admin_master", "proprietario", "gerente", "vendedor"];
 
-export default function SalvarNoEstoque({ dados, onConcluido }) {
+export default function SalvarNoEstoque({ variante = "padrao", dados, onConcluido }) {
   const { sessao, supabaseConfigurado, perfil } = useAuth();
   const [estado, setEstado] = useState(null);
   const [salvando, setSalvando] = useState(false);
@@ -64,10 +64,7 @@ export default function SalvarNoEstoque({ dados, onConcluido }) {
 
   return (
     <div style={card}>
-      <PrimaryButton onClick={salvar} disabled={salvando}
-        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}>
-        <Save size={16} /> {salvando ? "Salvando…" : "Salvar no estoque"}
-      </PrimaryButton>
+      {variante === "cta" ? (<button type="button" onClick={salvar} disabled={salvando} className="w-full py-4 px-6 rounded-2xl bg-[#004ac6] text-white font-bold text-base tracking-wide shadow-[0_10px_24px_-4px_rgba(0,74,198,0.45)] hover:bg-[#2563eb] hover:shadow-[0_14px_30px_-4px_rgba(0,74,198,0.55)] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"><Save size={16} /> {salvando ? "Salvando…" : "Salvar no estoque"}</button>) : (<PrimaryButton onClick={salvar} disabled={salvando} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}><Save size={16} /> {salvando ? "Salvando…" : "Salvar no estoque"}</PrimaryButton>)}
       {estado && (
         <div role="status" style={{ marginTop: 12, padding: "10px 14px", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 600,
           background: "var(--bg-elevated)", border: "1px solid var(--border-strong)", color: "var(--text)" }}>

@@ -1,3 +1,4 @@
+import { useState as useStateCn } from "react";
 import { createPortal } from "react-dom";
 import "./calcula-car-novo.css";
 import { ENTRADA, FADE } from "../lib/motion";
@@ -556,13 +557,7 @@ export default function CalculaCarNovo() {
 
 <div className="pt-2 border-t border-slate-100 space-y-3">
 <div className="flex flex-wrap items-center justify-between gap-2">
-<div className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1 text-xs shadow-inner">{[{ id: "grafico", label: "Evolução", Icon: BarChart3 }, { id: "composicao", label: "Composição", Icon: Grid3x3 }, { id: "tabela", label: "Tabela completa", Icon: Table2 }].map(({ id, label, Icon }) => (<button key={id} type="button" onClick={() => setTab(id)} className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 transition ${tab === id ? "bg-white font-bold text-brand-700 shadow-sm" : "font-medium text-slate-600 hover:text-slate-900"}`}><Icon size={14} />{label}</button>))}</div>
-<span className="text-[11px] font-medium text-slate-400">Curva de amortização do saldo</span>
-</div>
-
-{tab === "grafico" && <SaldoAreaChart data={chartData} />}{tab === "composicao" && <ComposicaoBarChart data={chartData} />}{tab === "tabela" && <CnTable rows={finRows} />}
-</div>
-</section>)}
+<CnResultadoFinanciamento rows={finRows} sistema={sistema} n={n} tab={tab} setTab={setTab} chartData={chartData} /></div></div></section>)}
 {veiculoValido && (<section className="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-4" data-purpose="additional-costs-calculator">
 
 <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -716,15 +711,15 @@ export default function CalculaCarNovo() {
 </section>)}
 {resultado && (
 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-<PrimaryButton onClick={handleExcel} disabled={isLoading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+<button type="button" onClick={handleExcel} disabled={isLoading} className={CTA_CLS}>
 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
 <polyline points="7 10 12 15 17 10" />
 <line x1="12" x2="12" y1="15" y2="3" />
 </svg>
 {dlState === "xlsx" ? "Gerando…" : dlState?.tipo === "xlsx" && isSuccess ? "Salvo!" : "Exportar Excel"}
-</PrimaryButton>
-<PrimaryButton onClick={handlePDF} disabled={isLoading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+</button>
+<button type="button" onClick={handlePDF} disabled={isLoading} className={CTA_CLS}>
 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
 <polyline points="14 2 14 8 20 8" />
@@ -732,10 +727,10 @@ export default function CalculaCarNovo() {
 <line x1="9" x2="15" y1="15" y2="15" />
 </svg>
 {dlState === "pdf" ? "Gerando…" : dlState?.tipo === "pdf" && isSuccess ? "Baixado!" : "Exportar PDF"}
-</PrimaryButton>
+</button>
 {isErr && <div className="col-span-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">Erro: {dlState.err}</div>}
 </div>)}
-<div className="pt-2"><SalvarNoEstoque dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda: valorVendaPretendida, numeroMotor, categoria, potenciaMotor, portas, lugares, tipoCapital, custos, financiamento, checklist, marca, dataAquisicao }} onConcluido={resetarCalcula} /></div>
+<div className="pt-2"><SalvarNoEstoque variante="cta" dados={{ modelo, placa, renavam, chassi, anoFab, anoMod, cor, km, combustivel, cambio, fipe, compra, valorVenda: valorVendaPretendida, numeroMotor, categoria, potenciaMotor, portas, lugares, tipoCapital, custos, financiamento, checklist, marca, dataAquisicao }} onConcluido={resetarCalcula} /></div>
 <p className="pt-2 text-center text-xs text-slate-400">Simulação estimada · Margem de 15% é uma referência, não uma regra obrigatória · Não substitui avaliação profissional</p>
 
 <footer className="border-t border-slate-200/80 pt-8 pb-12 mt-12 space-y-6" data-purpose="institutional-footer">
@@ -896,6 +891,135 @@ function CnTable({ rows }) {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+
+const CTA_CLS = "w-full py-4 px-6 rounded-2xl bg-[#004ac6] text-white font-bold text-base tracking-wide shadow-[0_10px_24px_-4px_rgba(0,74,198,0.45)] hover:bg-[#2563eb] hover:shadow-[0_14px_30px_-4px_rgba(0,74,198,0.55)] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed";
+
+function CnLineChart({ rows }) {
+  const [sobre, setSobre] = useStateCn(null);
+  if (!rows || !rows.length) return null;
+  const W = 900, H = 260, pl = 64, pr = 16, pt = 16, pb = 28;
+  const max = Math.max(...rows.map((r) => r.saldo), 1);
+  const x = (i) => (rows.length === 1 ? pl : pl + (i * (W - pl - pr)) / (rows.length - 1));
+  const y = (v) => pt + (1 - v / max) * (H - pt - pb);
+  const ticks = [1, 0.75, 0.5, 0.25, 0].map((f) => max * f);
+  const caminho = rows.map((r, i) => `${i ? "L" : "M"}${x(i)},${y(r.saldo)}`).join(" ");
+  const area = `${caminho} L${x(rows.length - 1)},${y(0)} L${x(0)},${y(0)} Z`;
+  const rotulo = (v) => (v >= 1000 ? `R$${Math.round(v / 1000)}k` : `R$${Math.round(v)}`);
+  const passo = Math.max(1, Math.ceil(rows.length / 6));
+  const aoMover = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = ((e.clientX - rect.left) / rect.width) * W;
+    let melhor = 0, dist = Infinity;
+    rows.forEach((_, i) => { const d = Math.abs(x(i) - px); if (d < dist) { dist = d; melhor = i; } });
+    setSobre(melhor);
+  };
+  const ativo = sobre !== null ? rows[sobre] : null;
+  return (
+    <div className="relative">
+      <svg viewBox={`0 0 ${W} ${H}`} className="h-64 w-full" onMouseMove={aoMover} onMouseLeave={() => setSobre(null)}>
+        {ticks.map((v, i) => (
+          <g key={i}>
+            <line x1={pl} x2={W - pr} y1={y(v)} y2={y(v)} stroke="#0f172a" strokeOpacity="0.45" strokeDasharray="4 4" />
+            <text x={pl - 10} y={y(v) + 4} textAnchor="end" fill="#64748b" fontSize="12">{rotulo(v)}</text>
+          </g>
+        ))}
+        <path d={area} fill="#94a3b8" fillOpacity="0.08" />
+        <path d={caminho} fill="none" stroke="#cbd5e1" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        {rows.map((r, i) => (i % passo === 0 || i === rows.length - 1) ? (
+          <text key={i} x={x(i)} y={H - 6} textAnchor="middle" fill="#64748b" fontSize="12">{r.mes}</text>
+        ) : null)}
+        {ativo && (
+          <g>
+            <line x1={x(sobre)} x2={x(sobre)} y1={pt} y2={y(0)} stroke="#2563eb" strokeOpacity="0.3" />
+            <circle cx={x(sobre)} cy={y(ativo.saldo)} r="5" fill="#2563eb" stroke="#ffffff" strokeWidth="2" />
+          </g>
+        )}
+      </svg>
+      {ativo && (
+        <div className="pointer-events-none absolute top-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md"
+          style={{ left: `${(x(sobre) / W) * 100}%`, transform: "translateX(-50%)" }}>
+          <div className="font-bold text-slate-700">Mês {ativo.mes}</div>
+          <div className="text-slate-500">Saldo: {fmt(ativo.saldo)}</div>
+          <div className="text-slate-500">Juros: {fmt(ativo.juros)}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CnTabelaCusto({ rows, sistema }) {
+  const total = rows.length;
+  const meio = Math.ceil(total / 2);
+  const rotuloMes = (r) => (r.mes === 1 ? "Início" : r.mes === meio ? "50%" : r.mes === total ? "Quitação" : null);
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="text-sm font-bold text-slate-800">Demonstrativo Mensal da Amortização Contratada</span>
+        <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">{sistema === "SAC" ? "SAC • Parcelas Decrescentes" : "Price • Parcelas Fixas"}</span>
+      </div>
+      <p className="mb-3 text-xs text-slate-500">Detalhamento exato mês a mês da composição entre amortização do principal, juros incorridos e saldo restante.</p>
+      <div className="overflow-x-auto rounded-xl border border-slate-100">
+        <table className="w-full min-w-[640px] border-collapse text-xs">
+          <thead className="bg-slate-50">
+            <tr>
+              <th className="px-3 py-2 text-left font-bold text-slate-600">Nº Mês</th>
+              <th className="px-3 py-2 text-right"><span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 font-bold text-blue-700">Parcela (PMT)</span></th>
+              <th className="px-3 py-2 text-right"><span className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 font-bold text-emerald-700">Amortização</span></th>
+              <th className="px-3 py-2 text-right"><span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 font-bold text-red-600">Juros BACEN</span></th>
+              <th className="px-3 py-2 text-right font-bold text-slate-600">Saldo Devedor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={r.mes} className={`${i % 2 === 0 ? "bg-white" : "bg-slate-50/60"} ${r.mes === 1 ? "bg-blue-50/60" : ""}`}>
+                <td className="px-3 py-1.5 text-slate-600">
+                  <span className="font-semibold">{r.mes}º</span>
+                  {rotuloMes(r) && <span className="ml-2 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">{rotuloMes(r)}</span>}
+                </td>
+                <td className="px-3 py-1.5 text-right font-semibold tabular-nums text-slate-800">{fmt(r.parcela)}</td>
+                <td className="px-3 py-1.5 text-right tabular-nums text-slate-700">{fmt(r.amortizacao)}</td>
+                <td className="px-3 py-1.5 text-right tabular-nums text-slate-700">{fmt(r.juros)}</td>
+                <td className="px-3 py-1.5 text-right tabular-nums text-slate-800">{fmt(r.saldo)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+        <span>Exibindo amortização completa ({total} meses){sistema === "SAC" ? " • Parcelas decrescentes" : ` • Parcela fixa de ${fmt(rows[0].parcela)}/mês`}</span>
+        <span className="font-semibold text-slate-500">{total} parcelas registradas</span>
+      </div>
+    </div>
+  );
+}
+
+function CnResultadoFinanciamento({ rows, sistema, n, tab, setTab, chartData }) {
+  if (!rows || !rows.length) return null;
+  const abas = [
+    { id: "grafico", label: "Evolução", Icon: BarChart3 },
+    { id: "composicao", label: "Composição", Icon: Grid3x3 },
+    { id: "tabela", label: "Tabela completa", Icon: Table2 },
+  ];
+  return (
+    <div className="mt-5 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 shadow-inner">
+          {abas.map(({ id, label, Icon }) => (
+            <button key={id} type="button" onClick={() => setTab(id)}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${tab === id ? "bg-white font-bold text-brand-600 shadow-sm" : "font-medium text-slate-600 hover:text-slate-900"}`}>
+              <Icon size={14} /> {label}
+            </button>
+          ))}
+        </div>
+        {tab === "grafico" && <span className="text-[11px] font-medium text-slate-400">Curva de amortização do saldo</span>}
+      </div>
+      {tab === "grafico" && <div className="rounded-xl border border-slate-100 bg-white p-4"><CnLineChart rows={rows} /></div>}
+      {tab === "composicao" && <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3"><ComposicaoBarChart data={chartData} /></div>}
+      {tab === "tabela" && <CnTabelaCusto rows={rows} sistema={sistema} />}
     </div>
   );
 }
