@@ -1,3 +1,4 @@
+import { useEffect as useEffectCn, useRef as useRefCn } from "react";
 import { useState as useStateCn } from "react";
 import { createPortal } from "react-dom";
 import "./calcula-car-novo.css";
@@ -557,7 +558,7 @@ export default function CalculaCarNovo() {
 
 <div className="pt-2 border-t border-slate-100 space-y-3">
 <div className="flex flex-wrap items-center justify-between gap-2">
-<CnResultadoFinanciamento rows={finRows} sistema={sistema} n={n} tab={tab} setTab={setTab} chartData={chartData} /></div></div></section>)}
+<PainelFinanciamento veiculo={toF(valorBemStr)} entrada={toF(entradaStr)} taxa={taxaNum} prazo={n} sistema={sistema} /></div></div></section>)}
 {veiculoValido && (<section className="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-4" data-purpose="additional-costs-calculator">
 
 <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -1021,5 +1022,29 @@ function CnResultadoFinanciamento({ rows, sistema, n, tab, setTab, chartData }) 
       {tab === "composicao" && <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3"><ComposicaoBarChart data={chartData} /></div>}
       {tab === "tabela" && <CnTabelaCusto rows={rows} sistema={sistema} />}
     </div>
+  );
+}
+
+
+function PainelFinanciamento({ veiculo, entrada, taxa, prazo, sistema }) {
+  const frame = useRefCn(null);
+  const [altura, setAltura] = useStateCn(900);
+  const envia = () => {
+    frame.current?.contentWindow?.postMessage({ type: "valores", veiculo, entrada, taxa, prazo, sistema }, window.location.origin);
+  };
+  useEffectCn(() => { envia(); }, [veiculo, entrada, taxa, prazo, sistema]);
+  useEffectCn(() => {
+    const ouvir = (e) => {
+      if (e.source !== frame.current?.contentWindow) return;
+      const d = e.data || {};
+      if (d.type === "pronto") envia();
+      if (d.type === "altura" && d.h > 0) setAltura(d.h);
+    };
+    window.addEventListener("message", ouvir);
+    return () => window.removeEventListener("message", ouvir);
+  });
+  return (
+    <iframe ref={frame} src="/calculadora-financiamento.html" title="Financiamento"
+      onLoad={envia} style={{ display: "block", width: "100%", height: altura, border: 0 }} />
   );
 }

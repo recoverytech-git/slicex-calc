@@ -1692,4 +1692,49 @@ function calcSAC(pv, taxa, n) {
 </script>
 
 
+
+<style id="sistema-painel">
+  html, body { background: transparent !important; overflow-x: clip !important; }
+  html { overflow-y: auto !important; }
+</style>
+<script id="sistema-painel">
+(function () {
+  const POST = (m) => window.parent && window.parent.postMessage(m, window.location.origin);
+  const folha = (t) => Array.from(document.querySelectorAll('*')).find((e) => e.children.length === 0 && e.textContent.trim().includes(t)) || null;
+  let painel = null;
+  function isolar() {
+    const a = folha('Evolução da Dívida'), b = folha('Demonstrativo Mensal');
+    if (!a || !b) return null;
+    let el = a;
+    while (el && el.parentElement && !(el.contains(b) && !el.querySelector('#input-veiculo'))) el = el.parentElement;
+    if (!el) return null;
+    let no = el;
+    while (no && no.parentElement && no !== document.body) {
+      Array.from(no.parentElement.children).forEach((f) => { if (f !== no) f.style.setProperty('display', 'none', 'important'); });
+      no = no.parentElement;
+    }
+    return el;
+  }
+  function medir() { POST({ type: 'altura', h: document.documentElement.scrollHeight }); }
+  function montar() { painel = isolar(); medir(); POST({ type: 'pronto' }); }
+  window.addEventListener('load', () => setTimeout(montar, 60));
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => medir()).observe(document.body);
+  window.addEventListener('message', (e) => {
+    if (e.source !== window.parent) return;
+    const d = e.data || {};
+    if (d.type !== 'valores') return;
+    const fmt = (v, dec) => Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    const veiculo = document.getElementById('input-veiculo'), entrada = document.getElementById('input-entrada');
+    const taxa = document.getElementById('input-taxa'), prazo = document.getElementById('input-prazo');
+    if (!veiculo || !entrada || !taxa || !prazo) return;
+    veiculo.value = fmt(d.veiculo, 2);
+    entrada.value = fmt(d.entrada, 2);
+    taxa.value = fmt(d.taxa, 2);
+    prazo.value = String(d.prazo);
+    try { switchSystem(d.sistema === 'SAC' ? 'SAC' : 'PRICE'); } catch (err) {}
+    try { triggerRecalculate(); } catch (err) {}
+    setTimeout(() => { if (!painel) painel = isolar(); medir(); }, 120);
+  });
+})();
+</script>
 </body></html>
