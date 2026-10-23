@@ -151,6 +151,7 @@ export function buildCalculaCarXLSX(XLSX, data) {
  * dependência de carregamento assíncrono de imagem dentro do PDF.
  */
 export function buildCalculaCarPDF({ jsPDF, autoTable, data }) {
+  const { numeroMotor, categoria, potenciaMotor, portas, lugares } = data;
   const {
     modelo, placa, fipe, compra, valorVenda,
     diferencaReais, diferencaPercentual, abaixoDaMargem,

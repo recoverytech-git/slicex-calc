@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import "./calcula-car-novo.css";
 import { ENTRADA, FADE } from "../lib/motion";
 import { useState, useMemo } from "react";
@@ -559,7 +560,7 @@ export default function CalculaCarNovo() {
 <span className="text-[11px] font-medium text-slate-400">Curva de amortização do saldo</span>
 </div>
 
-{tab === "grafico" && <CnAreaChart rows={finRows} />}{tab === "composicao" && <CnBars rows={finRows} />}{tab === "tabela" && <CnTable rows={finRows} />}
+{tab === "grafico" && <SaldoAreaChart data={chartData} />}{tab === "composicao" && <ComposicaoBarChart data={chartData} />}{tab === "tabela" && <CnTable rows={finRows} />}
 </div>
 </section>)}
 {veiculoValido && (<section className="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-4" data-purpose="additional-costs-calculator">
@@ -597,13 +598,13 @@ export default function CalculaCarNovo() {
 </div>))}</div>
 <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs sm:text-sm"><span className="font-extrabold uppercase text-slate-900">TOTAL DOS CUSTOS</span><span className="text-base font-extrabold text-slate-900 tabular-numbers">{fmt(totalCustosAdicionais)}</span></div>
 </div>)}
-<Modal open={modalOpen} onClose={closeModal} title="Adicionar novo custo" footer={<PrimaryButton onClick={closeModal} style={{ width: "100%" }}>Concluir</PrimaryButton>}>
+{createPortal(<Modal open={modalOpen} onClose={closeModal} title="Adicionar novo custo" footer={<PrimaryButton onClick={closeModal} style={{ width: "100%" }}>Concluir</PrimaryButton>}>
 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 <CnField label="Descrição do custo" val={draftDesc} set={setDraftDesc} hint="Ex.: Pneus, Revisão, Documentação…" />
 <CnMoney label="Valor" valor={draftCents / 100} onChange={(n) => setDraftCents(Math.round(n * 100))} />
 <PrimaryButton onClick={addOrUpdateCusto} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}><Plus size={16} /> {editingId ? "Salvar alteração" : "Adicionar"}</PrimaryButton>
 </div>
-</Modal>
+</Modal>, document.body)}
 </section>)}
 {resultado && (<section className="depth-card rounded-2xl border-2 border-brand-300/80 bg-gradient-to-b from-blue-50/50 via-white to-white p-6 shadow-glow-md hover:shadow-glow-lg space-y-6" data-purpose="final-deal-outcome-summary">
 
@@ -662,14 +663,14 @@ export default function CalculaCarNovo() {
 <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-600">
   COMPARAÇÃO DAS DUAS FORMAS DE VENDA
 </span>
-<span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shadow-inner">Cenários de Saída</span>
+<span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shadow-inner">CENÁRIO ATUAL</span>
 </div>
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 <div className="rounded-xl border border-blue-100/90 bg-gradient-to-b from-blue-50/50 to-blue-50/20 p-3 text-center transition-all duration-200 hover:bg-blue-50/70 hover:shadow-sm hover:-translate-y-0.5">
 <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><path d="m4.9 4.9 14.2 14.2" /></svg>
 </div>
-<span className="text-[10px] text-brand-700 font-semibold">Venda FIPE LIQUIDO</span>
+<span className="text-[10px] text-brand-700 font-semibold">VENDA FIPE LIQUIDO</span>
 <p className="text-sm font-extrabold text-brand-600 tabular-numbers">{fmt(resultado.resultadoLiquido)}</p>
 </div>
 
@@ -677,7 +678,7 @@ export default function CalculaCarNovo() {
 <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10" /><line x1="12" x2="12" y1="20" y2="4" /><line x1="6" x2="6" y1="20" y2="14" /></svg>
 </div>
-<span className="text-[10px] text-brand-700 font-semibold">Venda pela FIPE: margem</span>
+<span className="text-[10px] text-brand-700 font-semibold">MARGEM VENDA FIPE</span>
 <p className="text-sm font-extrabold text-brand-600 tabular-numbers">{`${(margemFinalPct ?? 0).toFixed(2)}%`}</p>
 </div>
 
@@ -685,7 +686,7 @@ export default function CalculaCarNovo() {
 <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 14 14" /></svg>
 </div>
-<span className="text-[10px] text-brand-700 font-semibold">Venda PRETENDIDA LIQUIDO</span>
+<span className="text-[10px] text-brand-700 font-semibold">VENDA PRETENDIDA LIQUIDO</span>
 <p className="text-sm font-extrabold text-brand-600 tabular-numbers">{fmt(resultadoPretendido ? resultadoPretendido.resultadoLiquido : 0)}</p>
 </div>
 
@@ -693,12 +694,10 @@ export default function CalculaCarNovo() {
 <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center text-brand-600">
 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10" /><line x1="12" x2="12" y1="20" y2="4" /><line x1="6" x2="6" y1="20" y2="14" /></svg>
 </div>
-<span className="text-[10px] text-brand-700 font-semibold">Venda pretendida: margem</span>
+<span className="text-[10px] text-brand-700 font-semibold">MARGEM PRETENDIDA LIQUIDO</span>
 <p className="text-sm font-extrabold text-brand-600 tabular-numbers">{`${(margemPretendidaPct ?? 0).toFixed(2)}%`}</p>
 </div></div>
-<p className="text-[11px] text-slate-400 text-center pt-1 font-medium">
-  Venda pela FIPE usa o valor FIPE ({fmt(valorVenda)}). Venda pretendida usa o valor informado ({fmt(valorVendaPretendida)}).
-</p></div>
+<p className="pt-1 text-center text-[11px] font-medium text-slate-400">Venda pela FIPE usa o valor FIPE ({fmt(valorVenda)}). Venda pretendida usa o valor informado ({fmt(valorVendaPretendida)}).</p></div>
 </section>)}
 {veiculoValido && (<section className="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-6" data-purpose="vehicle-inspection-checklist">
 <div className="flex items-center gap-2.5 border-b border-slate-100 pb-4">
