@@ -558,7 +558,7 @@ export default function CalculaCarNovo() {
 
 <div className="pt-2 border-t border-slate-100 space-y-3">
 <div className="flex flex-wrap items-center justify-between gap-2">
-<PainelFinanciamento veiculo={toF(valorBemStr)} entrada={toF(entradaStr)} taxa={taxaNum} prazo={n} sistema={sistema} /></div></div></section>)}
+<CnPainelFinanciamento pv={pv} taxa={taxaNum} n={n} sistema={sistema} /></div></div></section>)}
 {veiculoValido && (<section className="depth-card rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-sm p-6 shadow-layered hover:shadow-layered-hover hover:border-slate-300 space-y-4" data-purpose="additional-costs-calculator">
 
 <div className="flex items-center justify-between border-b border-slate-100 pb-4">
@@ -1026,25 +1026,157 @@ function CnResultadoFinanciamento({ rows, sistema, n, tab, setTab, chartData }) 
 }
 
 
-function PainelFinanciamento({ veiculo, entrada, taxa, prazo, sistema }) {
-  const frame = useRefCn(null);
-  const [altura, setAltura] = useStateCn(900);
-  const envia = () => {
-    frame.current?.contentWindow?.postMessage({ type: "valores", veiculo, entrada, taxa, prazo, sistema }, window.location.origin);
+
+
+function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
+  const [aba, setAba] = useStateCn("evolucao");
+  const [sobre, setSobre] = useStateCn(null);
+  if (!(pv > 0 && taxa > 0 && n > 0)) return null;
+
+  const sac = calcSAC(pv, taxa, n);
+  const price = calcPrice(pv, taxa, n);
+  const rows = sistema === "SAC" ? sac : price;
+  const jurosSac = sac.reduce((a, r) => a + r.juros, 0);
+  const jurosPrice = price.reduce((a, r) => a + r.juros, 0);
+  const jurosTotal = rows.reduce((a, r) => a + r.juros, 0);
+  const economia = jurosPrice - jurosSac;
+  const pctCapital = (pv / (pv + jurosTotal)) * 100;
+  const pctJuros = 100 - pctCapital;
+  const i6 = Math.min(6, n) - 1;
+
+  const W = 900, H = 260, pl = 64, pr = 16, pt = 16, pb = 28;
+  const max = Math.max(pv, 1);
+  const X = (i) => (n === 1 ? pl : pl + (i * (W - pl - pr)) / (n - 1));
+  const Y = (v) => pt + (1 - v / max) * (H - pt - pb);
+  const linha = (lista) => lista.map((r, i) => `${i ? "L" : "M"}${X(i)},${Y(r.saldo)}`).join(" ");
+  const areaSac = `${linha(sac)} L${X(n - 1)},${Y(0)} L${X(0)},${Y(0)} Z`;
+  const ticks = [1, 0.75, 0.5, 0.25, 0].map((f) => max * f);
+  const rotuloK = (v) => (v >= 1000 ? `R$ ${Math.round(v / 1000)}k` : `R$ ${Math.round(v)}`);
+  const passo = Math.max(1, Math.ceil(n / 6));
+  const aoMover = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = ((e.clientX - rect.left) / rect.width) * W;
+    let melhor = 0, dist = Infinity;
+    for (let i = 0; i < n; i++) { const d = Math.abs(X(i) - px); if (d < dist) { dist = d; melhor = i; } }
+    setSobre(melhor);
   };
-  useEffectCn(() => { envia(); }, [veiculo, entrada, taxa, prazo, sistema]);
-  useEffectCn(() => {
-    const ouvir = (e) => {
-      if (e.source !== frame.current?.contentWindow) return;
-      const d = e.data || {};
-      if (d.type === "pronto") envia();
-      if (d.type === "altura" && d.h > 0) setAltura(d.h);
-    };
-    window.addEventListener("message", ouvir);
-    return () => window.removeEventListener("message", ouvir);
-  });
+  const ponto = sobre !== null ? { sac: sac[sobre], price: price[sobre] } : null;
+
+  const abas = [
+    { id: "evolucao", label: "Evolução da Dívida", Icon: TrendingUp },
+    { id: "juros", label: "Juros x Capital", Icon: PieChart },
+    { id: "custo", label: "Custo Detalhado", Icon: Table2 },
+  ];
+  const circ = 2 * Math.PI * 80;
+
   return (
-    <iframe ref={frame} src="/calculadora-financiamento.html" title="Financiamento"
-      onLoad={envia} style={{ display: "block", width: "100%", height: altura, border: 0 }} />
+    <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-5 inline-flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
+        {abas.map(({ id, label, Icon }) => (
+          <button key={id} type="button" onClick={() => setAba(id)}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${aba === id ? "bg-white font-bold text-brand-600 shadow-sm" : "font-medium text-slate-600 hover:text-slate-900"}`}>
+            <Icon size={14} /> {label}
+          </button>
+        ))}
+      </div>
+
+      {aba === "evolucao" && (
+        <div>
+          <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-800">
+                Projeção Comparativa do Saldo Devedor
+                <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">Economia SAC: {fmt(economia)}</span>
+              </div>
+              <p className="text-xs text-slate-500">Compare a velocidade de amortização do capital entre Price e SAC ao longo dos {n} meses.</p>
+            </div>
+            <div className="flex flex-wrap gap-3 text-xs font-semibold text-slate-600">
+              <span className="flex items-center gap-1.5"><span className="inline-block h-0.5 w-5 bg-blue-600" /> SAC (Linear Rápido)</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block w-5 border-t-2 border-dashed border-emerald-500" /> Price (Curva Suave)</span>
+            </div>
+          </div>
+          <div className="relative rounded-xl border border-slate-100 bg-white p-2">
+            <svg viewBox={`0 0 ${W} ${H}`} className="h-64 w-full" onMouseMove={aoMover} onMouseLeave={() => setSobre(null)}>
+              {ticks.map((v, k) => (
+                <g key={k}>
+                  <line x1={pl} x2={W - pr} y1={Y(v)} y2={Y(v)} stroke="#0f172a" strokeOpacity="0.4" strokeDasharray="4 4" />
+                  <text x={pl - 10} y={Y(v) + 4} textAnchor="end" fill="#64748b" fontSize="12">{rotuloK(v)}</text>
+                </g>
+              ))}
+              <path d={areaSac} fill="#2563eb" fillOpacity="0.06" />
+              <path d={linha(price)} fill="none" stroke="#10b981" strokeWidth="2.5" strokeDasharray="6 5" strokeLinejoin="round" />
+              <path d={linha(sac)} fill="none" stroke="#2563eb" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
+              {sac.map((r, k) => (k % passo === 0 || k === n - 1) ? (
+                <text key={k} x={X(k)} y={H - 6} textAnchor="middle" fill="#64748b" fontSize="12">{k === 0 ? "Mês 1" : k === n - 1 ? `Mês ${n}` : `Mês ${r.mes}`}</text>
+              ) : null)}
+              {ponto && (
+                <g>
+                  <line x1={X(sobre)} x2={X(sobre)} y1={pt} y2={Y(0)} stroke="#2563eb" strokeOpacity="0.3" />
+                  <circle cx={X(sobre)} cy={Y(ponto.sac.saldo)} r="5" fill="#2563eb" stroke="#fff" strokeWidth="2" />
+                  <circle cx={X(sobre)} cy={Y(ponto.price.saldo)} r="5" fill="#10b981" stroke="#fff" strokeWidth="2" />
+                </g>
+              )}
+            </svg>
+            {ponto && (
+              <div className="pointer-events-none absolute top-4 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md"
+                style={{ left: `${(X(sobre) / W) * 100}%`, transform: "translateX(-50%)" }}>
+                <div className="font-bold text-slate-700">Mês {ponto.sac.mes}</div>
+                <div className="text-blue-700">SAC: {fmt(ponto.sac.saldo)}</div>
+                <div className="text-emerald-700">Price: {fmt(ponto.price.saldo)}</div>
+              </div>
+            )}
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+              <div className="text-[11px] font-semibold text-slate-500">Saldo em {i6 + 1}x (SAC)</div>
+              <div className="text-base font-extrabold text-slate-900">{fmt(sac[i6].saldo)}</div>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+              <div className="text-[11px] font-semibold text-slate-500">Saldo em {i6 + 1}x (Price)</div>
+              <div className="text-base font-extrabold text-slate-900">{fmt(price[i6].saldo)}</div>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+              <div className="text-[11px] font-semibold text-slate-500">Diferença de capital</div>
+              <div className="text-base font-extrabold text-slate-900">{fmt(price[i6].saldo - sac[i6].saldo)}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {aba === "juros" && (
+        <div className="grid items-center gap-6 lg:grid-cols-2">
+          <div className="flex justify-center">
+            <svg width="240" height="240" viewBox="0 0 220 220">
+              <circle cx="110" cy="110" r="80" fill="none" stroke="#dc2626" strokeWidth="26" />
+              <circle cx="110" cy="110" r="80" fill="none" stroke="#2563eb" strokeWidth="26"
+                strokeDasharray={`${(circ * pctCapital) / 100} ${circ}`} transform="rotate(-90 110 110)" />
+              <text x="110" y="100" textAnchor="middle" fontSize="10" fill="#64748b">TOTAL FINANCIADO</text>
+              <text x="110" y="120" textAnchor="middle" fontSize="14" fontWeight="700" fill="#0f172a">{fmt(pv + jurosTotal)}</text>
+              <text x="110" y="138" textAnchor="middle" fontSize="11" fontWeight="700" fill="#dc2626">{pctJuros.toFixed(1)}%</text>
+            </svg>
+          </div>
+          <div className="space-y-3">
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
+              <div className="text-[11px] font-semibold text-slate-500">Capital principal</div>
+              <div className="text-xl font-extrabold text-blue-700">{fmt(pv)}</div>
+              <div className="text-xs text-slate-500">{pctCapital.toFixed(1)}% do total</div>
+            </div>
+            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
+              <div className="text-[11px] font-semibold text-slate-500">Custo total de juros</div>
+              <div className="text-xl font-extrabold text-red-600">{fmt(jurosTotal)}</div>
+              <div className="text-xs text-slate-500">{pctJuros.toFixed(1)}% do total</div>
+            </div>
+            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+              <div className="flex h-full">
+                <div className="bg-blue-600" style={{ width: `${pctCapital}%` }} />
+                <div className="bg-red-600" style={{ width: `${pctJuros}%` }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {aba === "custo" && <CnTabelaCusto rows={rows} sistema={sistema} />}
+    </div>
   );
 }
