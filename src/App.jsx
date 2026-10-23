@@ -50,7 +50,7 @@ function AnimatedRoutes() {
           <Route path="/financiamento" element={<RotaPrivada><Financiamento /></RotaPrivada>} />
           <Route path="/percentual" element={<RotaPrivada><Percentual /></RotaPrivada>} />
           <Route path="/amortizacao" element={<RotaPrivada><Amortizacao /></RotaPrivada>} />
-          <Route path="/calcula-car" element={<RotaPrivada><CalculaCar /></RotaPrivada>} />
+          <Route path="/calcula-car" element={<Navigate to="/calcula-car-novo" replace />} />
           <Route path="/calcula-car-novo" element={<RotaPrivada><CalculaCarNovo /></RotaPrivada>} />
           <Route path="/estoque" element={<RotaPrivada><Estoque /></RotaPrivada>} />
           <Route path="/estoque/:id" element={<RotaPrivada><VeiculoDetalheVisual /></RotaPrivada>} />

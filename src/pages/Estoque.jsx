@@ -154,7 +154,7 @@ export default function Estoque() {
       if (d.type === "pronto") { enviarMarca(); enviarDados(); }
       if (d.type === "bell-rect") setSlot(d.rect);
       if (d.type === "abrir") navigate(`/estoque/${d.id}`);
-      if (d.type === "novo") navigate("/calcula-car");
+      if (d.type === "novo") navigate("/calcula-car-novo");
       if (d.type === "exportar-pdf") {
         const ids = d.ids || [];
         const filtrados = brutos.current.filter((v) => ids.includes(v.id));

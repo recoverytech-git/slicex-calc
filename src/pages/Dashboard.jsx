@@ -18,7 +18,7 @@ const ACESSOS = [
   { to: "/financiamento", titulo: "Financiamento", texto: "Price ou SAC, com tabela completa", icon: Landmark },
   { to: "/percentual", titulo: "Diferença %", texto: "Variação entre dois valores", icon: Percent },
   { to: "/amortizacao", titulo: "Amortização extra", texto: "Reduzir o prazo ou a parcela", icon: Scissors },
-  { to: "/calcula-car", titulo: "Calcula-Car", texto: "Análise de compra e venda", icon: Car },
+  { to: "/calcula-car-novo", titulo: "Calcula-Car", texto: "Análise de compra e venda", icon: Car },
   { to: "/estoque", titulo: "Estoque", texto: "Veículos, fotos e checklist", icon: Warehouse },
   { to: "/vendas", titulo: "Vendidos", texto: "Vendas e resultado final", icon: BadgeDollarSign, gestao: true },
 ];

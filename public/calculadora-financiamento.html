@@ -1696,6 +1696,12 @@ function calcSAC(pv, taxa, n) {
 <style id="sistema-painel">
   html, body { background: transparent !important; overflow-x: clip !important; }
   html { overflow-y: auto !important; }
+  .space-y-8 > * + *, .space-y-10 > * + *, .space-y-12 > * + * { margin-top: 1rem !important; }
+  .gap-8, .gap-10, .gap-12 { gap: 1rem !important; }
+  .py-10, .py-12, .py-16, .py-8 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+  .mt-12, .mt-10, .mt-8, .mt-16 { margin-top: 1rem !important; }
+  .mb-12, .mb-10, .mb-8, .mb-16 { margin-bottom: 1rem !important; }
+  .p-10, .p-12, .p-8 { padding: 1.25rem !important; }
 </style>
 <script id="sistema-painel">
 (function () {
@@ -1721,12 +1727,14 @@ function calcSAC(pv, taxa, n) {
     Array.from(painel.querySelectorAll('button'))
       .filter((b) => /CSV|Excel|PDF/.test(b.textContent))
       .forEach((b) => b.style.setProperty('display', 'none', 'important'));
-    const r = folha('Resumo da Operação Contratada');
-    if (r) {
-      let c = r;
-      while (c.parentElement && !c.parentElement.textContent.includes('Evolução da Dívida')) c = c.parentElement;
-      if (c !== painel) c.style.setProperty('display', 'none', 'important');
-    }
+    Array.from(document.querySelectorAll('*'))
+      .filter((e) => e.children.length === 0 && e.textContent.includes('Resumo da Operação Contratada'))
+      .forEach((e) => {
+        const cartao = e.closest('[class*="rounded-2xl"]') || e.closest('section');
+        if (cartao && !cartao.contains(painel) && !cartao.textContent.includes('Evolução da Dívida')) {
+          cartao.style.setProperty('display', 'none', 'important');
+        }
+      });
     let n = painel.parentElement;
     while (n && n !== document.documentElement) {
       ['margin', 'padding', 'min-height'].forEach((p) => n.style.setProperty(p, p === 'min-height' ? '0' : '0', 'important'));
