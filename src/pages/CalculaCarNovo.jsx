@@ -1117,6 +1117,7 @@ function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
   const linha = (lista) => lista.map((r, k) => `${k ? "L" : "M"}${X(k)},${Y(r.saldo)}`).join(" ");
   const area = `${linha(price)} L${X(n - 1)},${Y(0)} L${X(0)},${Y(0)} Z`;
   const ticks = [1, 0.75, 0.5, 0.25, 0].map((f) => maxG * f);
+  const rotuloY = (v) => `R$ ${Math.round(v).toLocaleString("pt-BR")}`;
   const marcas = price.map((_, k) => k).filter((k) => k === 0 || k === n - 1 || ((k + 1) % 12 === 0 && k !== n - 1));
   const aoMover = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
