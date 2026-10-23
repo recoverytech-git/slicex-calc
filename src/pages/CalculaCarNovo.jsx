@@ -1049,8 +1049,8 @@ function CnDemonstrativo({ rows, sistema, n }) {
         </span>
       </div>
       <p className="mb-4 text-xs text-slate-500">Detalhamento exato mês a mês da composição entre amortização do principal, juros incorridos e saldo restante.</p>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] border-collapse text-xs">
+      <div className="w-full overflow-x-auto">
+        <table className="w-full table-auto border-collapse text-xs">
           <thead>
             <tr className="border-b border-slate-100">
               <th className="px-3 py-2.5 text-left font-bold text-slate-600">Nº Mês</th>
@@ -1137,7 +1137,7 @@ function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
   ];
 
   return (
-    <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
+    <div className="mt-5 w-full rounded-2xl border border-slate-200 bg-white p-5">
       <div className="mb-5 inline-flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
         {abas.map(({ id, label, Icon }) => (
           <button key={id} type="button" onClick={() => setAba(id)}
@@ -1236,6 +1236,7 @@ function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
           <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs font-semibold">
             <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-slate-700 ring-1 ring-slate-200"><span className="h-2 w-2 rounded-full bg-blue-600" /> Principal: {pctCapital.toFixed(1).replace(".", ",")}% do total</span>
             <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-slate-700 ring-1 ring-slate-200"><span className="h-2 w-2 rounded-full bg-red-600" /> Juros: {pctJuros.toFixed(1).replace(".", ",")}% do total</span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-slate-700 ring-1 ring-slate-200">Taxa de juros: {String(taxa).replace(".", ",")}% a.m.</span>
           </div>
 
           <div className="mt-5 rounded-2xl bg-blue-50/40 p-6">
