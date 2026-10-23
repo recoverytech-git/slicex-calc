@@ -1,3 +1,4 @@
+import { Gauge as GaugeCn, Percent as PercentCn, Lightbulb as LightbulbCn, SlidersHorizontal as SlidersCn, ArrowUpDown as ArrowUpDownCn, TrendingDown as TrendingDownCn } from "lucide-react";
 import { useEffect as useEffectCn, useRef as useRefCn } from "react";
 import { useState as useStateCn } from "react";
 import { createPortal } from "react-dom";
@@ -1028,6 +1029,65 @@ function CnResultadoFinanciamento({ rows, sistema, n, tab, setTab, chartData }) 
 
 
 
+
+function CnDemonstrativo({ rows, sistema, n }) {
+  const total = rows.length;
+  const meio = Math.ceil(total / 2);
+  const marca = (r) => (r.mes === 1 ? "Início" : r.mes === meio ? "50%" : r.mes === total ? "Quitação" : null);
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-bold text-slate-800">Demonstrativo Mensal da Amortização Contratada</span>
+          <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+            {sistema === "SAC" ? "SAC • Parcelas Decrescentes" : "Price • Parcelas Fixas"}
+          </span>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
+          <ArrowUpDownCn size={13} /> Role para inspecionar até {n}x
+        </span>
+      </div>
+      <p className="mb-4 text-xs text-slate-500">Detalhamento exato mês a mês da composição entre amortização do principal, juros incorridos e saldo restante.</p>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] border-collapse text-xs">
+          <thead>
+            <tr className="border-b border-slate-100">
+              <th className="px-3 py-2.5 text-left font-bold text-slate-600">Nº Mês</th>
+              <th className="px-3 py-2.5 text-right"><span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 font-bold text-blue-700"><Wallet size={12} /> Parcela (PMT)</span></th>
+              <th className="px-3 py-2.5 text-right"><span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-1 font-bold text-emerald-700"><GaugeCn size={12} /> Amortização</span></th>
+              <th className="px-3 py-2.5 text-right"><span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-1 font-bold text-red-600"><PercentCn size={12} /> Juros BACEN</span></th>
+              <th className="px-3 py-2.5 text-right"><span className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-bold text-slate-600"><Landmark size={12} /> Saldo Devedor</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r, k) => (
+              <tr key={r.mes} className={`${k === 0 ? "bg-blue-50/70" : k % 2 === 1 ? "bg-slate-50/60" : "bg-white"} border-b border-slate-50`}>
+                <td className="px-3 py-2 text-slate-600">
+                  <span className="inline-flex items-center gap-2">{r.mes}º {marca(r) && <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">{marca(r)}</span>}</span>
+                </td>
+                <td className="px-3 py-2 text-right font-bold tabular-nums text-slate-800">{fmt(r.parcela)}</td>
+                <td className="px-3 py-2 text-right tabular-nums text-slate-700">{fmt(r.amortizacao)}</td>
+                <td className="px-3 py-2 text-right tabular-nums text-slate-700">{fmt(r.juros)}</td>
+                <td className="px-3 py-2 text-right tabular-nums text-slate-800">{fmt(r.saldo)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+        <span className="inline-flex items-center gap-2">
+          <CheckCircle2 size={14} className="text-emerald-600" />
+          Exibindo amortização completa ({total} meses){sistema === "SAC" ? " • Parcelas decrescentes" : ` • Parcela fixa de ${fmt(rows[0].parcela)}/mês`}
+        </span>
+        <span className="flex items-center gap-4">
+          <span className="font-medium text-emerald-700">● Amortização 100% integral</span>
+          <span className="font-bold text-slate-700">{total} parcelas registradas</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
   const [aba, setAba] = useStateCn("evolucao");
   const [sobre, setSobre] = useStateCn(null);
@@ -1039,144 +1099,204 @@ function CnPainelFinanciamento({ pv, taxa, n, sistema }) {
   const jurosSac = sac.reduce((a, r) => a + r.juros, 0);
   const jurosPrice = price.reduce((a, r) => a + r.juros, 0);
   const jurosTotal = rows.reduce((a, r) => a + r.juros, 0);
+  const totalPago = pv + jurosTotal;
   const economia = jurosPrice - jurosSac;
-  const pctCapital = (pv / (pv + jurosTotal)) * 100;
+  const pctCapital = (pv / totalPago) * 100;
   const pctJuros = 100 - pctCapital;
+  const multiplicador = (jurosTotal / pv) * 100;
   const i6 = Math.min(6, n) - 1;
+  const diffPct = price[i6].saldo > 0 ? ((sac[i6].saldo - price[i6].saldo) / price[i6].saldo) * 100 : 0;
 
-  const W = 900, H = 260, pl = 64, pr = 16, pt = 16, pb = 28;
-  const max = Math.max(pv, 1);
-  const X = (i) => (n === 1 ? pl : pl + (i * (W - pl - pr)) / (n - 1));
-  const Y = (v) => pt + (1 - v / max) * (H - pt - pb);
-  const linha = (lista) => lista.map((r, i) => `${i ? "L" : "M"}${X(i)},${Y(r.saldo)}`).join(" ");
-  const areaSac = `${linha(sac)} L${X(n - 1)},${Y(0)} L${X(0)},${Y(0)} Z`;
-  const ticks = [1, 0.75, 0.5, 0.25, 0].map((f) => max * f);
-  const rotuloK = (v) => (v >= 1000 ? `R$ ${Math.round(v / 1000)}k` : `R$ ${Math.round(v)}`);
-  const passo = Math.max(1, Math.ceil(n / 6));
+  const W = 900, H = 280, pl = 72, pr = 16, pt = 16, pb = 30;
+  const maxG = Math.max(price[0].saldo, sac[0].saldo, 1);
+  const X = (k) => (n === 1 ? pl : pl + (k * (W - pl - pr)) / (n - 1));
+  const Y = (v) => pt + (1 - v / maxG) * (H - pt - pb);
+  const linha = (lista) => lista.map((r, k) => `${k ? "L" : "M"}${X(k)},${Y(r.saldo)}`).join(" ");
+  const area = `${linha(price)} L${X(n - 1)},${Y(0)} L${X(0)},${Y(0)} Z`;
+  const ticks = [1, 0.75, 0.5, 0.25, 0].map((f) => maxG * f);
+  const marcas = price.map((_, k) => k).filter((k) => k === 0 || k === n - 1 || ((k + 1) % 12 === 0 && k !== n - 1));
   const aoMover = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const px = ((e.clientX - rect.left) / rect.width) * W;
     let melhor = 0, dist = Infinity;
-    for (let i = 0; i < n; i++) { const d = Math.abs(X(i) - px); if (d < dist) { dist = d; melhor = i; } }
+    for (let k = 0; k < n; k++) { const d = Math.abs(X(k) - px); if (d < dist) { dist = d; melhor = k; } }
     setSobre(melhor);
   };
-  const ponto = sobre !== null ? { sac: sac[sobre], price: price[sobre] } : null;
+  const ponto = sobre !== null ? { mes: sobre + 1, sac: sac[sobre].saldo, price: price[sobre].saldo } : null;
+  const circ = 2 * Math.PI * 80;
 
   const abas = [
     { id: "evolucao", label: "Evolução da Dívida", Icon: TrendingUp },
     { id: "juros", label: "Juros x Capital", Icon: PieChart },
     { id: "custo", label: "Custo Detalhado", Icon: Table2 },
   ];
-  const circ = 2 * Math.PI * 80;
 
   return (
-    <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-5 inline-flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
+    <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="mb-5 inline-flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1">
         {abas.map(({ id, label, Icon }) => (
           <button key={id} type="button" onClick={() => setAba(id)}
-            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs transition-all ${aba === id ? "bg-white font-bold text-brand-600 shadow-sm" : "font-medium text-slate-600 hover:text-slate-900"}`}>
-            <Icon size={14} /> {label}
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs transition-all ${aba === id ? "bg-white font-bold text-blue-600 shadow-sm" : "font-medium text-slate-600 hover:text-slate-900"}`}>
+            <Icon size={15} /> {label}
           </button>
         ))}
       </div>
 
       {aba === "evolucao" && (
         <div>
-          <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-800">
-                Projeção Comparativa do Saldo Devedor
-                <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700">Economia SAC: {fmt(economia)}</span>
-              </div>
-              <p className="text-xs text-slate-500">Compare a velocidade de amortização do capital entre Price e SAC ao longo dos {n} meses.</p>
-            </div>
-            <div className="flex flex-wrap gap-3 text-xs font-semibold text-slate-600">
-              <span className="flex items-center gap-1.5"><span className="inline-block h-0.5 w-5 bg-blue-600" /> SAC (Linear Rápido)</span>
-              <span className="flex items-center gap-1.5"><span className="inline-block w-5 border-t-2 border-dashed border-emerald-500" /> Price (Curva Suave)</span>
-            </div>
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-bold text-slate-800">Projeção Comparativa do Saldo Devedor</span>
+            <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">Economia SAC: {fmt(economia)}</span>
           </div>
-          <div className="relative rounded-xl border border-slate-100 bg-white p-2">
-            <svg viewBox={`0 0 ${W} ${H}`} className="h-64 w-full" onMouseMove={aoMover} onMouseLeave={() => setSobre(null)}>
+          <p className="text-xs text-slate-500">Compare visualmente a velocidade de amortização do capital entre Price e SAC ao longo dos {n} meses.</p>
+          <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-slate-700 ring-1 ring-slate-200"><span className="inline-block h-1.5 w-4 rounded bg-emerald-500" /> SAC (Linear Rápido)</span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-slate-700 ring-1 ring-slate-200"><span className="inline-block h-1.5 w-4 rounded bg-blue-600" /> Price (Curva Suave)</span>
+          </div>
+
+          <div className="relative mt-4 rounded-2xl border border-slate-100 bg-blue-50/40 p-4">
+            <div className="absolute right-6 top-6 z-10 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-600" />
+              <span className="font-semibold text-slate-700">Quitação Mês {n}:</span>
+              <span className="font-bold text-emerald-700">{fmt(price[n - 1].saldo)}</span>
+            </div>
+            <svg viewBox={`0 0 ${W} ${H}`} className="h-72 w-full" onMouseMove={aoMover} onMouseLeave={() => setSobre(null)}>
               {ticks.map((v, k) => (
                 <g key={k}>
-                  <line x1={pl} x2={W - pr} y1={Y(v)} y2={Y(v)} stroke="#0f172a" strokeOpacity="0.4" strokeDasharray="4 4" />
-                  <text x={pl - 10} y={Y(v) + 4} textAnchor="end" fill="#64748b" fontSize="12">{rotuloK(v)}</text>
+                  <line x1={pl} x2={W - pr} y1={Y(v)} y2={Y(v)} stroke="#94a3b8" strokeOpacity="0.6" strokeDasharray="4 4" />
+                  <text x={pl - 10} y={Y(v) + 4} textAnchor="end" fill="#64748b" fontSize="12">{rotuloY(v)}</text>
                 </g>
               ))}
-              <path d={areaSac} fill="#2563eb" fillOpacity="0.06" />
-              <path d={linha(price)} fill="none" stroke="#10b981" strokeWidth="2.5" strokeDasharray="6 5" strokeLinejoin="round" />
-              <path d={linha(sac)} fill="none" stroke="#2563eb" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-              {sac.map((r, k) => (k % passo === 0 || k === n - 1) ? (
-                <text key={k} x={X(k)} y={H - 6} textAnchor="middle" fill="#64748b" fontSize="12">{k === 0 ? "Mês 1" : k === n - 1 ? `Mês ${n}` : `Mês ${r.mes}`}</text>
-              ) : null)}
+              <path d={area} fill="#2563eb" fillOpacity="0.08" />
+              <path d={linha(sac)} fill="none" stroke="#10b981" strokeWidth="2.5" strokeDasharray="6 5" strokeLinejoin="round" />
+              <path d={linha(price)} fill="none" stroke="#2563eb" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+              {marcas.map((k) => (
+                <text key={k} x={X(k)} y={H - 8} textAnchor="middle" fontSize="12"
+                  fontWeight={k === 0 || k === n - 1 ? 700 : 500}
+                  fill={k === 0 ? "#2563eb" : k === n - 1 ? "#059669" : "#64748b"}>
+                  {k === 0 ? "Mês 1" : k === n - 1 ? `Mês ${n} (Final)` : `Mês ${k + 1}`}
+                </text>
+              ))}
               {ponto && (
                 <g>
                   <line x1={X(sobre)} x2={X(sobre)} y1={pt} y2={Y(0)} stroke="#2563eb" strokeOpacity="0.3" />
-                  <circle cx={X(sobre)} cy={Y(ponto.sac.saldo)} r="5" fill="#2563eb" stroke="#fff" strokeWidth="2" />
-                  <circle cx={X(sobre)} cy={Y(ponto.price.saldo)} r="5" fill="#10b981" stroke="#fff" strokeWidth="2" />
+                  <circle cx={X(sobre)} cy={Y(ponto.price)} r="5" fill="#2563eb" stroke="#fff" strokeWidth="2" />
+                  <circle cx={X(sobre)} cy={Y(ponto.sac)} r="5" fill="#10b981" stroke="#fff" strokeWidth="2" />
                 </g>
               )}
             </svg>
             {ponto && (
-              <div className="pointer-events-none absolute top-4 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md"
-                style={{ left: `${(X(sobre) / W) * 100}%`, transform: "translateX(-50%)" }}>
-                <div className="font-bold text-slate-700">Mês {ponto.sac.mes}</div>
-                <div className="text-blue-700">SAC: {fmt(ponto.sac.saldo)}</div>
-                <div className="text-emerald-700">Price: {fmt(ponto.price.saldo)}</div>
+              <div className="pointer-events-none absolute top-12 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md"
+                style={{ left: `calc(${(X(sobre) / W) * 100}% + 16px)` }}>
+                <div className="font-bold text-slate-700">Mês {ponto.mes}</div>
+                <div className="text-blue-700">Price: {fmt(ponto.price)}</div>
+                <div className="text-emerald-700">SAC: {fmt(ponto.sac)}</div>
               </div>
             )}
           </div>
+
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-              <div className="text-[11px] font-semibold text-slate-500">Saldo em {i6 + 1}x (SAC)</div>
-              <div className="text-base font-extrabold text-slate-900">{fmt(sac[i6].saldo)}</div>
+            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Saldo em {i6 + 1}x (SAC)</div>
+                <div className="text-base font-extrabold text-emerald-700">{fmt(sac[i6].saldo)}</div>
+              </div>
+              <TrendingDownCn size={18} className="text-emerald-600" />
             </div>
-            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-              <div className="text-[11px] font-semibold text-slate-500">Saldo em {i6 + 1}x (Price)</div>
-              <div className="text-base font-extrabold text-slate-900">{fmt(price[i6].saldo)}</div>
+            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Saldo em {i6 + 1}x (Price)</div>
+                <div className="text-base font-extrabold text-blue-700">{fmt(price[i6].saldo)}</div>
+              </div>
+              <Wallet size={18} className="text-blue-600" />
             </div>
-            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-              <div className="text-[11px] font-semibold text-slate-500">Diferença de capital</div>
-              <div className="text-base font-extrabold text-slate-900">{fmt(price[i6].saldo - sac[i6].saldo)}</div>
+            <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Diferença de capital</div>
+                <div className="text-base font-extrabold text-slate-900">{fmt(sac[i6].saldo - price[i6].saldo)}</div>
+              </div>
+              <span className="rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">SAC {diffPct.toFixed(1).replace(".", ",")}%</span>
             </div>
           </div>
         </div>
       )}
 
       {aba === "juros" && (
-        <div className="grid items-center gap-6 lg:grid-cols-2">
-          <div className="flex justify-center">
-            <svg width="240" height="240" viewBox="0 0 220 220">
-              <circle cx="110" cy="110" r="80" fill="none" stroke="#dc2626" strokeWidth="26" />
-              <circle cx="110" cy="110" r="80" fill="none" stroke="#2563eb" strokeWidth="26"
-                strokeDasharray={`${(circ * pctCapital) / 100} ${circ}`} transform="rotate(-90 110 110)" />
-              <text x="110" y="100" textAnchor="middle" fontSize="10" fill="#64748b">TOTAL FINANCIADO</text>
-              <text x="110" y="120" textAnchor="middle" fontSize="14" fontWeight="700" fill="#0f172a">{fmt(pv + jurosTotal)}</text>
-              <text x="110" y="138" textAnchor="middle" fontSize="11" fontWeight="700" fill="#dc2626">{pctJuros.toFixed(1)}%</text>
-            </svg>
+        <div>
+          <div className="mb-2 flex flex-wrap items-center justify-center gap-2 text-center">
+            <span className="text-sm font-bold text-slate-800">Composição Efetiva: Capital Financiado vs. Custo de Juros</span>
+            <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-700 ring-1 ring-blue-200">Análise CET &amp; Spread</span>
           </div>
-          <div className="space-y-3">
-            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
-              <div className="text-[11px] font-semibold text-slate-500">Capital principal</div>
-              <div className="text-xl font-extrabold text-blue-700">{fmt(pv)}</div>
-              <div className="text-xs text-slate-500">{pctCapital.toFixed(1)}% do total</div>
+          <p className="text-center text-xs text-slate-500">Entenda exatamente para onde vai cada real desembolsado nas parcelas ao longo do financiamento.</p>
+          <div className="mt-3 flex flex-wrap justify-center gap-2 text-xs font-semibold">
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-slate-700 ring-1 ring-slate-200"><span className="h-2 w-2 rounded-full bg-blue-600" /> Principal: {pctCapital.toFixed(1).replace(".", ",")}% do total</span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-slate-700 ring-1 ring-slate-200"><span className="h-2 w-2 rounded-full bg-red-600" /> Juros: {pctJuros.toFixed(1).replace(".", ",")}% do total</span>
+          </div>
+
+          <div className="mt-5 rounded-2xl bg-blue-50/40 p-6">
+            <div className="flex justify-center">
+              <svg width="260" height="260" viewBox="0 0 220 220">
+                <circle cx="110" cy="110" r="80" fill="none" stroke="#dc2626" strokeWidth="28" />
+                <circle cx="110" cy="110" r="80" fill="none" stroke="#2563eb" strokeWidth="28"
+                  strokeDasharray={`${(circ * pctCapital) / 100} ${circ}`} transform="rotate(-90 110 110)" />
+                <text x="110" y="98" textAnchor="middle" fontSize="9" fontWeight="600" fill="#64748b">TOTAL FINANCIAMENTO</text>
+                <text x="110" y="118" textAnchor="middle" fontSize="14" fontWeight="800" fill="#0f172a">{fmt(totalPago)}</text>
+                <text x="110" y="136" textAnchor="middle" fontSize="11" fontWeight="700" fill="#dc2626">{pctJuros.toFixed(1).replace(".", ",")}%</text>
+              </svg>
             </div>
-            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
-              <div className="text-[11px] font-semibold text-slate-500">Custo total de juros</div>
-              <div className="text-xl font-extrabold text-red-600">{fmt(jurosTotal)}</div>
-              <div className="text-xs text-slate-500">{pctJuros.toFixed(1)}% do total</div>
-            </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
-              <div className="flex h-full">
-                <div className="bg-blue-600" style={{ width: `${pctCapital}%` }} />
-                <div className="bg-red-600" style={{ width: `${pctJuros}%` }} />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-800"><Car size={16} className="text-blue-600" /> Capital Principal</span>
+                  <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-700">{pctCapital.toFixed(1).replace(".", ",")}% da soma</span>
+                </div>
+                <div className="mt-3 text-xl font-extrabold text-blue-700">{fmt(pv)} <span className="text-base">({pctCapital.toFixed(1).replace(".", ",")}%)</span></div>
+                <p className="mt-1 text-xs text-slate-500">Valor líquido efetivamente contratado para aquisição do bem.</p>
+                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                  <span className="text-slate-500">Parcela fixa p/ pagamento:</span>
+                  <span className="font-mono font-bold text-slate-800">{fmt(rows[0].parcela)}</span>
+                </div>
               </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-800"><PercentCn size={16} className="text-red-600" /> Custo Total de Juros</span>
+                  <span className="rounded-md bg-red-50 px-2 py-0.5 text-[11px] font-bold text-red-600">{pctJuros.toFixed(1).replace(".", ",")}% da soma</span>
+                </div>
+                <div className="mt-3 text-xl font-extrabold text-red-600">{fmt(jurosTotal)} <span className="text-base">({pctJuros.toFixed(1).replace(".", ",")}%)</span></div>
+                <p className="mt-1 text-xs text-slate-500">Custo do dinheiro no tempo, spread bancário e IOF integrado.</p>
+                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
+                  <span className="text-slate-500">Multiplicador de custo:</span>
+                  <span className="font-mono font-bold text-red-600">+{multiplicador.toFixed(1).replace(".", ",")}% s/ capital</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-800"><SlidersCn size={16} /> Proporção Visual Contratada</span>
+                <span className="font-mono text-[11px] text-slate-500">100% = {fmt(totalPago)}</span>
+              </div>
+              <div className="mt-3 flex h-3 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="h-full bg-blue-600" style={{ width: `${pctCapital}%` }} />
+                <div className="h-full bg-red-600" style={{ width: `${pctJuros}%` }} />
+              </div>
+              <div className="mt-2 flex justify-between text-[11px] font-medium text-slate-600">
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-blue-600" /> Principal ({fmt(pv)})</span>
+                <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-red-600" /> Juros BACEN ({fmt(jurosTotal)})</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4">
+            <LightbulbCn size={20} className="mt-0.5 shrink-0 text-emerald-700" />
+            <div>
+              <div className="text-sm font-bold text-emerald-900">Estratégia de Inteligência Financeira: Amortização Antecipada</div>
+              <p className="mt-1 text-xs leading-relaxed text-emerald-900/80">No Sistema SAC, qualquer aporte extraordinário abate diretamente o saldo principal, cancelando os juros compostos calculados para os meses remanescentes e reduzindo proporcionalmente o valor das parcelas futuras.</p>
             </div>
           </div>
         </div>
       )}
 
-      {aba === "custo" && <CnTabelaCusto rows={rows} sistema={sistema} />}
+      {aba === "custo" && <CnDemonstrativo rows={rows} sistema={sistema} n={n} />}
     </div>
   );
 }
