@@ -37,6 +37,7 @@ export default function AdminUsuarios() {
   const [form, setForm] = useRascunho("usr.form", FORM_VAZIO, { ignorar: ["senha"] });
   const [salvando, setSalvando] = useState(false);
   const [editando, setEditando] = useState(null);
+  const [pagina, setPagina] = useState(1);
 
   const carregar = useCallback(async () => {
     const { data, erro } = await rpc("admin_listar_usuarios");
@@ -156,7 +157,13 @@ export default function AdminUsuarios() {
     vendedores: lista.filter((u) => u.papel === "vendedor").length,
   };
   const iniciais = (nome) => (nome || "?").trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
-  const pct = (n) => (kpis.total ? Math.round((n / kpis.total) * 100) : 0);
+  const LIMITE = 1000000;
+  const POR_PAGINA = 6;
+  const progresso = (n) => (n / LIMITE) * 100;
+  const fmtPct = (v) => v.toLocaleString("pt-BR", { maximumFractionDigits: 4 }) + "%";
+  const totalPaginas = Math.max(1, Math.ceil(lista.length / POR_PAGINA));
+  const paginaAtual = Math.min(pagina, totalPaginas);
+  const listaPagina = lista.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
 
   const campo = "w-full px-4 py-3 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-on-surface text-sm font-label placeholder:text-outline/50 shadow-sm focus:outline-none focus:border-primary transition-all";
   const seletor = campo + " appearance-none cursor-pointer";
@@ -186,12 +193,12 @@ export default function AdminUsuarios() {
 
           <section className="relative z-10 grid grid-cols-1 gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {[
-              { titulo: "Total de Usuários", valor: kpis.total, sub: `${kpis.ativos} ativos`, icone: "badge", barra: 100 },
-              { titulo: "Administradores", valor: kpis.admins, sub: `${pct(kpis.admins)}% do total`, icone: "shield_person", barra: pct(kpis.admins) },
-              { titulo: "Lojistas", valor: kpis.lojistas, sub: `${pct(kpis.lojistas)}% do total`, icone: "storefront", barra: pct(kpis.lojistas) },
-              { titulo: "Gerentes", valor: kpis.gerentes, sub: `${pct(kpis.gerentes)}% do total`, icone: "manage_accounts", barra: pct(kpis.gerentes) },
-              { titulo: "Vendedores", valor: kpis.vendedores, sub: `${pct(kpis.vendedores)}% do total`, icone: "sell", barra: pct(kpis.vendedores) },
-            ].map((k) => (
+              { titulo: "Total de Usuários", valor: kpis.total, icone: "badge" },
+            { titulo: "Administradores", valor: kpis.admins, icone: "shield_person" },
+            { titulo: "Lojistas", valor: kpis.lojistas, icone: "storefront" },
+            { titulo: "Gerentes", valor: kpis.gerentes, icone: "manage_accounts" },
+            { titulo: "Vendedores", valor: kpis.vendedores, icone: "sell" },
+          ].map((k) => (
               <div key={k.titulo} className="layer-card-shadow group relative overflow-hidden rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/95 p-4 backdrop-blur-sm">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="font-label text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">{k.titulo}</span>
@@ -201,10 +208,11 @@ export default function AdminUsuarios() {
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className="font-headline text-3xl font-extrabold tracking-tight text-on-surface">{k.valor}</span>
-                  <span className="flex items-center gap-0.5 font-label text-xs font-semibold text-secondary">{k.sub}</span>
+                  <span className="font-label text-xs font-semibold text-secondary">{fmtPct(progresso(k.valor))} do limite</span>
                 </div>
+                <p className="mt-1 font-label text-[11px] text-on-surface-variant">Faltam {(LIMITE - k.valor).toLocaleString("pt-BR")} para 1.000.000</p>
                 <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-container-low">
-                  <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${k.barra}%` }} />
+                  <div className="h-full rounded-full bg-primary transition-all duration-700" style={{ width: `${Math.min(progresso(k.valor), 100)}%` }} />
                 </div>
               </div>
             ))}
@@ -289,7 +297,7 @@ export default function AdminUsuarios() {
                 )}
 
                 <button type="submit" disabled={salvando}
-                  className="w-full rounded-xl bg-primary py-3.5 font-label text-sm font-bold text-on-primary shadow-[0_8px_16px_-4px_rgba(37,99,235,0.35)] transition-all hover:bg-primary-container disabled:opacity-60">
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-center font-label text-sm font-bold text-on-primary shadow-[0_8px_16px_-4px_rgba(37,99,235,0.35)] transition-all hover:bg-primary-container disabled:opacity-60">
                   {salvando ? "Criando…" : "Criar usuário"}
                 </button>
               </form>
@@ -301,7 +309,7 @@ export default function AdminUsuarios() {
               <h2 className="font-headline text-lg font-extrabold tracking-tight text-on-surface">Membros da equipe</h2>
               <span className="font-label text-xs font-semibold text-on-surface-variant">{kpis.total} cadastrados</span>
             </div>
-            {lista.map((u) => (
+            {listaPagina.map((u) => (
               <article key={u.id} className="usuario-card relative rounded-2xl border border-outline-variant/35 bg-surface-container-lowest/95 p-5 backdrop-blur-sm lg:p-6 layer-card-shadow">
                 <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
                   <div className="flex min-w-0 items-start gap-4 sm:items-center">
@@ -330,20 +338,20 @@ export default function AdminUsuarios() {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-shrink-0 flex-nowrap items-center gap-1.5">
                     <select value={u.papel} onChange={(e) => mudarPapel(u, e.target.value)} disabled={u.id === sessao?.user?.id}
-                      className="cursor-pointer appearance-none rounded-xl border border-outline-variant/30 bg-surface-container-low py-2 pl-3.5 pr-8 font-label text-xs font-bold text-on-surface shadow-sm transition-colors hover:bg-surface-container focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60">
+                      className="cursor-pointer appearance-none whitespace-nowrap rounded-lg border border-outline-variant/30 bg-surface-container-low py-1.5 pl-3 pr-7 font-label text-[11px] font-bold text-on-surface shadow-sm transition-colors hover:bg-surface-container focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60">
                       {[...new Set([...papeis, u.papel])].map((p) => <option key={p} value={p} disabled={!papeis.includes(p)}>{ROTULO[p]}</option>)}
                     </select>
-                    <button onClick={() => abrirEdicao(u)} className="inline-flex items-center gap-1.5 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 py-2 font-label text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container">
+                    <button onClick={() => abrirEdicao(u)} className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-outline-variant/30 bg-surface-container-low px-2.5 py-1.5 font-label text-[11px] font-semibold text-on-surface transition-colors hover:bg-surface-container">
                       <span className="material-symbols-outlined text-[16px]">edit</span> Editar
                     </button>
                     {u.id !== sessao?.user?.id && (
                       <>
                         {u.ativo
-                          ? <button onClick={() => executar("suspender", u.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 py-2 font-label text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container"><span className="material-symbols-outlined text-[16px]">pause_circle</span> Suspender</button>
-                          : <button onClick={() => executar("reativar", u.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-outline-variant/30 bg-surface-container-low px-3 py-2 font-label text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container"><span className="material-symbols-outlined text-[16px]">play_circle</span> Reativar</button>}
-                        <button onClick={() => executar("excluir", u.id)} className="inline-flex items-center gap-1.5 rounded-xl border border-error/30 bg-error-container/40 px-3 py-2 font-label text-xs font-semibold text-error transition-colors hover:bg-error-container/70">
+                          ? <button onClick={() => executar("suspender", u.id)} className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-outline-variant/30 bg-surface-container-low px-2.5 py-1.5 font-label text-[11px] font-semibold text-on-surface transition-colors hover:bg-surface-container"><span className="material-symbols-outlined text-[16px]">pause_circle</span> Suspender</button>
+                          : <button onClick={() => executar("reativar", u.id)} className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-outline-variant/30 bg-surface-container-low px-2.5 py-1.5 font-label text-[11px] font-semibold text-on-surface transition-colors hover:bg-surface-container"><span className="material-symbols-outlined text-[16px]">play_circle</span> Reativar</button>}
+                        <button onClick={() => executar("excluir", u.id)} className="inline-flex items-center gap-1 whitespace-nowrap rounded-lg border border-error/30 bg-error-container/40 px-2.5 py-1.5 font-label text-[11px] font-semibold text-error transition-colors hover:bg-error-container/70">
                           <span className="material-symbols-outlined text-[16px]">delete</span> Excluir
                         </button>
                       </>
@@ -352,6 +360,19 @@ export default function AdminUsuarios() {
                 </div>
               </article>
             ))}
+            {totalPaginas > 1 && (
+              <nav className="mt-2 flex flex-wrap items-center justify-center gap-2" aria-label="Paginação">
+                <button type="button" disabled={paginaAtual <= 1} onClick={() => setPagina(paginaAtual - 1)}
+                  className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-1.5 font-label text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container disabled:opacity-40">Anterior</button>
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
+                  <button key={n} type="button" onClick={() => setPagina(n)}
+                    className={`min-w-[34px] rounded-lg border px-2.5 py-1.5 font-label text-xs font-bold transition-colors ${n === paginaAtual ? "border-primary bg-primary text-on-primary" : "border-outline-variant/40 bg-surface-container-lowest text-on-surface hover:bg-surface-container"}`}>{n}</button>
+                ))}
+                <button type="button" disabled={paginaAtual >= totalPaginas} onClick={() => setPagina(paginaAtual + 1)}
+                  className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-3 py-1.5 font-label text-xs font-semibold text-on-surface transition-colors hover:bg-surface-container disabled:opacity-40">Próxima</button>
+                <span className="ml-2 font-label text-xs text-on-surface-variant">Página {paginaAtual} de {totalPaginas}</span>
+              </nav>
+            )}
           </section>
         </main>
 
@@ -362,8 +383,8 @@ export default function AdminUsuarios() {
         )}
 
         {editando && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm">
-            <div className="relative w-full max-w-lg rounded-3xl border border-outline-variant/30 bg-surface-container-lowest/95 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:p-8">
+          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-inverse-surface/40 p-3 backdrop-blur-sm sm:p-6">
+            <div className="relative flex max-h-[92vh] w-full max-w-2xl flex-col rounded-3xl border border-outline-variant/30 bg-surface-container-lowest p-5 shadow-[0_24px_64px_rgba(0,0,0,0.18)] sm:p-7">
               <div className="mb-4 flex items-center justify-between border-b border-outline-variant/20 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-fixed/80 text-primary shadow-sm">
@@ -378,7 +399,7 @@ export default function AdminUsuarios() {
                   <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
-              <div className="space-y-4">
+              <div className="grid min-h-0 flex-1 grid-cols-1 content-start gap-4 overflow-y-auto pr-1 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
                   <label className={rotulo}>Nome</label>
                   <input className={campo} value={editando.nome} onChange={(e) => setEditando({ ...editando, nome: e.target.value })} />
@@ -418,9 +439,9 @@ export default function AdminUsuarios() {
                   </>
                 )}
               </div>
-              <div className="mt-6 flex justify-end gap-3 border-t border-outline-variant/20 pt-5">
+              <div className="mt-5 flex shrink-0 flex-col-reverse gap-3 border-t border-outline-variant/20 pt-4 sm:flex-row sm:justify-end">
                 <button type="button" onClick={() => setEditando(null)} className="rounded-xl border border-outline-variant/40 bg-surface-container-lowest px-5 py-2.5 font-label text-sm font-semibold text-on-surface transition-colors hover:bg-surface-container">Cancelar</button>
-                <button type="button" onClick={salvarEdicao} className="rounded-xl bg-primary px-5 py-2.5 font-label text-sm font-bold text-on-primary shadow-[0_8px_16px_-4px_rgba(37,99,235,0.35)] transition-all hover:bg-primary-container">Salvar alterações</button>
+                <button type="button" onClick={salvarEdicao} className="rounded-xl bg-primary px-5 py-2.5 text-center font-label text-sm font-bold text-on-primary shadow-[0_8px_16px_-4px_rgba(37,99,235,0.35)] transition-all hover:bg-primary-container">Salvar alterações</button>
               </div>
             </div>
           </div>
