@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
+import PageTransition from "../components/PageTransition";
 
 export default function GaleriaPublica() {
   const { token } = useParams();
@@ -35,7 +36,7 @@ export default function GaleriaPublica() {
 
   const botao = { position: "absolute", width: 44, height: 44, borderRadius: 12, border: 0, background: "#1e2d45", color: "#fff", fontSize: 22, cursor: "pointer" };
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f7fb", fontFamily: "system-ui, sans-serif" }}>
+    <PageTransition><div style={{ minHeight: "100vh", background: "#f5f7fb", fontFamily: "system-ui, sans-serif" }}>
       <header style={{ background: "#0E1A2E", color: "#fff", padding: "22px 24px" }}>
         <div style={{ fontWeight: 800, fontSize: 20 }}>{dados.titulo || "Fotos do veículo"}</div>
         <div style={{ color: "#94a3b8", fontSize: 13, marginTop: 6 }}>{dados.detalhes?.numero_motor ? `Motor ${dados.detalhes.numero_motor} · ` : ""}{dados.urls.length} foto(s) · link válido até {new Date(dados.expira_em).toLocaleString("pt-BR")}</div>
@@ -56,6 +57,6 @@ export default function GaleriaPublica() {
           <div style={{ position: "absolute", bottom: 16, color: "#cbd5e1", fontWeight: 600, fontSize: 13 }}>{aberta + 1} de {dados.urls.length}</div>
         </div>
       )}
-    </div>
+    </div></PageTransition>
   );
 }
