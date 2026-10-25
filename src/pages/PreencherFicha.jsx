@@ -133,12 +133,12 @@ function SlotSelect({ k, id, cls, opcoes }) {
 function GrupoCnh() {
   const { form, setForm } = useContext(CTX);
   return (
-    <div style={{ display: "inline-flex", flexWrap: "wrap", gap: 4, padding: 4, borderRadius: 14, background: "#eff4ff", border: "1px solid #d3e4fe" }}>
+    <div style={{ display: "flex", flexWrap: "nowrap", width: "100%", gap: 4, padding: 4, borderRadius: 14, background: "#eff4ff", border: "1px solid #d3e4fe" }}>
       {[[true, "Sim", "#10b981"], [false, "Não", "#ba1a1a"]].map(([v, rotulo, cor]) => {
         const ativo = form.cnh === v;
         return (
           <button key={rotulo} type="button" onClick={() => setForm({ ...form, cnh: v })}
-            style={{ minWidth: 96, padding: "8px 20px", borderRadius: 10, border: 0, fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all .2s ease",
+            style={{ flex: "1 1 0", whiteSpace: "nowrap", padding: "8px 16px", borderRadius: 10, border: 0, fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all .2s ease",
               background: ativo ? cor : "transparent",
               color: ativo ? "#fff" : "#434655",
               boxShadow: ativo ? `0 2px 6px ${cor}55` : "none" }}>
