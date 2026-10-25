@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/pages/CalculaCarNovo.jsx", "./src/pages/AdminUsuarios.jsx", "./src/pages/Ficha.jsx"],
+  content: ["./src/pages/CalculaCarNovo.jsx", "./src/pages/AdminUsuarios.jsx", "./src/pages/Ficha.jsx", "./src/pages/PreencherFicha.jsx"],
   important: ".cc-novo",
   corePlugins: { preflight: false },
   theme: {
