@@ -15,7 +15,6 @@ const OBRIGATORIOS = ["nome", "cpf", "telefone", "cnh", "profissao", "renda", "c
 const CHAVES_ENVIO = SECOES.flatMap((s) => s.campos.map((c) => c[0]));
 const PADROES = {"estado_civil": "Casado(a)", "regime": "CLT (Carteira)"};
 const BODY_CLASS = "bg-background font-body text-on-surface relative min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed antialiased flex flex-col overflow-x-hidden";
-const CNH_INATIVO = "flex-1 h-full rounded-xl font-label text-xs font-bold transition-all duration-200 bg-surface-container text-on-surface-variant hover:bg-surface-container-high";
 const CTX = createContext(null);
 
 const dinheiro = (v) => Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -131,10 +130,24 @@ function SlotSelect({ k, id, cls, opcoes }) {
   );
 }
 
-function SlotCnh({ v, cls }) {
+function GrupoCnh() {
   const { form, setForm } = useContext(CTX);
-  const ativo = form.cnh === v;
-  return <button type="button" onClick={() => setForm({ ...form, cnh: v })} className={ativo ? cls : CNH_INATIVO}>{v ? "Sim" : "Não"}</button>;
+  return (
+    <div style={{ display: "inline-flex", flexWrap: "wrap", gap: 4, padding: 4, borderRadius: 14, background: "#eff4ff", border: "1px solid #d3e4fe" }}>
+      {[[true, "Sim", "#10b981"], [false, "Não", "#ba1a1a"]].map(([v, rotulo, cor]) => {
+        const ativo = form.cnh === v;
+        return (
+          <button key={rotulo} type="button" onClick={() => setForm({ ...form, cnh: v })}
+            style={{ minWidth: 96, padding: "8px 20px", borderRadius: 10, border: 0, fontSize: 12, fontWeight: 600, cursor: "pointer", transition: "all .2s ease",
+              background: ativo ? cor : "transparent",
+              color: ativo ? "#fff" : "#434655",
+              boxShadow: ativo ? `0 2px 6px ${cor}55` : "none" }}>
+            {rotulo}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 function SlotSubmit({ cls, children }) {
@@ -334,10 +347,7 @@ export default function PreencherFicha() {
 <label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide">
                 Possui CNH?
               </label>
-<div className="grid grid-cols-2 gap-2 h-11">
-<SlotCnh v={true} cls="w-full h-full rounded-xl font-label text-xs font-bold transition-all duration-200 bg-primary text-on-primary shadow-sm shadow-primary/20 hover:shadow-md hover:bg-primary-container active:scale-95" />
-<SlotCnh v={false} cls="h-full px-4 rounded-xl font-label text-xs font-semibold transition-all duration-200 bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container border border-outline-variant/60 shadow-sm active:scale-95" />
-</div>
+<GrupoCnh />
 </div>
 </div>
 
