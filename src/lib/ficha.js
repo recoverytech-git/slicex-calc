@@ -12,9 +12,9 @@ export const SECOES = [
     ["cnh", "Possui CNH", "bool"],
   ]},
   { titulo: "2. Dados financeiros e ocupacionais", campos: [
-    ["empresa", "Nome da empresa"], ["admissao", "Data de admissão"], ["profissao", "Profissão"],
+    ["empresa", "Nome da empresa"], ["admissao", "Data de admissão"], ["profissao", "Profissão"], ["regime", "Regime contratual"],
     ["cargo", "Cargo"], ["renda", "Renda", "money"], ["renda_adicional", "Renda adicional", "money"],
-    ["contato_empresa", "Contato da empresa"],
+    ["contato_empresa", "Contato da empresa"], ["consulta_scr", "Autoriza consulta bancária (SCR / Bacen)", "bool"],
     ["ref_emp_nome", "Referência comercial — Nome"], ["ref_emp_tel", "Referência comercial — Telefone / WhatsApp", "tel"],
   ]},
   { titulo: "3. Dados do veículo", campos: [

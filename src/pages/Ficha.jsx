@@ -16,7 +16,7 @@ const EDITAM = ["admin_master", "proprietario", "gerente"];
 const DEF = Object.fromEntries(SECOES.flatMap((s) => s.campos.map((c) => [c[0], c])));
 const ETAPAS = [
   { n: 1, titulo: "Identificação & Dados Pessoais", campos: ["nome", "mae", "rg", "cpf", "nascimento", "telefone", "estado_civil", "email", "cep", "endereco", ["numero", "complemento"], "bairro", "cidade", "uf", "tempo_residencia", "ref_pessoal_nome", "ref_pessoal_tel", "cnh"] },
-  { n: 2, titulo: "Perfil Ocupacional & Renda", campos: ["empresa", "admissao", "profissao", "cargo", "renda", "renda_adicional", "contato_empresa", "ref_emp_nome", "ref_emp_tel"] },
+  { n: 2, titulo: "Perfil Ocupacional & Renda", campos: ["empresa", "admissao", "profissao", "regime", "cargo", "renda", "renda_adicional", "contato_empresa", "ref_emp_nome", "ref_emp_tel"] },
   { n: 3, titulo: "Garantia & Veículo", campos: ["placa", "renavam", "modelo", "ano_modelo", "cor", "valor_veiculo", "valor_entrada", "valor_financiar"] },
 ];
 const TODAS = ETAPAS.flatMap((e) => e.campos.flat());

@@ -1,139 +1,85 @@
+// Layout gerado a partir do design (HTML e DESIGN.md) da ficha publica
 // sem-rascunho: dados de cliente externo; nada fica guardado no navegador
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { CheckCircle2, ArrowLeft, ArrowRight, Send, Loader2, Clock3, ShieldCheck, XCircle, Calendar, Lock, Check } from "lucide-react";
+import { CheckCircle2, Clock3, ShieldCheck, XCircle, Loader2 } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { SECOES, FICHA_VAZIA } from "../lib/ficha";
 import { formatarCPF, formatarTelefone, soDigitos, cpfValido } from "../lib/mascaras";
 import { ESTILOS_PREENCHER } from "./preencher-estilos";
-import logo from "../assets/logo.png";
 
-// Mesmos blocos e obrigatorios de antes: bloco 1 (pessoal, com CNH) e bloco 2 (renda e ocupacao)
-const ETAPAS = [
-  { titulo: "Identificação, Civil & Residência", eyebrow: "Seção 1 · Dados pessoais", campos: SECOES[0].campos, obrigatorios: ["nome", "cpf", "telefone", "cnh"] },
-  { titulo: "Dados Financeiros & Profissionais", eyebrow: "Seção 2 · Renda e ocupação", campos: SECOES[1].campos, obrigatorios: ["profissao", "renda"] },
-];
-const CHAVES_ENVIO = ETAPAS.flatMap((e) => e.campos.map(([k]) => k));
-const ESTADOS_CIVIS = ["SOLTEIRO", "CASADO", "DIVORCIADO", "VIÚVO", "UNIÃO ESTÁVEL"];
-const EXEMPLOS = {
-  nome: "Nome completo do titular", mae: "Nome materno completo", rg: "00.000.000-0", cpf: "000.000.000-00",
-  telefone: "(11) 98765-4321", email: "cliente@email.com", cep: "00000-000", endereco: "Rua, Avenida, Alameda...",
-  numero: "123", complemento: "Apto, Bloco...", bairro: "Nome do bairro", cidade: "São Paulo", uf: "SP",
-  tempo_residencia: "ex: 3 anos e 6 meses", ref_pessoal_nome: "Nome de um parente ou amigo", ref_pessoal_tel: "(11) 90000-0000",
-  empresa: "Razão social da empresa", profissao: "ex: Analista de sistemas", cargo: "ex: Gerente comercial",
-  contato_empresa: "(11) 3000-0000", ref_emp_nome: "Nome do contato comercial", ref_emp_tel: "(11) 3000-0000",
-};
+const OBRIGATORIOS = ["nome", "cpf", "telefone", "cnh", "profissao", "renda", "consulta_scr"];
+const CHAVES_ENVIO = SECOES.flatMap((s) => s.campos.map((c) => c[0]));
+const PADROES = {"estado_civil": "Casado(a)", "regime": "CLT (Carteira)"};
+const BODY_CLASS = "bg-background font-body text-on-surface relative min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed antialiased flex flex-col overflow-x-hidden";
+const CNH_INATIVO = "flex-1 h-full rounded-xl font-label text-xs font-bold transition-all duration-200 bg-surface-container text-on-surface-variant hover:bg-surface-container-high";
+const CTX = createContext(null);
 
-const campoCls = "w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-sm text-on-surface placeholder:text-outline-variant border border-outline-variant/60 focus:border-primary focus:outline-none font-medium shadow-sm transition-all duration-200";
-const rotuloCls = "block font-label text-xs font-bold text-on-surface-variant mb-1.5";
 const dinheiro = (v) => Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const mascData = (d) => (d.length <= 2 ? d : d.length <= 4 ? `${d.slice(0, 2)}/${d.slice(2)}` : `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4, 8)}`);
 const mascCep = (d) => (d.length <= 5 ? d : `${d.slice(0, 5)}-${d.slice(5, 8)}`);
+const MASC = { cpf: "cpf", telefone: "tel", ref_pessoal_tel: "tel", ref_emp_tel: "tel", contato_empresa: "telFmt", cep: "cep", nascimento: "data", admissao: "data", renda: "money", renda_adicional: "money", consulta_scr: "bool" };
 
-function Pilula({ ativo, onClick, children }) {
+function faltando(f) {
+  return OBRIGATORIOS.filter((k) => {
+    const v = f[k];
+    if (k === "cpf") return !cpfValido(v || "");
+    if (k === "telefone") return soDigitos(v || "").length < 10;
+    if (k === "cnh") return v !== true && v !== false;
+    if (k === "consulta_scr") return v !== true;
+    if (k === "renda") return !(Number(v) > 0);
+    return !(typeof v === "string" ? v.trim() : v);
+  });
+}
+
+function Slot({ k, id, cls, ph, type }) {
+  const { form, setForm, invalidos } = useContext(CTX);
+  const tipo = MASC[k] ?? "texto";
+  const classe = cls + (invalidos.includes(k) ? " !border-error" : "");
+  const v = form[k];
+  if (tipo === "bool") return <input id={id} type="checkbox" checked={v === true} onChange={(e) => setForm({ ...form, [k]: e.target.checked })} className={cls} />;
+  if (tipo === "money") {
+    return <input id={id} inputMode="numeric" placeholder={ph} className={classe} value={dinheiro(v)}
+      onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); setForm({ ...form, [k]: d ? Number(d) / 100 : 0 }); }} />;
+  }
+  let valor = v ?? "";
+  let set = (t) => setForm({ ...form, [k]: t });
+  if (tipo === "cpf") { const d = soDigitos(v || "").slice(0, 11); valor = d ? formatarCPF(d) : ""; set = (t) => setForm({ ...form, [k]: soDigitos(t).slice(0, 11) }); }
+  if (tipo === "tel") { const d = soDigitos(v || "").slice(0, 11); valor = d ? formatarTelefone(d) : ""; set = (t) => setForm({ ...form, [k]: soDigitos(t).slice(0, 11) }); }
+  if (tipo === "telFmt") { set = (t) => { const d = soDigitos(t).slice(0, 11); setForm({ ...form, [k]: d ? formatarTelefone(d) : "" }); }; }
+  if (tipo === "cep") { valor = mascCep(soDigitos(v || "").slice(0, 8)); set = (t) => setForm({ ...form, [k]: soDigitos(t).slice(0, 8) }); }
+  if (tipo === "data") { valor = mascData(soDigitos(v || "").slice(0, 8)); set = (t) => setForm({ ...form, [k]: mascData(soDigitos(t).slice(0, 8)) }); }
+  return <input id={id} type={type} placeholder={ph} className={classe} value={valor} onChange={(e) => set(e.target.value)} />;
+}
+
+function SlotSelect({ k, id, cls, opcoes }) {
+  const { form, setForm } = useContext(CTX);
   return (
-    <button type="button" onClick={onClick}
-      className={`flex-1 h-11 rounded-xl font-label text-xs font-bold transition-all duration-200 active:scale-95 ${ativo ? "bg-primary text-on-primary shadow-sm shadow-primary/20 hover:shadow-md hover:bg-primary-container" : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"}`}>
-      {children}
-    </button>
+    <select id={id} className={cls} value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: e.target.value })}>
+      {opcoes.map((o) => <option key={o.t} value={o.t}>{o.t}</option>)}
+    </select>
   );
 }
 
-function Campo({ def, obrigatorio, form, setForm }) {
-  const [chave, rotulo, tipo] = def;
-  const id = `campo-${chave}`;
-  const rotuloFinal = `${rotulo}${obrigatorio ? " *" : ""}`;
-  const set = (v) => setForm({ ...form, [chave]: tipo === "cpf" || tipo === "tel" ? soDigitos(v) : v });
+function SlotCnh({ v, cls }) {
+  const { form, setForm } = useContext(CTX);
+  const ativo = form.cnh === v;
+  return <button type="button" onClick={() => setForm({ ...form, cnh: v })} className={ativo ? cls : CNH_INATIVO}>{v ? "Sim" : "Não"}</button>;
+}
 
-  if (tipo === "money") {
-    return (
-      <div className="flex flex-col">
-        <label htmlFor={id} className={rotuloCls}>{rotuloFinal}</label>
-        <div className="relative">
-          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 font-label text-xs font-bold text-on-surface-variant">R$</span>
-          <input id={id} inputMode="numeric" placeholder="0,00" className={campoCls + " pl-12 pr-3.5 font-headline font-bold tabular-nums"} value={dinheiro(form[chave])}
-            onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); setForm({ ...form, [chave]: d ? Number(d) / 100 : 0 }); }} />
-        </div>
-      </div>
-    );
-  }
-  if (tipo === "bool") {
-    return (
-      <div className="flex flex-col md:col-span-2">
-        <span className={rotuloCls}>{rotuloFinal}</span>
-        <div className="flex gap-2 max-w-xs">
-          {[[true, "Sim"], [false, "Não"]].map(([v, t]) => (
-            <Pilula key={t} ativo={form[chave] === v} onClick={() => setForm({ ...form, [chave]: v })}>
-              {form[chave] === v && <Check size={13} className="mr-1 inline" />}{t}
-            </Pilula>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  if (chave === "estado_civil") {
-    return (
-      <div className="flex flex-col">
-        <label htmlFor={id} className={rotuloCls}>{rotuloFinal}</label>
-        <select id={id} className={campoCls + " appearance-none cursor-pointer"} value={form[chave] ?? ""} onChange={(e) => set(e.target.value)}>
-          <option value="">Selecione</option>
-          {ESTADOS_CIVIS.map((x) => <option key={x} value={x}>{x}</option>)}
-        </select>
-      </div>
-    );
-  }
-  if (chave === "nascimento" || chave === "admissao") {
-    return (
-      <div className="flex flex-col">
-        <label htmlFor={id} className={rotuloCls}>{rotuloFinal}</label>
-        <div className="relative">
-          <input id={id} inputMode="numeric" placeholder="dd / mm / aaaa" className={campoCls + " pr-11 font-mono"} value={mascData(soDigitos(form[chave]).slice(0, 8))}
-            onChange={(e) => set(mascData(soDigitos(e.target.value).slice(0, 8)))} />
-          <Calendar size={16} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant" />
-          <input type="date" aria-label={`Selecionar ${rotulo}`} className="absolute inset-y-0 right-0 w-11 cursor-pointer opacity-0"
-            onChange={(e) => { if (e.target.value) { const [a, m, d] = e.target.value.split("-"); setForm({ ...form, [chave]: `${d}${m}${a}` }); } }} />
-        </div>
-      </div>
-    );
-  }
-  if (tipo === "cpf" || tipo === "tel" || chave === "cep") {
-    const digitos = soDigitos(form[chave] || "").slice(0, tipo === "cep" || chave === "cep" ? 8 : 11);
-    const valor = tipo === "cpf" ? formatarCPF(digitos) : tipo === "tel" ? formatarTelefone(digitos) : mascCep(digitos);
-    const invalido = tipo === "cpf" && digitos.length === 11 && !cpfValido(digitos);
-    return (
-      <div className="flex flex-col">
-        <label htmlFor={id} className={rotuloCls}>{rotuloFinal}</label>
-        <input id={id} inputMode="numeric" placeholder={EXEMPLOS[chave] ?? ""} className={campoCls + " font-mono " + (invalido ? "!border-error" : "")} value={valor}
-          onChange={(e) => setForm({ ...form, [chave]: soDigitos(e.target.value).slice(0, chave === "cep" ? 8 : 11) })} />
-        {invalido && <p className="mt-1 font-body text-xs font-semibold text-error">CPF inválido</p>}
-      </div>
-    );
-  }
-  if (chave === "uf") {
-    return (
-      <div className="flex flex-col">
-        <label htmlFor={id} className={rotuloCls}>{rotuloFinal}</label>
-        <input id={id} placeholder={EXEMPLOS.uf} className={campoCls + " uppercase"} value={form[chave] ?? ""} onChange={(e) => set(e.target.value.toUpperCase().slice(0, 2))} />
-      </div>
-    );
-  }
-  return (
-    <div className="flex flex-col">
-      <label htmlFor={id} className={rotuloCls}>{rotuloFinal}</label>
-      <input id={id} placeholder={EXEMPLOS[chave] ?? ""} className={campoCls} value={form[chave] ?? ""} onChange={(e) => set(e.target.value)} />
-    </div>
-  );
+function SlotSubmit({ cls, children }) {
+  const { enviar, enviando } = useContext(CTX);
+  return <button type="button" onClick={enviar} disabled={enviando} className={cls + (enviando ? " opacity-60" : "")}>{children}</button>;
 }
 
 export default function PreencherFicha() {
   const { token } = useParams();
   const [estado, setEstado] = useState("carregando"); // carregando | valido | invalido | expirado | preenchido | enviado
-  const [orgNome, setOrgNome] = useState("");
-  const [etapa, setEtapa] = useState(0);
-  const [form, setForm] = useState({ ...FICHA_VAZIA });
-  const [erro, setErro] = useState(null);
+  const [form, setForm] = useState({ ...FICHA_VAZIA, ...PADROES });
+  const [tentou, setTentou] = useState(false);
   const [enviando, setEnviando] = useState(false);
+  const [msg, setMsg] = useState(null);
 
   useEffect(() => {
     if (!supabaseConfigurado) { setEstado("invalido"); return; }
@@ -142,160 +88,613 @@ export default function PreencherFicha() {
       if (error || !row) { setEstado("invalido"); return; }
       if (row.status === "preenchido") { setEstado("preenchido"); return; }
       if (new Date(row.expira_em) < new Date()) { setEstado("expirado"); return; }
-      setOrgNome(row.org_nome);
       setEstado("valido");
     });
   }, [token]);
 
-  const faltando = (lista) => lista.filter((k) => {
-    const v = form[k];
-    if (k === "cpf") return !cpfValido(v || "");
-    if (k === "telefone") return soDigitos(v || "").length < 10;
-    if (k === "cnh") return v !== true && v !== false;
-    if (k === "renda") return !(Number(v) > 0);
-    return !(typeof v === "string" ? v.trim() : v);
-  });
+  useEffect(() => {
+    if (!msg) return undefined;
+    const t = setTimeout(() => setMsg(null), 4500);
+    return () => clearTimeout(t);
+  }, [msg]);
 
-  const avancar = () => {
-    const pendentes = faltando(ETAPAS[etapa].obrigatorios);
-    if (pendentes.length) { setErro("Preencha os campos obrigatórios destacados para continuar."); return; }
-    setErro(null);
-    setEtapa((e) => e + 1);
-  };
+  const invalidos = tentou ? faltando(form) : [];
 
   const enviar = async () => {
-    setErro(null);
+    setMsg(null);
+    if (faltando(form).length) {
+      setTentou(true);
+      setMsg("Preencha os campos obrigatórios destacados para enviar.");
+      return;
+    }
     setEnviando(true);
     const dados = Object.fromEntries(CHAVES_ENVIO.map((k) => [k, form[k]]));
     const { error } = await supabase.rpc("salvar_ficha_cliente", { p_token: token, p_dados: dados });
     setEnviando(false);
-    if (error) { setErro(error.message); return; }
+    if (error) { setMsg(error.message); return; }
     setEstado("enviado");
   };
 
-  const etapaAtual = ETAPAS[etapa];
-  const ultima = etapa === ETAPAS.length - 1;
-  const obrigatoriosTotal = ETAPAS.flatMap((e) => e.obrigatorios).length;
-  const obrigatoriosOk = obrigatoriosTotal - faltando(ETAPAS.flatMap((e) => e.obrigatorios)).length;
-  const pct = Math.round((obrigatoriosOk / obrigatoriosTotal) * 100);
+  const ctx = { form, setForm, invalidos, enviar, enviando };
 
   const telaFinal = (icone, cor, titulo, texto) => (
-    <div className="layer-card-shadow mx-auto max-w-lg rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-8 text-center">
+    <div className="mx-auto my-16 max-w-lg rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-8 text-center shadow-xl">
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ color: cor, background: `${cor}1a` }}>{icone}</div>
       <h2 className="font-headline text-xl font-extrabold text-on-surface">{titulo}</h2>
       <p className="mt-2 font-body text-sm leading-relaxed text-on-surface-variant">{texto}</p>
     </div>
   );
 
+  const conteudo =
+    estado === "carregando" ? <div className="flex justify-center py-20"><Loader2 size={28} className="animate-spin text-primary" /></div>
+    : estado === "invalido" ? telaFinal(<XCircle size={30} />, "#ba1a1a", "Link inválido", "Este endereço não existe ou foi copiado de forma incompleta. Peça um novo link ao atendente.")
+    : estado === "expirado" ? telaFinal(<Clock3 size={30} />, "#b45309", "Link expirado", "Este link já não está mais disponível. Peça um novo ao atendente.")
+    : estado === "preenchido" ? telaFinal(<ShieldCheck size={30} />, "#004ac6", "Ficha já enviada", "Os seus dados já foram recebidos. Obrigado!")
+    : estado === "enviado" ? telaFinal(<CheckCircle2 size={30} />, "#006c49", "Ficha enviada com sucesso", "A equipe da loja recebeu os seus dados e entrará em contato. Você já pode fechar esta página.")
+    : null;
+
   return (
     <PageTransition>
-      <div className="cc-novo relative min-h-screen overflow-x-clip bg-surface font-body text-on-surface antialiased">
-        <style>{ESTILOS_PREENCHER}</style>
-        <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="animate-orb-1 absolute -top-32 left-1/4 h-[480px] w-[480px] rounded-full bg-primary/10 blur-[100px]" />
-          <div className="animate-orb-2 absolute top-1/3 -right-24 h-[520px] w-[520px] rounded-full bg-secondary-container/25 blur-[110px]" />
-        </div>
+      <CTX.Provider value={ctx}>
+        <div className={"cc-novo " + BODY_CLASS}>
+          <style>{ESTILOS_PREENCHER}</style>
+          
 
-        <header className="sticky top-0 z-30 border-b border-outline-variant/30 bg-surface-container-lowest/85 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <div className="flex items-center gap-4">
-              <img src={logo} alt="SliceX.calc" className="h-7 w-auto" />
-              {orgNome && <span className="border-l border-outline-variant/60 pl-4 font-label text-xs font-semibold text-on-surface-variant">{orgNome}</span>}
-            </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary-container/30 px-3 py-1 font-label text-[11px] font-bold text-on-secondary-container">
-              <Lock size={12} /> Ambiente seguro
-            </span>
-          </div>
-        </header>
+<div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+<div className="absolute -top-44 left-1/2 -translate-x-1/2 w-[1150px] h-[550px] bg-gradient-to-br from-primary/15 via-[#2563eb]/10 to-[#38bdf8]/10 rounded-full blur-[140px] animate-orb-1"></div>
+<div className="absolute top-72 -left-48 w-[680px] h-[580px] bg-gradient-to-tr from-secondary-fixed/35 via-[#38bdf8]/15 to-transparent rounded-full blur-[160px] animate-orb-2"></div>
+<div className="absolute top-1/2 -right-48 w-[740px] h-[620px] bg-gradient-to-bl from-primary-fixed/60 via-[#2563eb]/15 to-transparent rounded-full blur-[170px] animate-orb-3"></div>
+</div>
 
-        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
-          {estado === "carregando" && <div className="mx-auto h-64 max-w-3xl animate-pulse rounded-3xl bg-surface-container" />}
-          {estado === "invalido" && telaFinal(<XCircle size={30} />, "#ba1a1a", "Link inválido", "Este endereço não existe ou foi copiado de forma incompleta. Peça um novo link ao atendente.")}
-          {estado === "expirado" && telaFinal(<Clock3 size={30} />, "#b45309", "Link expirado", "Este link já não está mais disponível. Peça um novo ao atendente.")}
-          {estado === "preenchido" && telaFinal(<ShieldCheck size={30} />, "#004ac6", "Ficha já enviada", "Os seus dados já foram recebidos. Obrigado!")}
-          {estado === "enviado" && telaFinal(<CheckCircle2 size={30} />, "#006c49", "Ficha enviada com sucesso", "A equipe da loja recebeu os seus dados e entrará em contato. Você já pode fechar esta página.")}
+<header className="sticky top-0 z-50 bg-surface/90 backdrop-blur-xl border-b border-surface-container shadow-[0_1px_12px_rgba(11,28,48,0.04)] transition-all">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+<div className="flex items-center gap-6">
+<a className="flex items-center gap-2 group transition-transform duration-300 hover:scale-[1.02]" href="#">
+<div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-primary-container flex items-center justify-center text-on-primary shadow-md shadow-primary/20 group-hover:scale-110 group-hover:shadow-primary/35 transition-all duration-300">
+<span className="material-symbols-outlined text-[22px] transition-transform duration-300 group-hover:rotate-6">directions_car</span>
+</div>
+<div className="flex flex-col">
+<span className="font-headline font-extrabold text-lg tracking-tight text-on-surface leading-none">
+            Calcula<span className="text-primary-container">.car</span>
+</span>
+</div>
+</a>
+<div className="hidden md:block h-6 w-px bg-outline-variant/60"></div>
+</div>
 
-          {estado === "valido" && (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <section className="space-y-6 lg:col-span-2">
-                <div>
-                  <span className="font-label text-[11px] font-bold uppercase tracking-[0.12em] text-primary">Ficha cadastral</span>
-                  <h1 className="mt-1 font-headline text-2xl font-extrabold tracking-tight text-on-surface sm:text-3xl">Ficha Cadastral &amp; Financeira.</h1>
-                  <p className="mt-2 font-body text-sm text-on-surface-variant">Preencha no seu ritmo, de qualquer lugar. Leva poucos minutos e seus dados ficam protegidos.</p>
+<div className="flex items-center gap-3">
+<div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low text-xs font-label text-on-surface-variant border border-outline-variant/40 hover:border-primary/40 hover:bg-surface-container transition-all cursor-default">
+<span className="material-symbols-outlined text-[16px] text-primary">storefront</span>
+<span className="font-semibold text-on-surface">Loja Principal</span>
+</div>
+<button aria-label="Notificações" className="relative p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all active:scale-95">
+<span className="material-symbols-outlined text-[20px]">notifications</span>
+<span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface animate-pulse"></span>
+</button>
+</div>
+</div>
+</header>
+
+          {estado === "valido" ? (
+            <main className="relative z-10 flex-1 w-full pt-4 pb-12">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+<div className="flex items-center gap-2">
+</div>
+</div>
+
+<div className="fade-in-stagger delay-100 relative overflow-hidden rounded-3xl bg-surface-container-lowest border border-surface-container p-6 lg:p-7 shadow-xl shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 group">
+<div className="absolute top-0 right-0 w-80 h-full bg-gradient-to-l from-primary/5 via-secondary/5 to-transparent pointer-events-none group-hover:opacity-80 transition-opacity"></div>
+<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+
+<div className="space-y-2">
+<div className="flex flex-wrap items-center gap-2.5">
+<span className="beacon-active inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-primary-fixed/60 text-primary text-[11px] font-label font-bold uppercase tracking-wider shadow-sm transition-all"><span className="material-symbols-outlined text-[14px]">fact_check</span>Aprovação de crédito.</span>
+</div>
+<h1 className="font-headline font-extrabold text-2xl sm:text-3xl text-on-surface tracking-tight group-hover:text-primary transition-colors duration-300">
+            Ficha Cadastral &amp; Financeira.</h1>
+<p className="font-body text-xs sm:text-sm text-on-surface-variant max-w-2xl leading-relaxed">
+            Visão consolidada para aprovação simultânea em 14 mesas bancárias. Preenchimento rápido e fácil..
+          </p>
+</div>
+
+</div>
+</div>
+
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+
+
+<section className="fade-in-stagger delay-200 bg-surface-container-lowest rounded-3xl p-6 sm:p-7 border border-surface-container shadow-xl shadow-primary/5 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 space-y-6 h-full flex flex-col">
+
+<div className="flex items-center justify-between pb-4 border-b border-surface-container">
+<div className="flex items-center gap-3">
+<div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold shadow-sm bg-secondary-container/50 text-secondary transition-transform duration-300 hover:scale-110">
+<span className="material-symbols-outlined text-[20px]">badge</span>
+</div>
+<div>
+<div className="flex items-center gap-2">
+<span className="text-[10px] font-label font-bold text-primary uppercase tracking-wider">Seção 01</span>
+<span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span className="text-[10px] font-label text-secondary font-bold flex items-center gap-0.5">
+<span className="material-symbols-outlined text-[12px] animate-pulse">check_circle</span> 100% Preenchido
+                </span>
+</div>
+<h2 className="font-headline font-extrabold text-base sm:text-lg text-on-surface">
+                1. Identificação, Civil &amp; Residência.</h2>
+</div>
+</div>
+<span className="hidden sm:inline-flex text-[11px] font-label text-outline font-medium bg-surface-container px-2.5 py-1 rounded-md transition-colors hover:bg-surface-container-high">
+            Dados do Proponente
+          </span>
+</div>
+<div className="space-y-4">
+
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="nome_completo">
+                Nome completo <span className="text-error font-bold">*</span>
+</label>
+<Slot k="nome" id="nome_completo" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-sm text-on-surface placeholder:text-outline-variant border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="Nome completo do titular" type="text" />
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="nome_mae">
+                Nome da mãe <span className="text-error font-bold">*</span>
+</label>
+<Slot k="mae" id="nome_mae" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-sm text-on-surface placeholder:text-outline-variant border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="Nome da m\u00e3e completo" type="text" />
+</div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+<div className="space-y-1.5">
+<div className="flex items-center justify-between">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="cpf">
+                  CPF <span className="text-error font-bold">*</span>
+</label>
+<span className="inline-flex items-center gap-0.5 text-[10px] font-label font-bold text-secondary">
+<span className="material-symbols-outlined text-[13px] animate-pulse">verified_user</span> Autenticado Receita
+                </span>
+</div>
+<div className="relative">
+<Slot k="cpf" id="cpf" cls="input-animated w-full h-11 px-3.5 pr-10 rounded-xl bg-surface-container-lowest font-mono text-sm text-on-surface border border-secondary/40 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-semibold shadow-sm" ph="" type="text" />
+<span className="material-symbols-outlined text-[17px] text-secondary absolute right-3 top-3">check_circle</span>
+</div>
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="rg">
+                RG / Órgão Emissor
+              </label>
+<Slot k="rg" id="rg" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-mono text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="00.000.000-0 SSP/UF" type="text" />
+</div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="data_nasc">
+                Nascimento <span className="text-error font-bold">*</span>
+</label>
+<div className="relative">
+<Slot k="nascimento" id="data_nasc" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-mono text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="estado_civil">
+                Estado Civil
+              </label>
+<SlotSelect k="estado_civil" id="estado_civil" cls="input-animated w-full h-11 px-3 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm cursor-pointer" opcoes={[{"v": "casado", "t": "Casado(a)"}, {"v": "solteiro", "t": "Solteiro(a)"}, {"v": "uniao_estavel", "t": "Uni\u00e3o Est\u00e1vel"}, {"v": "divorciado", "t": "Divorciado(a)"}, {"v": "viuvo", "t": "Vi\u00favo(a)"}]} />
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide">
+                Possui CNH?
+              </label>
+<div className="flex items-center gap-1.5 h-11">
+<SlotCnh v={true} cls="flex-1 h-full rounded-xl font-label text-xs font-bold transition-all duration-200 bg-primary text-on-primary shadow-sm shadow-primary/20 hover:shadow-md hover:bg-primary-container active:scale-95" />
+<SlotCnh v={false} cls="h-full px-4 rounded-xl font-label text-xs font-semibold transition-all duration-200 bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container border border-outline-variant/60 shadow-sm active:scale-95" />
+</div>
+</div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="telefone_whatsapp">
+                Telefone / WhatsApp <span className="text-error font-bold">*</span>
+</label>
+<div className="relative">
+<Slot k="telefone" id="telefone_whatsapp" cls="input-animated w-full h-11 pl-3.5 pr-10 rounded-xl bg-surface-container-lowest font-mono text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+<span className="material-symbols-outlined text-[18px] text-secondary absolute right-3 top-3">phone_iphone</span>
+</div>
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="email">
+                E-mail Pessoal / Faturamento
+              </label>
+<div className="relative">
+<Slot k="email" id="email" cls="input-animated w-full h-11 pl-3.5 pr-10 rounded-xl bg-surface-container-lowest font-body text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="email" />
+<span className="material-symbols-outlined text-[18px] text-outline absolute right-3 top-3">alternate_email</span>
+</div>
+</div>
+</div>
+
+<div className="pt-2">
+<div className="flex items-center gap-2 mb-3.5">
+<span className="material-symbols-outlined text-[16px] text-primary">home_pin</span>
+<span className="text-xs font-headline font-bold text-on-surface tracking-wide uppercase">Endereço Residencial Completo</span>
+<div className="flex-1 h-px bg-surface-container"></div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+<div className="sm:col-span-4 space-y-1.5">
+<div className="flex items-center justify-between">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="cep">CEP</label>
+<span className="text-[10px] font-label text-primary font-bold">SP</span>
+</div>
+<Slot k="cep" id="cep" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-mono text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+<div className="sm:col-span-6 space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="endereco">Logradouro / Avenida</label>
+<Slot k="endereco" id="endereco" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+<div className="sm:col-span-2 space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="numero">Nº</label>
+<Slot k="numero" id="numero" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-mono text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5 mt-3.5">
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="complemento">Complemento</label>
+<Slot k="complemento" id="complemento" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="bairro">Bairro</label>
+<Slot k="bairro" id="bairro" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="cidade">Cidade / UF</label>
+<Slot k="cidade" id="cidade" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="tempo_residencia">Tempo Residência</label>
+<Slot k="tempo_residencia" id="tempo_residencia" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+</div>
+</div>
+
+<div className="p-4 rounded-2xl bg-surface-container-low/70 border border-surface-container mt-2 transition-all duration-200 hover:bg-surface-container-low">
+<div className="flex items-center gap-1.5 mb-2.5">
+<span className="material-symbols-outlined text-[16px] text-tertiary">group</span>
+<span className="text-xs font-label font-bold text-on-surface uppercase tracking-wider">Referência Pessoal (Familiar / Parente)</span>
+</div>
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<Slot k="ref_pessoal_nome" id="ref_pessoal_nome" cls="input-animated w-full h-10 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:border-primary focus:outline-none shadow-sm font-medium" ph="Nome de parente" type="text" />
+<Slot k="ref_pessoal_tel" id="ref_pessoal_tel" cls="input-animated w-full h-10 px-3.5 rounded-xl bg-surface-container-lowest font-mono text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:border-primary focus:outline-none font-medium shadow-sm" ph="Telefone" type="text" />
+</div>
+</div>
+</div>
+</section>
+
+
+
+<section className="fade-in-stagger delay-300 bg-surface-container-lowest rounded-3xl p-6 sm:p-7 border border-surface-container shadow-xl shadow-primary/5 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 space-y-6 h-full flex flex-col">
+<div className="flex items-center justify-between pb-4 border-b border-surface-container">
+<div className="flex items-center gap-3">
+<div className="w-9 h-9 rounded-xl bg-secondary-container/50 flex items-center justify-center text-secondary font-bold shadow-sm transition-transform duration-300 hover:scale-110">
+<span className="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div>
+<div className="flex items-center gap-2">
+<span className="text-[10px] font-label font-bold text-secondary uppercase tracking-wider">Seção 02</span>
+<span className="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span className="text-[10px] font-label text-primary font-bold flex items-center gap-0.5">
+<span className="material-symbols-outlined text-[12px] animate-pulse">verified</span> Solvência Confirmada
+        </span>
+</div>
+<h2 className="font-headline font-extrabold text-base sm:text-lg text-on-surface">
+        2. Dados Financeiros &amp; Profissionais.</h2>
+</div>
+</div>
+<span className="hidden sm:inline-flex text-[11px] font-label text-outline font-medium bg-surface-container px-2.5 py-1 rounded-md transition-colors hover:bg-surface-container-high">
+    Análise de Renda
+  </span>
+</div>
+<div className="space-y-4 flex-1 flex flex-col justify-between">
+
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+
+<div className="p-4 rounded-2xl bg-gradient-to-br from-primary-fixed/40 to-surface-container-low border border-primary/20 space-y-2 hover:border-primary/50 transition-all duration-300 hover:shadow-md">
+<div className="flex items-center justify-between">
+<label className="text-xs font-label font-bold text-primary uppercase tracking-wider" htmlFor="renda_principal">
+          Renda Principal <span className="text-error font-bold">*</span>
+</label>
+<span className="text-[10px] font-label font-bold bg-primary text-on-primary px-1.5 py-0.5 rounded shadow-sm">Comprovada</span>
+</div>
+<div className="relative flex items-center">
+<span className="absolute left-3.5 font-headline font-black text-lg text-primary">R$</span>
+<Slot k="renda" id="renda_principal" cls="input-animated w-full h-11 pl-12 pr-3.5 rounded-xl bg-surface-container-lowest font-headline font-extrabold text-xl text-on-surface border border-primary/40 focus:border-primary focus:outline-none font-mono" ph="" type="text" />
+</div>
+</div>
+
+<div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/50 space-y-2 hover:border-outline-variant transition-all duration-300 hover:shadow-md">
+<div className="flex items-center justify-between">
+<label className="text-xs font-label font-bold text-on-surface-variant uppercase tracking-wider" htmlFor="renda_adicional">
+          Renda extra
+        </label>
+<span className="text-[10px] font-label font-bold bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20">Opcional</span>
+</div>
+<div className="relative flex items-center">
+<span className="absolute left-3.5 font-headline font-black text-lg text-outline">R$</span>
+<Slot k="renda_adicional" id="renda_adicional" cls="input-animated w-full h-11 pl-12 pr-3.5 rounded-xl bg-surface-container-lowest font-headline font-bold text-xl text-on-surface border border-outline-variant/60 focus:border-primary focus:outline-none font-mono" ph="" type="text" />
+</div>
+</div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+<div className="sm:col-span-8 space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="nome_empresa">
+        Empresa Contratante / Empregador <span className="text-error font-bold">*</span>
+</label>
+<Slot k="empresa" id="nome_empresa" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+<div className="sm:col-span-4 space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="regime">
+        Regime Contratual
+      </label>
+<SlotSelect k="regime" id="regime" cls="input-animated w-full h-11 px-3 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm cursor-pointer" opcoes={[{"v": "clt", "t": "CLT (Carteira)"}, {"v": "pj", "t": "PJ / MEI"}, {"v": "servidor", "t": "Servidor P\u00fablico"}, {"v": "autonomo", "t": "Profissional Liberal"}, {"v": "aposentado", "t": "Aposentado / Pens."}]} />
+</div>
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="profissao">
+        Profissão <span className="text-error font-bold">*</span>
+</label>
+<Slot k="profissao" id="profissao" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="cargo">
+        Cargo Atual
+      </label>
+<Slot k="cargo" id="cargo" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="data_admissao">
+        Data Admissão <span className="text-error font-bold">*</span>
+</label>
+<div className="relative">
+<Slot k="admissao" id="data_admissao" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-mono text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+</div>
+</div>
+
+<div className="pt-2">
+<div className="flex items-center gap-2 mb-3.5">
+<span className="material-symbols-outlined text-[16px] text-primary">corporate_fare</span>
+<span className="text-xs font-headline font-bold text-on-surface tracking-wide uppercase">Vínculo Corporativo &amp; Referência Comercial</span>
+<div className="flex-1 h-px bg-surface-container"></div>
+</div>
+<div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+<div className="sm:col-span-6 space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="contato_empresa">
+          Telefone Central da Empresa
+        </label>
+<div className="relative">
+<Slot k="contato_empresa" id="contato_empresa" cls="input-animated w-full h-11 pl-3.5 pr-10 rounded-xl bg-surface-container-lowest font-mono text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+<span className="material-symbols-outlined text-[18px] text-outline absolute right-3 top-3">call</span>
+</div>
+</div>
+<div className="sm:col-span-6 space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="ref_comercial_nome">
+          Referência Comercial — Contato&nbsp;</label>
+<Slot k="ref_emp_nome" id="ref_comercial_nome" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+</div>
+</div>
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-3.5">
+<div className="space-y-1.5">
+<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="ref_comercial_telefone">
+          Telefone / WhatsApp Comercial
+        </label>
+<div className="relative">
+<Slot k="ref_emp_tel" id="ref_comercial_telefone" cls="input-animated w-full h-11 pl-3.5 pr-10 rounded-xl bg-surface-container-lowest font-mono text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
+<span className="material-symbols-outlined text-[18px] text-secondary absolute right-3 top-3">chat</span>
+</div>
+</div>
+<div className="p-2.5 px-3.5 rounded-xl bg-surface-container-low border border-surface-container flex flex-col justify-center transition-all duration-300 hover:shadow-inner">
+<div className="flex items-center justify-between">
+<span className="text-[10px] font-label font-bold text-outline uppercase">Estabilidade Profissional</span>
+<span className="text-xs font-mono font-bold text-secondary">6 anos</span>
+</div>
+<div className="flex items-center gap-2 mt-1">
+<div className="flex-1 bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div className="bg-secondary h-full rounded-full w-[85%] transition-all duration-1000 ease-out"></div>
+</div>
+</div>
+<span className="text-[10px] font-label text-on-surface-variant mt-1">Vínculo contínuo sem quebras</span>
+</div>
+</div>
+</div>
+
+<div className="p-4 rounded-2xl bg-surface-container-low/70 border border-surface-container mt-2 flex flex-wrap items-center justify-between gap-2 transition-all hover:bg-surface-container-low">
+<label className="flex items-center gap-2.5 text-xs font-label font-medium text-on-surface cursor-pointer select-none">
+<Slot k="consulta_scr" id="consulta_scr" cls="w-4 h-4 rounded text-primary focus:ring-primary/30 border-outline-variant cursor-pointer transition-transform active:scale-90" ph="" type="checkbox" />
+<span className="">Autorizo consulta bancária simultânea (SCR / Bacen)</span>
+</label>
+<span className="text-[11px] font-mono text-secondary font-bold flex items-center gap-1">
+<span className="material-symbols-outlined text-[14px]">lock</span>
+      Tokenizado SHA-256
+    </span>
+</div>
+</div></section>
+</div>
+
+
+
+<div className="fade-in-stagger delay-400 rounded-3xl bg-surface-container-lowest border border-surface-container p-6 lg:p-8 shadow-2xl shadow-primary/10 relative overflow-hidden transition-all duration-300 hover:shadow-primary/15">
+
+<div className="absolute -bottom-24 -left-24 w-96 h-96 bg-secondary/10 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
+<div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none animate-pulse"></div>
+<div className="relative z-10 space-y-6">
+
+<div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-surface-container">
+<div className="space-y-1">
+<div className="flex items-center gap-2">
+<span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-container/40 text-secondary text-xs font-label font-bold">
+<span className="relative flex h-2 w-2">
+<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span className="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+                Esteira de Despacho Multi-Bancos Simultânea
+              </span>
+</div>
+<h3 className="font-headline font-extrabold text-lg sm:text-xl text-on-surface tracking-tight">Conheça algumas das nossas instituições parceiras.</h3>
+</div>
+<div className="flex items-center gap-3">
+</div>
+</div>
+
+<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3.5" id="bank-cards-grid">
+
+<label className="bank-card group relative flex flex-col justify-between p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container-highest/50 border-2 border-primary/40 hover:border-primary cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98]">
+<div className="flex items-start justify-between">
+<div className="flex items-center gap-2">
+<div className="w-8 h-8 rounded-lg bg-red-600/10 text-red-600 flex items-center justify-center font-black text-xs font-headline group-hover:scale-110 transition-transform duration-200">
+                  SAN
                 </div>
+<div>
+<h4 className="font-headline font-bold text-xs sm:text-sm text-on-surface leading-tight group-hover:text-primary transition-colors">Santander Auto</h4>
+<span className="text-[10px] font-label text-outline font-medium">Taxa Especial VIP</span>
+</div>
+</div>
+</div>
+</label>
 
-                <div className="layer-card-shadow rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-5 sm:p-7">
-                  <div className="mb-6 flex items-start justify-between gap-3 border-b border-outline-variant/20 pb-5">
-                    <div>
-                      <span className="font-label text-[11px] font-bold uppercase tracking-[0.12em] text-on-surface-variant">{etapaAtual.eyebrow}</span>
-                      <h2 className="mt-1 font-headline text-lg font-extrabold text-on-surface">{etapa + 1}. {etapaAtual.titulo}</h2>
-                    </div>
-                    <span className="shrink-0 rounded-full bg-primary-fixed px-3 py-1 font-label text-[11px] font-bold text-on-primary-fixed-variant">Etapa {etapa + 1} de {ETAPAS.length}</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2">
-                    {etapaAtual.campos.map((c) => (
-                      <Campo key={c[0]} def={c} obrigatorio={etapaAtual.obrigatorios.includes(c[0])} form={form} setForm={setForm} />
-                    ))}
-                  </div>
-                  <p className="mt-5 font-body text-[11px] text-on-surface-variant">* campos obrigatórios</p>
-
-                  {erro && <p role="alert" className="mt-4 rounded-xl border border-error bg-error-container/40 px-4 py-3 font-body text-sm font-semibold text-on-error-container">{erro}</p>}
-
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant/20 pt-5">
-                    <button type="button" onClick={() => { setErro(null); setEtapa((e) => Math.max(0, e - 1)); }} disabled={etapa === 0}
-                      className="inline-flex h-12 items-center gap-2 rounded-xl border border-outline-variant/60 bg-surface-container-lowest px-5 font-label text-xs font-bold text-on-surface shadow-sm transition-all hover:bg-surface-container active:scale-95 disabled:opacity-40">
-                      <ArrowLeft size={15} /> Voltar
-                    </button>
-                    {!ultima ? (
-                      <button type="button" onClick={avancar}
-                        className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 font-label text-sm font-bold text-on-primary shadow-lg shadow-primary/25 transition-all hover:bg-primary-container active:scale-95">
-                        Continuar <ArrowRight size={15} />
-                      </button>
-                    ) : (
-                      <button type="button" onClick={enviar} disabled={enviando}
-                        className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 font-label text-sm font-bold text-on-primary shadow-lg shadow-primary/25 transition-all hover:bg-primary-container active:scale-95 disabled:opacity-60">
-                        {enviando ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />} {enviando ? "Enviando…" : "Enviar Dados !"}
-                      </button>
-                    )}
-                  </div>
+<label className="bank-card group relative flex flex-col justify-between p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container-highest/50 border-2 border-primary/40 hover:border-primary cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98]">
+<div className="flex items-start justify-between">
+<div className="flex items-center gap-2">
+<div className="w-8 h-8 rounded-lg bg-blue-700/10 text-blue-700 flex items-center justify-center font-black text-xs font-headline group-hover:scale-110 transition-transform duration-200">
+                  BV
                 </div>
+<div>
+<h4 className="font-headline font-bold text-xs sm:text-sm text-on-surface leading-tight group-hover:text-primary transition-colors">BV Financeira</h4>
+<span className="text-[10px] font-label text-outline font-medium">Líder Usados</span>
+</div>
+</div>
+</div>
+</label>
 
-                <p className="px-1 font-body text-[11px] leading-relaxed text-on-surface-variant">
-                  As informações são usadas somente para analisar o financiamento do veículo.
-                </p>
-              </section>
+<label className="bank-card group relative flex flex-col justify-between p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container-highest/50 border-2 border-primary/40 hover:border-primary cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98]">
+<div className="flex items-start justify-between">
+<div className="flex items-center gap-2">
+<div className="w-8 h-8 rounded-lg bg-orange-600/10 text-orange-600 flex items-center justify-center font-black text-xs font-headline group-hover:scale-110 transition-transform duration-200">
+                  ITAU
+                </div>
+<div>
+<h4 className="font-headline font-bold text-xs sm:text-sm text-on-surface leading-tight group-hover:text-primary transition-colors">Itaú Financiamento</h4>
+<span className="text-[10px] font-label text-outline font-medium">Agilidade Alta</span>
+</div>
+</div>
+</div>
+</label>
 
-              <aside className="space-y-6">
-                <div className="layer-card-shadow rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-5 sm:p-6">
-                  <span className="font-label text-[11px] font-bold uppercase tracking-[0.12em] text-on-surface-variant">Progresso</span>
-                  <div className="mt-3 flex items-baseline gap-2">
-                    <span className="font-headline text-3xl font-extrabold text-on-surface">{pct}%</span>
-                    <span className="font-label text-xs font-semibold text-on-surface-variant">dos campos obrigatórios</span>
-                  </div>
-                  <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-surface-container-low">
-                    <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${pct}%` }} />
-                  </div>
-                  <ol className="mt-5 space-y-3">
-                    {ETAPAS.map((e, i) => (
-                      <li key={e.titulo} className="flex items-center gap-3">
-                        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-label text-xs font-bold ${i < etapa ? "bg-secondary text-on-secondary" : i === etapa ? "bg-primary text-on-primary" : "bg-surface-container text-on-surface-variant"}`}>
-                          {i < etapa ? <Check size={14} /> : i + 1}
-                        </span>
-                        <span className={`font-body text-sm ${i === etapa ? "font-bold text-on-surface" : "font-medium text-on-surface-variant"}`}>{e.titulo}</span>
-                      </li>
-                    ))}
-                  </ol>
+<label className="bank-card group relative flex flex-col justify-between p-4 rounded-2xl bg-surface-container-low hover:bg-surface-container-highest/50 border-2 border-primary/40 hover:border-primary cursor-pointer transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-[0.98]">
+<div className="flex items-start justify-between">
+<div className="flex items-center gap-2">
+<div className="w-8 h-8 rounded-lg bg-red-700/10 text-red-700 flex items-center justify-center font-black text-xs font-headline group-hover:scale-110 transition-transform duration-200">
+                  BRA
                 </div>
-                <div className="rounded-2xl border border-secondary/25 bg-secondary-container/15 p-5">
-                  <p className="font-label text-xs font-bold text-on-secondary-container">Seus dados estão protegidos</p>
-                  <p className="mt-1 font-body text-xs leading-relaxed text-on-surface-variant">Esta ficha só pode ser enviada uma vez. Após o envio, a equipe da loja recebe as informações.</p>
-                </div>
-              </aside>
+<div>
+<h4 className="font-headline font-bold text-xs sm:text-sm text-on-surface leading-tight group-hover:text-primary transition-colors">Bradesco Financiamentos</h4>
+<span className="text-[10px] font-label text-outline font-medium">Convênio Prime</span>
+</div>
+</div>
+</div>
+</label>
+</div>
+
+<div className="pt-2">
+<div className="flex flex-wrap items-center gap-2 text-xs font-label">
+<span className="text-[11px] font-bold text-outline uppercase tracking-wider mr-1">+ 10 Mesas Inclusas na Fila:</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Safra Auto</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Banco Pan</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">C6 Bank</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Daycoval</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Omni Fin.</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Porto Seguro</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Banco do Brasil</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Caixa</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm bg-surface-container text-on-surface">Creditas</span>
+<span className="bank-chip px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-semibold text-[11px] hover:bg-primary hover:text-on-primary transition-all duration-200 hover:-translate-y-0.5 cursor-pointer shadow-sm">Digimais</span>
+</div>
+</div>
+
+<div className="pt-4 border-t border-surface-container flex flex-col sm:flex-row items-center justify-between gap-4">
+<div className="flex items-center gap-3">
+<div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-secondary shrink-0 transition-transform duration-300 hover:rotate-12">
+<span className="material-symbols-outlined text-[22px]">timer</span>
+</div>
+<div>
+<p className="font-headline font-bold text-sm text-on-surface">Tempo de Retorno Estimado: <span className="text-secondary font-mono">60 MINUTOS.</span></p>
+</div>
+</div>
+<div className="flex items-center gap-3 w-full sm:w-auto">
+<SlotSubmit cls="shimmer-sweep w-full sm:w-auto inline-flex items-center justify-center gap-3 h-14 px-8 rounded-2xl font-headline text-sm sm:text-base font-extrabold text-on-primary bg-primary hover:bg-primary-container shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/35 active:scale-[0.98] transition-all duration-200 group"><span className="material-symbols-outlined text-[22px] transition-transform duration-200 group-hover:scale-110">send</span><span className="">Enviar Dados !</span></SlotSubmit>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+          ) : (
+            <main className="relative z-10 flex-1 w-full pt-4 pb-12">{conteudo}</main>
+          )}
+          
+
+
+
+<footer className="fade-in-stagger delay-500 relative z-10 w-full bg-surface-container-lowest border-t border-surface-container mt-auto">
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-surface-container">
+
+<div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs font-label text-on-surface-variant">
+<div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low border border-surface-container hover:border-secondary/40 transition-colors">
+<span className="material-symbols-outlined text-secondary text-[16px]">lock</span>
+<span className="font-semibold text-on-surface">Criptografia SSL 256-bit Ativa</span>
+</div>
+<div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low border border-surface-container hover:border-primary/40 transition-colors">
+<span className="material-symbols-outlined text-primary text-[16px]">verified</span>
+<span className="font-semibold text-on-surface">Conformidade BACEN e Resoluções CMN</span>
+</div>
+<div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low border border-surface-container hover:border-primary/40 transition-colors">
+<span className="material-symbols-outlined text-primary text-[16px]">shield</span>
+<span className="font-semibold text-on-surface">Proteção de Dados LGPD</span>
+</div>
+</div>
+
+<div className="flex items-center gap-4">
+<a className="inline-flex items-center gap-1.5 text-xs font-label font-bold text-primary hover:text-on-primary-fixed-variant transition-colors group" href="#">
+<span className="material-symbols-outlined text-[16px] group-hover:rotate-12 transition-transform">support_agent</span>
+          Mesa de Apoio &amp; Suporte Especializado F&amp;I
+        </a>
+</div>
+</div>
+<div className="pt-5 flex flex-col sm:flex-row items-center justify-between text-xs font-label text-outline gap-3">
+<p className="">© 2025 Calcula.car Soluções Automotivas Ltda. Todos os direitos reservados. FIPE ® atualizada em tempo real.</p>
+<p className="text-[11px] font-mono">Ambiente Homologado para Lojas, Concessionárias e Correspondentes Bancários.</p>
+</div>
+</div>
+</footer>
+
+
+
+
+          {msg && (
+            <div role="alert" className="fixed bottom-6 left-1/2 z-[70] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-2xl border border-error/30 bg-surface-container-lowest p-4 shadow-2xl">
+              <span className="material-symbols-outlined text-[24px] text-error">error</span>
+              <p className="font-body text-sm font-semibold text-on-surface">{msg}</p>
             </div>
           )}
-        </main>
-      </div>
+        </div>
+      </CTX.Provider>
     </PageTransition>
   );
 }
