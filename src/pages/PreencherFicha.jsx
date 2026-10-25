@@ -2,12 +2,14 @@
 // sem-rascunho: dados de cliente externo; nada fica guardado no navegador
 import { createContext, useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { CheckCircle2, Clock3, ShieldCheck, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, Clock3, ShieldCheck, XCircle, Loader2, X } from "lucide-react";
 import PageTransition from "../components/PageTransition";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { SECOES, FICHA_VAZIA } from "../lib/ficha";
 import { formatarCPF, formatarTelefone, soDigitos, cpfValido } from "../lib/mascaras";
 import { ESTILOS_PREENCHER } from "./preencher-estilos";
+import logo from "../assets/logo.png";
+import { useMarca } from "../lib/marca";
 
 const OBRIGATORIOS = ["nome", "cpf", "telefone", "cnh", "profissao", "renda", "consulta_scr"];
 const CHAVES_ENVIO = SECOES.flatMap((s) => s.campos.map((c) => c[0]));
@@ -31,6 +33,73 @@ function faltando(f) {
     if (k === "renda") return !(Number(v) > 0);
     return !(typeof v === "string" ? v.trim() : v);
   });
+}
+
+function calcularEstabilidade(admissao, hoje) {
+  const d = soDigitos(admissao || "");
+  if (d.length !== 8) return { pct: 0, texto: "—" };
+  const dia = Number(d.slice(0, 2)), mes = Number(d.slice(2, 4)), ano = Number(d.slice(4, 8));
+  const inicio = new Date(ano, mes - 1, dia);
+  if (Number.isNaN(inicio.getTime()) || inicio.getDate() !== dia || inicio > hoje) return { pct: 0, texto: "Data inválida" };
+  const meses = Math.max((hoje.getFullYear() - ano) * 12 + (hoje.getMonth() - (mes - 1)) - (hoje.getDate() < dia ? 1 : 0), 0);
+  const anos = meses / 12;
+  const pct = anos < 1 ? 25 : anos < 3 ? 50 : anos < 7 ? 75 : 100;
+  const inteiros = Math.floor(anos);
+  const texto = inteiros >= 1 ? `${inteiros} ${inteiros === 1 ? "ano" : "anos"}` : `${meses} ${meses === 1 ? "mês" : "meses"}`;
+  return { pct, texto };
+}
+
+function CabecalhoPublico({ nome }) {
+  const marca = useMarca();
+  const logoSrc = marca?.logo_claro || logo;
+  const logoPadrao = logoSrc === logo;
+  return (
+    <div style={{ background: "var(--bg-header)", padding: "18px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 16 }}>
+      <img src={logoSrc} alt="SliceX.calc" style={{ height: 38, width: "auto", display: "block", filter: logoPadrao ? "invert(1)" : "none" }} />
+      <div style={{ borderLeft: "1px solid var(--border-strong)", paddingLeft: 16 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{nome || "Ficha cadastral"}</div>
+        <div style={{ fontSize: 10, color: "var(--text-mute)", marginTop: 2 }}>Preenchimento de ficha financeira</div>
+      </div>
+    </div>
+  );
+}
+
+function TelaSucesso() {
+  const etapas = [
+    { t: "1. Ficha Enviada", d: "Dados cadastrados e enviados com sucesso.", s: "feito" },
+    { t: "2. Análise da Loja", d: "Sua ficha já está em análise com o nosso time.", s: "atual" },
+    { t: "3. Retorno Direto", d: "Em breve retornaremos o contato por WhatsApp.", s: "futuro" },
+  ];
+  const estilo = { feito: "border-secondary/40 bg-secondary-container/15", atual: "border-primary/40 bg-primary-fixed/30", futuro: "border-outline-variant/40 bg-surface-container-low opacity-70" };
+  return (
+    <div className="mx-auto mt-10 w-full max-w-md px-4">
+      <div className="relative overflow-hidden rounded-3xl border border-outline-variant/40 bg-surface-container-lowest p-8 text-center shadow-xl">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-[#38bdf8] to-primary" />
+        <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center">
+          <span className="absolute inset-0 rounded-full bg-secondary/20 blur-xl" />
+          <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-secondary-container/40 ring-1 ring-secondary/30"><CheckCircle2 size={34} className="text-secondary" /></span>
+        </div>
+        <h2 className="font-headline text-2xl font-extrabold text-on-surface">Ficha enviada com sucesso!</h2>
+        <p className="mt-2 font-body text-sm leading-relaxed text-on-surface-variant">A equipe da loja recebeu os seus dados e entrará em contato.<br />Você já pode fechar esta página.</p>
+        <div className="my-6 h-px bg-outline-variant/40" />
+        <span className="font-label text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Etapas da sua proposta</span>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-left">
+          {etapas.map((e) => (
+            <div key={e.t} className={`rounded-xl border p-2.5 ${estilo[e.s]}`}>
+              <div className="flex items-center gap-1.5">
+                {e.s === "feito" ? <CheckCircle2 size={12} className="text-secondary" /> : <span className={`h-2 w-2 rounded-full ${e.s === "atual" ? "bg-primary" : "bg-outline"}`} />}
+                <span className="font-label text-[10px] font-bold text-on-surface">{e.t}</span>
+              </div>
+              <p className="mt-1 font-body text-[10px] leading-snug text-on-surface-variant">{e.d}</p>
+            </div>
+          ))}
+        </div>
+        <button type="button" onClick={() => window.close()} className="mt-7 inline-flex h-10 items-center gap-2 rounded-xl border border-outline-variant/60 bg-surface-container-lowest px-5 font-label text-xs font-bold text-on-surface shadow-sm transition hover:bg-surface-container">
+          <X size={14} /> Fechar Janela
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function Slot({ k, id, cls, ph, type }) {
@@ -80,6 +149,7 @@ export default function PreencherFicha() {
   const [tentou, setTentou] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [msg, setMsg] = useState(null);
+  const [orgNome, setOrgNome] = useState("");
 
   useEffect(() => {
     if (!supabaseConfigurado) { setEstado("invalido"); return; }
@@ -88,6 +158,7 @@ export default function PreencherFicha() {
       if (error || !row) { setEstado("invalido"); return; }
       if (row.status === "preenchido") { setEstado("preenchido"); return; }
       if (new Date(row.expira_em) < new Date()) { setEstado("expirado"); return; }
+      setOrgNome(row.org_nome || "");
       setEstado("valido");
     });
   }, [token]);
@@ -98,6 +169,8 @@ export default function PreencherFicha() {
     return () => clearTimeout(t);
   }, [msg]);
 
+  const hoje = useState(() => new Date())[0];
+  const estabilidade = calcularEstabilidade(form.admissao, hoje);
   const invalidos = tentou ? faltando(form) : [];
 
   const enviar = async () => {
@@ -130,7 +203,7 @@ export default function PreencherFicha() {
     : estado === "invalido" ? telaFinal(<XCircle size={30} />, "#ba1a1a", "Link inválido", "Este endereço não existe ou foi copiado de forma incompleta. Peça um novo link ao atendente.")
     : estado === "expirado" ? telaFinal(<Clock3 size={30} />, "#b45309", "Link expirado", "Este link já não está mais disponível. Peça um novo ao atendente.")
     : estado === "preenchido" ? telaFinal(<ShieldCheck size={30} />, "#004ac6", "Ficha já enviada", "Os seus dados já foram recebidos. Obrigado!")
-    : estado === "enviado" ? telaFinal(<CheckCircle2 size={30} />, "#006c49", "Ficha enviada com sucesso", "A equipe da loja recebeu os seus dados e entrará em contato. Você já pode fechar esta página.")
+    : estado === "enviado" ? <TelaSucesso />
     : null;
 
   return (
@@ -146,34 +219,7 @@ export default function PreencherFicha() {
 <div className="absolute top-1/2 -right-48 w-[740px] h-[620px] bg-gradient-to-bl from-primary-fixed/60 via-[#2563eb]/15 to-transparent rounded-full blur-[170px] animate-orb-3"></div>
 </div>
 
-<header className="sticky top-0 z-50 bg-surface/90 backdrop-blur-xl border-b border-surface-container shadow-[0_1px_12px_rgba(11,28,48,0.04)] transition-all">
-<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-<div className="flex items-center gap-6">
-<a className="flex items-center gap-2 group transition-transform duration-300 hover:scale-[1.02]" href="#">
-<div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-primary-container flex items-center justify-center text-on-primary shadow-md shadow-primary/20 group-hover:scale-110 group-hover:shadow-primary/35 transition-all duration-300">
-<span className="material-symbols-outlined text-[22px] transition-transform duration-300 group-hover:rotate-6">directions_car</span>
-</div>
-<div className="flex flex-col">
-<span className="font-headline font-extrabold text-lg tracking-tight text-on-surface leading-none">
-            Calcula<span className="text-primary-container">.car</span>
-</span>
-</div>
-</a>
-<div className="hidden md:block h-6 w-px bg-outline-variant/60"></div>
-</div>
-
-<div className="flex items-center gap-3">
-<div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low text-xs font-label text-on-surface-variant border border-outline-variant/40 hover:border-primary/40 hover:bg-surface-container transition-all cursor-default">
-<span className="material-symbols-outlined text-[16px] text-primary">storefront</span>
-<span className="font-semibold text-on-surface">Loja Principal</span>
-</div>
-<button aria-label="Notificações" className="relative p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-all active:scale-95">
-<span className="material-symbols-outlined text-[20px]">notifications</span>
-<span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface animate-pulse"></span>
-</button>
-</div>
-</div>
-</header>
+<CabecalhoPublico nome={orgNome} />
 
           {estado === "valido" ? (
             <main className="relative z-10 flex-1 w-full pt-4 pb-12">
@@ -288,8 +334,8 @@ export default function PreencherFicha() {
 <label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide">
                 Possui CNH?
               </label>
-<div className="flex items-center gap-1.5 h-11">
-<SlotCnh v={true} cls="flex-1 h-full rounded-xl font-label text-xs font-bold transition-all duration-200 bg-primary text-on-primary shadow-sm shadow-primary/20 hover:shadow-md hover:bg-primary-container active:scale-95" />
+<div className="grid grid-cols-2 gap-2 h-11">
+<SlotCnh v={true} cls="w-full h-full rounded-xl font-label text-xs font-bold transition-all duration-200 bg-primary text-on-primary shadow-sm shadow-primary/20 hover:shadow-md hover:bg-primary-container active:scale-95" />
 <SlotCnh v={false} cls="h-full px-4 rounded-xl font-label text-xs font-semibold transition-all duration-200 bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container border border-outline-variant/60 shadow-sm active:scale-95" />
 </div>
 </div>
@@ -327,7 +373,7 @@ export default function PreencherFicha() {
 <div className="sm:col-span-4 space-y-1.5">
 <div className="flex items-center justify-between">
 <label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="cep">CEP</label>
-<span className="text-[10px] font-label text-primary font-bold">SP</span>
+
 </div>
 <Slot k="cep" id="cep" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-mono text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
 </div>
@@ -355,7 +401,7 @@ export default function PreencherFicha() {
 <Slot k="cidade" id="cidade" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
 </div>
 <div className="space-y-1.5">
-<label className="block font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="tempo_residencia">Tempo Residência</label>
+<label className="block whitespace-nowrap font-label text-xs font-semibold text-on-surface uppercase tracking-wide" htmlFor="tempo_residencia">Tempo Residência</label>
 <Slot k="tempo_residencia" id="tempo_residencia" cls="input-animated w-full h-11 px-3.5 rounded-xl bg-surface-container-lowest font-body text-xs sm:text-sm text-on-surface border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:outline-none font-medium shadow-sm" ph="" type="text" />
 </div>
 </div>
@@ -502,11 +548,11 @@ export default function PreencherFicha() {
 <div className="p-2.5 px-3.5 rounded-xl bg-surface-container-low border border-surface-container flex flex-col justify-center transition-all duration-300 hover:shadow-inner">
 <div className="flex items-center justify-between">
 <span className="text-[10px] font-label font-bold text-outline uppercase">Estabilidade Profissional</span>
-<span className="text-xs font-mono font-bold text-secondary">6 anos</span>
+<span className="text-xs font-mono font-bold text-secondary">{estabilidade.texto}</span>
 </div>
 <div className="flex items-center gap-2 mt-1">
 <div className="flex-1 bg-surface-container-highest h-2 rounded-full overflow-hidden">
-<div className="bg-secondary h-full rounded-full w-[85%] transition-all duration-1000 ease-out"></div>
+<div className="bg-secondary h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${estabilidade.pct}%` }}></div>
 </div>
 </div>
 <span className="text-[10px] font-label text-on-surface-variant mt-1">Vínculo contínuo sem quebras</span>
