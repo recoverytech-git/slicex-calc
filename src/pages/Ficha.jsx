@@ -203,7 +203,7 @@ export default function Ficha() {
   };
 
   const renderEtapa = (e) => (
-    <div key={e.n} className="step-pane" style={{ display: etapa === e.n ? "block" : "none" }}>
+    <div key={e.n} className="block">
       <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-sm backdrop-blur-xl sm:p-7">
         <h2 className="mb-5 text-sm font-bold uppercase tracking-wider text-slate-700">{e.n}. {e.titulo}</h2>
         <div className="grid grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-2 lg:grid-cols-3">
@@ -294,7 +294,7 @@ export default function Ficha() {
           )}
 
           <div className={somenteLeitura ? "pointer-events-none opacity-85" : ""}>
-            {ETAPAS.map(renderEtapa)}
+            {ETAPAS.filter((e) => e.n === etapa).map(renderEtapa)}
           </div>
 
           <section className="sticky bottom-4 z-30 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/95 p-4 shadow-floating-dock ring-1 ring-slate-200/80 backdrop-blur-xl sm:p-5 lg:flex-row" data-purpose="floating-dock">
