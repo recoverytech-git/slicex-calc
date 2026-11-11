@@ -112,12 +112,15 @@ export default function Estoque() {
       // Dados financeiros e tecnicos (fora do perfil vendedor)
       const extras = {};
       const custos = {};
+      const metricas = {};
       let checklists = null;
       if (!vendedor && ids.length) {
         const { data: ex } = await supabase.from("veiculos").select("id, preco_compra, combustivel, cambio, cor").in("id", ids);
         for (const r of ex ?? []) extras[r.id] = r;
         const { data: cs } = await supabase.from("veiculo_custos").select("veiculo_id, valor").in("veiculo_id", ids);
         for (const c of cs ?? []) custos[c.veiculo_id] = (custos[c.veiculo_id] || 0) + Number(c.valor || 0);
+        const { data: mt } = await supabase.from("v_estoque_metricas").select("veiculo_id, dias_em_estoque, juros_diario_acumulado").in("veiculo_id", ids);
+        for (const m of mt ?? []) { metricas[m.veiculo_id] = m; custos[m.veiculo_id] = (custos[m.veiculo_id] || 0) + Number(m.juros_diario_acumulado || 0); }
       }
       if (ids.length) {
         const { data: ck, error: eck } = await supabase.from("veiculo_checklists").select("veiculo_id").in("veiculo_id", ids);
@@ -137,6 +140,8 @@ export default function Estoque() {
         combustivel: extras[v.id]?.combustivel ?? v.combustivel ?? null,
         cambio: extras[v.id]?.cambio ?? v.cambio ?? null,
         capa: capas[v.id] ?? null,
+        dias_em_estoque: metricas[v.id]?.dias_em_estoque ?? null,
+        juros_diario: Number(metricas[v.id]?.juros_diario_acumulado ?? 0),
       }));
       setItens(mapeados);
       setStats(calcularResumo(lista.map((v) => ({ ...v, preco: v.preco_venda_pretendido ?? 0 })), extras, custos, checklists, vendedor));

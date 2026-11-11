@@ -61,6 +61,7 @@ export default function Dashboard() {
   const [veiculos, setVeiculos] = useState([]);
   const [vendas, setVendas] = useState([]);
   const [custos, setCustos] = useState([]);
+  const [jurosEst, setJurosEst] = useState([]);
   const [erro, setErro] = useState(null);
 
   useEffect(() => {
@@ -69,8 +70,10 @@ export default function Dashboard() {
       supabase.from("veiculos").select("id, status, preco_compra, preco_venda_pretendido"),
       supabase.from("v_vendas_resultado").select("data_venda, valor_venda, resultado_final, investimento_total"),
       supabase.from("veiculo_custos").select("veiculo_id, valor"),
-    ]).then(([v, s, c]) => {
+      supabase.from("v_estoque_metricas").select("veiculo_id, juros_diario_acumulado"),
+    ]).then(([v, s, c, j]) => {
       setCustos(c.data ?? []);
+      setJurosEst(j.data ?? []);
       if (v.error || s.error) setErro((v.error || s.error).message);
       setVeiculos(v.data ?? []);
       setVendas(s.data ?? []);
@@ -92,6 +95,7 @@ export default function Dashboard() {
   const emEstoque = veiculos.filter((v) => v.status !== "vendido");
   const custosPorVeiculo = {};
   custos.forEach((c) => { custosPorVeiculo[c.veiculo_id] = (custosPorVeiculo[c.veiculo_id] || 0) + Number(c.valor ?? 0); });
+  jurosEst.forEach((j) => { custosPorVeiculo[j.veiculo_id] = (custosPorVeiculo[j.veiculo_id] || 0) + Number(j.juros_diario_acumulado ?? 0); });
   const totalCustosEstoque = emEstoque.reduce((s, v) => s + (custosPorVeiculo[v.id] || 0), 0);
   // Capital investido = valor de compra + custos adicionais de todo o estoque
   const capital = emEstoque.reduce((s, v) => s + Number(v.preco_compra ?? 0), 0) + totalCustosEstoque;
