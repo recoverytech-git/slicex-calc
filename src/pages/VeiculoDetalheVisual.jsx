@@ -1,6 +1,7 @@
 // sem-rascunho: a tela e o design do HTML (iframe); dados e acoes passam pelo sistema
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import PopupVendaRegistrada from "../components/PopupVendaRegistrada";
 import PageTransition from "../components/PageTransition";
 import Header from "../components/Header";
 import { ITENS, DOCUMENTACAO } from "../components/ChecklistVeiculo";
@@ -45,6 +46,7 @@ async function urlParaDataUrl(url) {
 export default function VeiculoDetalheVisual() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [vendaOk, setVendaOk] = useState(false);
   const { perfil, sessao } = useAuth();
   const papel = perfil?.papel;
   const gestao = papel !== "vendedor";
@@ -55,7 +57,8 @@ export default function VeiculoDetalheVisual() {
 
   const enviar = useCallback(() => {
     if (!cache.current) return;
-    frame.current?.contentWindow?.postMessage({ type: "dados", ...cache.current, gestao, itensChecklist: ITENS_CK, docLabels: DOC_LABELS }, window.location.origin);
+    const vendido = (cache.current?.vendas?.length ?? 0) > 0 || cache.current?.veiculo?.status === "vendido";
+    frame.current?.contentWindow?.postMessage({ type: "dados", ...cache.current, gestao, vendido, itensChecklist: ITENS_CK, docLabels: DOC_LABELS }, window.location.origin);
   }, [gestao]);
 
   const carregar = useCallback(async () => {
@@ -246,6 +249,7 @@ export default function VeiculoDetalheVisual() {
             const { error: es } = await supabase.from("veiculos").update({ status: "vendido" }).eq("id", id);
             if (es) { alert(es.message); return; }
             await carregar();
+            setVendaOk(true);
             break;
           }
           default:
@@ -264,6 +268,7 @@ export default function VeiculoDetalheVisual() {
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Detalhes do veículo" />
         {erro && <div style={{ padding: 16, fontSize: 13, fontWeight: 600 }}>{erro}</div>}
+        {vendaOk && <PopupVendaRegistrada onIr={() => navigate("/estoque")} />}
         <iframe
           ref={frame}
           src="/calculadora-veiculo.html"

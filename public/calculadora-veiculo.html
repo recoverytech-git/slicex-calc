@@ -628,7 +628,7 @@
     if (colBanner && g) {
       let ctl = document.getElementById('status-controle');
       if (!ctl) { ctl = document.createElement('div'); ctl.id = 'status-controle'; ctl.className = 'flex flex-wrap items-center gap-2 pt-2'; colBanner.appendChild(ctl); }
-      ctl.innerHTML = '<span class="ve-label mr-1">Status</span>' + Object.entries(ROT).map(([k, r]) => `<button type="button" data-status-set="${k}" class="status-pill ${v.status === k ? 'on' : ''}">${r}</button>`).join('');
+      ctl.innerHTML = '<span class="ve-label mr-1">Status</span>' + Object.entries(ROT).filter(([k]) => !D.vendido || k === 'retirado').map(([k, r]) => `<button type="button" data-status-set="${k}" class="status-pill ${v.status === k ? 'on' : ''}">${r}</button>`).join('');
     }
 
     // Alerta antes de publicar: fotos e checklist
@@ -643,6 +643,13 @@
     // Esconde os botoes de edicao para quem nao pode editar
     $$('button').forEach(b => { if (/Editar/.test(b.textContent) && !g) b.style.display = 'none'; });
     if (!g) { const b = $('#btn-registrar-venda'); if (b) b.style.display = 'none'; const x = $('#btn-excluir-veiculo'); if (x) x.style.display = 'none'; }
+    // Veiculo vendido: edicoes bloqueadas; so e permitido marcar como Retirado
+    document.body.classList.toggle('veiculo-vendido', !!D.vendido);
+    if (D.vendido) {
+      $$('button').forEach(b => { if (/Editar/.test(b.textContent)) b.style.display = 'none'; });
+      ['#btn-registrar-venda', '#btn-excluir-veiculo'].forEach(sel => { const el = $(sel); if (el) el.style.display = 'none'; });
+      $$('input,select,textarea').forEach(el => { if (!el.closest('#status-controle')) el.disabled = true; });
+    }
 
     const sup = $('a[data-path="suporte-especializado"]');
     if (sup) { sup.setAttribute('href', 'https://wa.me/5561991432700?text=Preciso%20de%20ajuda%20para%20acessar%20a%20plataforma%20CALCULA.CAR%20'); sup.setAttribute('target', '_blank'); sup.setAttribute('rel', 'noopener noreferrer'); }
@@ -770,7 +777,7 @@
     if (hit('#btn-excluir-veiculo')) { e.preventDefault(); return post('excluir'); }
     if (hit('#btn-registrar-venda')) { e.preventDefault(); return abrirVenda(); }
     if (hit('a[data-path="todas-as-calculadoras"]')) { e.preventDefault(); return post('voltar'); }
-    if ((b = hit('[data-status-set]'))) { e.preventDefault(); if (b.dataset.statusSet === 'vendido') return abrirVenda(); return post('mudar-status', { status: b.dataset.statusSet }); }
+    if ((b = hit('[data-status-set]'))) { e.preventDefault(); if (D.vendido && b.dataset.statusSet !== 'retirado') return; if (b.dataset.statusSet === 'vendido') return abrirVenda(); return post('mudar-status', { status: b.dataset.statusSet }); }
     if ((b = hit('[data-zoom]'))) { e.preventDefault(); return abrirZoom(Number(b.dataset.zoom)); }
     if ((b = hit('.ck-seg button'))) { e.preventDefault(); b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); return; }
     const slot = t.closest('div.cursor-pointer');
@@ -849,6 +856,12 @@
     if (e.key === 'ArrowRight') navZoom(1);
   });
 
+  // Veiculo vendido: bloqueia cliques em controles de edicao (exceto status e exportacao)
+  document.addEventListener('click', e => {
+    if (!D.vendido) return;
+    const alvo = e.target.closest('button,[data-ck],[data-ck-group],[data-novo],[data-del-foto],[data-del-custo]');
+    if (alvo && !alvo.closest('#status-controle') && !alvo.matches('[data-zoom],[data-path],#btn-export-pdf')) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
   window.addEventListener('message', e => {
     if (e.source !== window.parent) return;
     const d = e.data || {};

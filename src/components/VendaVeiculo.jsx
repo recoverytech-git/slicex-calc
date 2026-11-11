@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import PopupVendaRegistrada from "./PopupVendaRegistrada";
 import { BadgeDollarSign } from "lucide-react";
 import PrimaryButton from "./PrimaryButton";
 import MoneyField from "./MoneyField";
@@ -17,6 +19,9 @@ export default function VendaVeiculo({ veiculoId, onSucesso }) {
   const [obs, setObs] = useState("");
   const [msg, setMsg] = useState(null);
   const [salvando, setSalvando] = useState(false);
+  const [popup, setPopup] = useState(false);
+  const navigate = useNavigate();
+  const irEstoque = useCallback(() => navigate("/estoque"), [navigate]);
 
   const marcarVendido = async () => {
     const { error } = await supabase.from("veiculos").update({ status: "vendido" }).eq("id", veiculoId);
@@ -52,6 +57,7 @@ export default function VendaVeiculo({ veiculoId, onSucesso }) {
       if (error.code === "23505") {
         setAberto(false);
         setMsg({ tipo: "ok", texto: "Este veículo já tem uma venda registrada. A lista foi atualizada." });
+        setPopup(true);
         onSucesso?.();
         return;
       }
@@ -66,12 +72,14 @@ export default function VendaVeiculo({ veiculoId, onSucesso }) {
     } else {
       setMsg({ tipo: "ok", texto: "Venda registrada. O veículo foi marcado como vendido." });
     }
+    setPopup(true);
     onSucesso?.();
   };
 
   if (!aberto) {
     return (
       <div style={{ marginTop: 18 }}>
+        {popup && <PopupVendaRegistrada onIr={irEstoque} />}
         <PrimaryButton onClick={() => setAberto(true)} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}>
           <BadgeDollarSign size={15} /> Registrar venda
         </PrimaryButton>
