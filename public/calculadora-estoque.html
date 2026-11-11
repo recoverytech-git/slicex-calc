@@ -426,6 +426,11 @@
         const cor = COR_STATUS[v.status] || '#64748b';
         const km = v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString('pt-BR')} KM` : 'KM —';
         const img = v.capa ? `<img src="${esc(v.capa)}" alt="">` : `<div class="vc-sem-foto">Sem foto</div>`;
+        const dias = v.dias_em_estoque;
+        const estiloAlerta = dias >= 60 ? 'background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5' : dias >= 30 ? 'background:#fef3c7;color:#b45309;border:1px solid #fcd34d' : 'background:#eff4ff;color:#434655;border:1px solid #d3e4fe';
+        const icone = dias >= 30 ? 'warning' : 'schedule';
+        const alerta = dias == null ? '' : `<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font:600 12px Inter,sans-serif;margin-top:8px;${estiloAlerta}"><span class="material-symbols-outlined" style="font-size:16px">${icone}</span>${dias >= 30 ? 'Parado há ' + dias + ' dias' : dias + ' dias em estoque'}</span>`;
+        const jurosLinha = mostraPlaca && v.juros_diario > 0 ? `<div style="font:600 12px Inter,sans-serif;color:#b45309;margin-top:6px">Juros diário acumulado: ${fmtBRL(v.juros_diario)}</div>` : '';
         const placa = mostraPlaca && v.placa ? `<span class="vc-plate"><span class="vc-dot" style="background:#60a5fa"></span>${esc(v.placa)}</span>` : '';
         return `
         <div class="vc" data-id="${esc(v.id)}" data-status="${esc(v.status)}" data-year="${Number(v.ano_modelo || 0)}" data-price="${Number(v.preco || 0)}" data-search="${esc([v.modelo, mostraPlaca ? v.placa : '', v.ano_modelo, v.marca].filter(Boolean).join(' ').toLowerCase())}" tabindex="0">
@@ -442,6 +447,8 @@
               <span class="vc-chip"><span class="material-symbols-outlined">local_gas_station</span>${esc(v.combustivel || '—')}</span>
               <span class="vc-chip"><span class="material-symbols-outlined">settings</span>${esc(v.cambio || '—')}</span>
             </div>
+            ${alerta}
+            ${jurosLinha}
           </div>
           <div class="vc-foot">
             <div>
