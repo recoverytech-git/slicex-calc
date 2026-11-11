@@ -242,7 +242,7 @@ export default function VeiculoDetalheVisual() {
               veiculo_id: id, data_venda: texto(x.data_venda) || new Date().toISOString().slice(0, 10),
               valor_venda: valor, despesas_venda: numero(x.despesas_venda) || 0, descontos: numero(x.descontos) || 0, registrado_por: uid,
             });
-            if (ev) { alert(ev.message); return; }
+            if (ev) { if (ev.code === "23505") { alert("Este veículo já possui uma venda registrada."); await carregar(); return; } alert(ev.message); return; }
             const { error: es } = await supabase.from("veiculos").update({ status: "vendido" }).eq("id", id);
             if (es) { alert(es.message); return; }
             await carregar();

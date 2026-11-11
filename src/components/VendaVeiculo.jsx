@@ -7,7 +7,7 @@ import { useAuth } from "../lib/auth";
 
 const hoje = () => new Date().toISOString().slice(0, 10);
 
-export default function VendaVeiculo({ veiculoId }) {
+export default function VendaVeiculo({ veiculoId, onSucesso }) {
   const { sessao } = useAuth();
   const [aberto, setAberto] = useState(false);
   const [data, setData] = useState(hoje());
@@ -18,11 +18,26 @@ export default function VendaVeiculo({ veiculoId }) {
   const [msg, setMsg] = useState(null);
   const [salvando, setSalvando] = useState(false);
 
+  const marcarVendido = async () => {
+    const { error } = await supabase.from("veiculos").update({ status: "vendido" }).eq("id", veiculoId);
+    return error;
+  };
+
   const registrar = async () => {
     setMsg(null);
     if (!(valor > 0)) { setMsg({ tipo: "erro", texto: "Informe o valor efetivo da venda." }); return; }
     if (!data) { setMsg({ tipo: "erro", texto: "Informe a data da venda." }); return; }
     setSalvando(true);
+    const { data: existente, error: erroBusca } = await supabase.from("veiculo_vendas").select("id").eq("veiculo_id", veiculoId).maybeSingle();
+    if (erroBusca) { setSalvando(false); setMsg({ tipo: "erro", texto: `Não foi possível verificar a venda: ${erroBusca.message}` }); return; }
+    if (existente) {
+      await marcarVendido();
+      setSalvando(false);
+      setAberto(false);
+      setMsg({ tipo: "ok", texto: "Este veículo já tem uma venda registrada. A lista foi atualizada." });
+      onSucesso?.();
+      return;
+    }
     const { error } = await supabase.from("veiculo_vendas").insert({
       veiculo_id: veiculoId,
       data_venda: new Date(`${data}T12:00:00`).toISOString(),
@@ -32,12 +47,26 @@ export default function VendaVeiculo({ veiculoId }) {
       observacoes: obs || null,
       registrado_por: sessao?.user?.id,
     });
+    if (error) {
+      setSalvando(false);
+      if (error.code === "23505") {
+        setAberto(false);
+        setMsg({ tipo: "ok", texto: "Este veículo já tem uma venda registrada. A lista foi atualizada." });
+        onSucesso?.();
+        return;
+      }
+      setMsg({ tipo: "erro", texto: `Venda não registrada: ${error.message}` });
+      return;
+    }
+    const erroStatus = await marcarVendido();
     setSalvando(false);
-    if (error) { setMsg({ tipo: "erro", texto: `Venda não registrada: ${error.message}` }); return; }
-    const { error: es } = await supabase.from("veiculos").update({ status: "vendido" }).eq("id", veiculoId);
-    if (es) { setMsg({ tipo: "erro", texto: `Venda registrada, mas o status do veículo não foi atualizado: ${es.message}` }); return; }
-    setMsg({ tipo: "ok", texto: "Venda registrada. O veículo foi marcado como vendido." });
     setAberto(false);
+    if (erroStatus) {
+      setMsg({ tipo: "erro", texto: `Venda registrada, mas o status do veículo não foi atualizado: ${erroStatus.message}` });
+    } else {
+      setMsg({ tipo: "ok", texto: "Venda registrada. O veículo foi marcado como vendido." });
+    }
+    onSucesso?.();
   };
 
   if (!aberto) {

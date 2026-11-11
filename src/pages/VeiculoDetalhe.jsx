@@ -510,7 +510,7 @@ export default function VeiculoDetalhe() {
 
               {podeVender && veiculo.status !== "vendido" && (
                 <div style={card}>
-                  <VendaVeiculo veiculoId={veiculo.id} />
+                  <VendaVeiculo veiculoId={veiculo.id} onSucesso={carregar} />
                 </div>
               )}
 
