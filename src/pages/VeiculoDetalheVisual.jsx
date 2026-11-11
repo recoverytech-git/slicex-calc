@@ -240,7 +240,7 @@ export default function VeiculoDetalheVisual() {
             if (valor == null || valor <= 0) { alert("Informe o valor de venda."); return; }
             const { error: ev } = await supabase.from("veiculo_vendas").insert({
               veiculo_id: id, data_venda: texto(x.data_venda) || new Date().toISOString().slice(0, 10),
-              valor_venda: valor, despesas_venda: numero(x.despesas_venda) || 0, descontos: numero(x.descontos) || 0, criado_por: uid,
+              valor_venda: valor, despesas_venda: numero(x.despesas_venda) || 0, descontos: numero(x.descontos) || 0, registrado_por: uid,
             });
             if (ev) { alert(ev.message); return; }
             const { error: es } = await supabase.from("veiculos").update({ status: "vendido" }).eq("id", id);

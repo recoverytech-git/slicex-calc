@@ -34,6 +34,8 @@ export default function VendaVeiculo({ veiculoId }) {
     });
     setSalvando(false);
     if (error) { setMsg({ tipo: "erro", texto: `Venda não registrada: ${error.message}` }); return; }
+    const { error: es } = await supabase.from("veiculos").update({ status: "vendido" }).eq("id", veiculoId);
+    if (es) { setMsg({ tipo: "erro", texto: `Venda registrada, mas o status do veículo não foi atualizado: ${es.message}` }); return; }
     setMsg({ tipo: "ok", texto: "Venda registrada. O veículo foi marcado como vendido." });
     setAberto(false);
   };
