@@ -1,3 +1,4 @@
+import VeiculosParados from "../components/VeiculosParados";
 import PainelPeriodo, { inicioPeriodo } from "../components/PainelPeriodo";
 import { ENTRADA } from "../lib/motion";
 // sem-rascunho: painel somente de consulta, sem formulário
@@ -63,17 +64,20 @@ export default function Dashboard() {
   const [vendas, setVendas] = useState([]);
   const [custos, setCustos] = useState([]);
   const [jurosEst, setJurosEst] = useState([]);
+  const [finEst, setFinEst] = useState([]);
   const [erro, setErro] = useState(null);
   const [periodo, setPeriodo] = useState(90);
 
   useEffect(() => {
     if (!supabaseConfigurado || !gestao) return;
     Promise.all([
-      supabase.from("veiculos").select("id, status, modelo, placa, preco_compra, valor_fipe, preco_venda_pretendido, data_aquisicao, criado_em"),
+      supabase.from("veiculos").select("id, status, modelo, placa, preco_compra, valor_fipe, preco_venda_pretendido, data_aquisicao, criado_em, ano_fabricacao, ano_modelo"),
       supabase.from("v_vendas_resultado").select("data_venda, modelo, placa, valor_venda, despesas_venda, descontos, juros_total, investimento_total, resultado_final, preco_venda_pretendido"),
       supabase.from("veiculo_custos").select("veiculo_id, valor"),
       supabase.from("v_estoque_metricas").select("veiculo_id, dias_em_estoque, juros_diario_acumulado"),
-    ]).then(([v, s, c, j]) => {
+      supabase.from("veiculo_financiamentos").select("veiculo_id, total_juros"),
+    ]).then(([v, s, c, j, f]) => {
+      setFinEst(f.data ?? []);
       setCustos(c.data ?? []);
       setJurosEst(j.data ?? []);
       if (v.error || s.error) setErro((v.error || s.error).message);
@@ -97,6 +101,7 @@ export default function Dashboard() {
   const emEstoque = veiculos.filter((v) => v.status !== "vendido");
   const custosPorVeiculo = {};
   custos.forEach((c) => { custosPorVeiculo[c.veiculo_id] = (custosPorVeiculo[c.veiculo_id] || 0) + Number(c.valor ?? 0); });
+  finEst.forEach((f) => { custosPorVeiculo[f.veiculo_id] = (custosPorVeiculo[f.veiculo_id] || 0) + Number(f.total_juros ?? 0); });
   jurosEst.forEach((j) => { custosPorVeiculo[j.veiculo_id] = (custosPorVeiculo[j.veiculo_id] || 0) + Number(j.juros_diario_acumulado ?? 0); });
   const totalCustosEstoque = emEstoque.reduce((s, v) => s + (custosPorVeiculo[v.id] || 0), 0);
   // Capital investido = valor de compra + custos adicionais de todo o estoque
@@ -120,7 +125,8 @@ export default function Dashboard() {
             <LayoutDashboard size={22} /> Dashboard
           </h1>
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acesse as ferramentas e acompanhe a operação.</p>
-          <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} custos={custos} />
+          <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} custos={[...custos, ...finEst.map((f) => ({ veiculo_id: f.veiculo_id, valor: f.total_juros }))]} />
+          <VeiculosParados veiculos={veiculos} metricas={jurosEst} />
 
           <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Acessos</p>
           <div className="grid-3" style={{ marginBottom: 22 }}>

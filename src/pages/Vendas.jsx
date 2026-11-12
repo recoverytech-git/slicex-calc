@@ -1,3 +1,4 @@
+import ResumoVendas from "../components/ResumoVendas";
 // sem-rascunho: página somente de consulta, sem formulário
 import { useEffect, useState } from "react";
 import { BadgeDollarSign } from "lucide-react";
@@ -36,6 +37,7 @@ export default function Vendas() {
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: "22px 0 14px", color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
             <BadgeDollarSign size={22} /> Veículos vendidos
           </h1>
+          <ResumoVendas />
 
           <div className="grid-3" style={{ marginBottom: 14 }}>
             <div style={card}><p style={{ margin: 0, fontSize: 12, color: "var(--text-mute)" }}>Veículos vendidos</p><p style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text)" }}>{linhas.length}</p></div>

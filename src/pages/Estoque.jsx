@@ -86,6 +86,8 @@ export default function Estoque() {
         for (const r of ex ?? []) extras[r.id] = r;
         const { data: cs } = await supabase.from("veiculo_custos").select("veiculo_id, valor").in("veiculo_id", ids);
         for (const c of cs ?? []) custos[c.veiculo_id] = (custos[c.veiculo_id] || 0) + Number(c.valor || 0);
+        const { data: fi } = await supabase.from("veiculo_financiamentos").select("veiculo_id, total_juros").in("veiculo_id", ids);
+        for (const f of fi ?? []) custos[f.veiculo_id] = (custos[f.veiculo_id] || 0) + Number(f.total_juros || 0);
         const { data: mt } = await supabase.from("v_estoque_metricas").select("veiculo_id, dias_em_estoque, juros_diario_acumulado").in("veiculo_id", ids);
         for (const m of mt ?? []) { metricas[m.veiculo_id] = m; custos[m.veiculo_id] = (custos[m.veiculo_id] || 0) + Number(m.juros_diario_acumulado || 0); }
       }

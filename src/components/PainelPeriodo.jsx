@@ -140,56 +140,6 @@ export default function PainelPeriodo({ periodo, setPeriodo, veiculos, vendas, m
         </button>
       </div>
 
-      <h3 style={subtitulo}>Faturamento no período</h3>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, fontSize: 13 }}>
-        <span><span style={{ color: "var(--text-dim)" }}>Bruto (valor vendido): </span><strong style={{ color: "var(--text)" }}>{BRL(fat.bruto)}</strong></span>
-        <span><span style={{ color: "var(--text-dim)" }}>Deduções (despesas e descontos): </span><strong style={{ color: "#b91c1c" }}>{BRL(fat.deducoes)}</strong></span>
-        <span><span style={{ color: "var(--text-dim)" }}>Líquido: </span><strong style={{ color: "#059669" }}>{BRL(fat.liquido)}</strong></span>
-      </div>
-
-      <h3 style={subtitulo}>Ágio e deságio por venda</h3>
-      <p style={texto}>Diferença entre o valor vendido e o pretendido. Negativo = venda abaixo do pretendido.</p>
-      {agio.linhas.length === 0 ? (
-        <p style={texto}>Nenhuma venda no período.</p>
-      ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table style={tabela}>
-            <thead><tr>
-              <th style={cabecTd}>Veículo</th><th style={{ ...cabecTd, textAlign: "right" }}>Vendido</th>
-              <th style={{ ...cabecTd, textAlign: "right" }}>Pretendido</th><th style={{ ...cabecTd, textAlign: "right" }}>Ágio/deságio</th>
-              <th style={{ ...cabecTd, textAlign: "right" }}>%</th>
-            </tr></thead>
-            <tbody>
-              {agio.linhas.map((l) => (
-                <tr key={l.venda_id || `${l.placa}-${l.data_venda}`}>
-                  <td style={td}>{l.modelo} {l.placa ? `· ${l.placa}` : ""}</td>
-                  <td style={{ ...td, textAlign: "right" }}>{BRL(l.valor_venda)}</td>
-                  <td style={{ ...td, textAlign: "right" }}>{BRL(l.preco_venda_pretendido)}</td>
-                  <td style={{ ...td, textAlign: "right", fontWeight: 700, color: l.reais < 0 ? "#b91c1c" : "#059669" }}>{BRL(l.reais)}</td>
-                  <td style={{ ...td, textAlign: "right", color: l.reais < 0 ? "#b91c1c" : "#059669" }}>{PCT(l.pct)}</td>
-                </tr>
-              ))}
-              <tr>
-                <td style={{ ...td, fontWeight: 800 }}>Média por venda</td><td style={td} />
-                <td style={td} />
-                <td style={{ ...td, textAlign: "right", fontWeight: 800 }}>{BRL(agio.mediaReais)}</td>
-                <td style={{ ...td, textAlign: "right", fontWeight: 800 }}>{PCT(agio.mediaPct)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <h3 style={subtitulo}>Veículos parados em estoque</h3>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {parados.map((p) => (
-          <span key={p.dias} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 12px", borderRadius: 999, fontSize: 12, fontWeight: 700,
-            border: `1px solid ${p.quantidade ? COR_PARADOS[p.dias] : "var(--border)"}`, color: p.quantidade ? COR_PARADOS[p.dias] : "var(--text-dim)", background: "var(--surface)" }}>
-            {p.dias}+ dias <span style={{ fontWeight: 800 }}>{p.quantidade}</span>
-          </span>
-        ))}
-      </div>
-
       <h3 style={subtitulo}>Giro mensal (últimos {periodo} dias)</h3>
       <p style={texto}>Entradas pela data de aquisição e saídas pela data da venda. Total no período: {totEnt} entradas e {totSai} saídas.</p>
       <div style={{ overflowX: "auto" }}>
