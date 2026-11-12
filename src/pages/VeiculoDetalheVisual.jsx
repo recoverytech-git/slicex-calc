@@ -1,5 +1,6 @@
 // sem-rascunho: a tela e o design do HTML (iframe); dados e acoes passam pelo sistema
 import { useCallback, useEffect, useRef, useState } from "react";
+import BackLink from "../components/BackLink";
 import { useParams, useNavigate } from "react-router-dom";
 import PopupVendaRegistrada from "../components/PopupVendaRegistrada";
 import PageTransition from "../components/PageTransition";
@@ -267,6 +268,9 @@ export default function VeiculoDetalheVisual() {
     <PageTransition>
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Detalhes do veículo" />
+        <div className="container" style={{ paddingTop: 8 }}>
+          <BackLink />
+        </div>
         {erro && <div style={{ padding: 16, fontSize: 13, fontWeight: 600 }}>{erro}</div>}
         {vendaOk && <PopupVendaRegistrada onIr={() => navigate("/estoque")} />}
         <iframe

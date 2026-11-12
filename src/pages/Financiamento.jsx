@@ -1,5 +1,6 @@
 // sem-rascunho: formulario e resultados ficam no documento do design (iframe); o calculo usa calcPrice e calcSAC
 import { useCallback, useEffect, useRef, useState } from "react";
+import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
 import Header from "../components/Header";
 import Sino from "../components/Sino";
@@ -100,6 +101,9 @@ export default function Financiamento() {
     <PageTransition>
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Simulador Avançado de Financiamento" />
+        <div className="container" style={{ paddingTop: 8 }}>
+          <BackLink />
+        </div>
         <iframe
           ref={frame}
           src="/calculadora-financiamento.html"
