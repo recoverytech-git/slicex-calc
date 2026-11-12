@@ -496,13 +496,30 @@
   const post = (acao, dados) => window.parent && window.parent.postMessage({ type: 'acao', acao, dados }, window.location.origin);
   const mostrarPagina = () => document.documentElement.classList.remove('carregando');
 
+  const calcRegraJuros = (d) => {
+    const fin = d.financiamento || null;
+    const v = d.veiculo || {};
+    const venda = (d.vendas || [])[0] || null;
+    const parcelas = fin ? Number(fin.quantidade_parcelas || 0) : 0;
+    const base = { aplica: false, motivo: '', jm: 0, diario: 0, dias: 0, cobrados: 0, acumulado: 0, fimLabel: '' };
+    if (!fin) return { ...base, motivo: 'Não aplicável: aquisição sem financiamento. Os juros diários valem somente para financiamento de 1 parcela.' };
+    if (parcelas !== 1) return { ...base, motivo: `Não aplicável: financiamento com ${parcelas} parcelas. A regra vale somente para 1 parcela (30 dias).` };
+    const jm = Number(fin.total_juros || 0);
+    const diario = jm / 30;
+    const inicio = new Date(String(v.data_aquisicao || v.criado_em || '').slice(0, 10) + 'T00:00:00');
+    const fim = venda ? new Date(venda.data_venda) : new Date();
+    const dias = Math.max(0, Math.floor((fim - inicio) / 86400000));
+    const cobrados = Math.max(0, dias - 30);
+    return { aplica: true, motivo: 'Aplicável: financiamento de 1 parcela. Do dia 31 em diante, o juros do mês é cobrado dia a dia (juros do mês ÷ 30).', jm, diario, dias, cobrados, acumulado: cobrados * diario, fimLabel: venda ? `até a venda (${new Date(venda.data_venda).toLocaleDateString('pt-BR')})` : 'até hoje' };
+  };
   function render() {
     if (!D) return;
     if (D.erro) { const m = $('main'); if (m) m.innerHTML = '<div class="p-6 text-sm font-semibold">' + esc(D.erro) + '</div>'; mostrarPagina(); return; }
     const v = D.veiculo, g = D.gestao, fin = D.financiamento, custos = D.custos || [], vendas = D.vendas || [], ck = D.checklist, fotos = D.fotos || [];
     const compra = Number(v.preco_compra || 0), fipe = Number(v.valor_fipe || 0), venda = Number(v.preco_venda_pretendido || 0);
     const totalCustos = custos.reduce((s, c) => s + Number(c.valor || 0), 0);
-    const juros = fin ? Number(fin.total_juros || 0) : 0;
+    const regraJ = calcRegraJuros(D);
+    const juros = (fin ? Number(fin.total_juros || 0) : 0) + regraJ.acumulado;
     const invest = compra + totalCustos + juros;
     const parcial = venda - invest;
     const pParc = invest > 0 ? (parcial / invest) * 100 : null;
@@ -518,36 +535,31 @@
     const status = folha(t => t === 'Disponível para Venda' || Object.values(ROT).includes(t));
     if (status) status.textContent = ROT[v.status] || v.status;
     const placaTopo = document.getElementById('placa-topo');
-    const renderJurosRegra = (d) => {
-      let box = document.getElementById('juros-regra');
-      if (!box) { box = document.createElement('section'); box.id = 'juros-regra'; box.className = 'glass-card rounded-2xl p-6 sm:p-7'; box.style.margin = '16px 0'; const alvo = document.querySelector('main') || document.body; alvo.insertBefore(box, alvo.children[1] || null); }
-      const fmt = (n) => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      const linha = (rot, val) => `<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #e5eeff;font-size:13px"><span style="color:#64748b">${rot}</span><span style="font-weight:700;color:#0f172a">${val}</span></div>`;
-      const cabec = (txt) => `<h3 style="margin:0 0 6px;font-size:15px;font-weight:800;color:#0f172a">Regra de juros após o 30º dia</h3><p style="margin:0 0 10px;font-size:13px;color:#434655">${txt}</p>`;
-      if (!d.gestao) { box.innerHTML = cabec('Informação restrita à gestão.'); return; }
-      const fin = d.financiamento || null;
-      if (!fin) { box.innerHTML = cabec('Não aplicável: aquisição sem financiamento. Os juros diários valem somente para financiamento de 1 parcela.'); return; }
-      const parcelas = Number(fin.quantidade_parcelas || 0);
-      if (parcelas !== 1) { box.innerHTML = cabec(`Não aplicável: financiamento com ${parcelas} parcelas. A regra vale somente para 1 parcela (30 dias).`); return; }
-      const venda = (d.vendas || [])[0] || null;
-      const v = d.veiculo || {};
-      const jm = Number(fin.total_juros || 0);
-      const diario = jm / 30;
-      const inicio = new Date(String(v.data_aquisicao || v.criado_em || '').slice(0, 10) + 'T00:00:00');
-      const fim = venda ? new Date(venda.data_venda) : new Date();
-      const dias = Math.max(0, Math.floor((fim - inicio) / 86400000));
-      const cobrados = Math.max(0, dias - 30);
-      const acumulado = cobrados * diario;
-      const rotuloFim = venda ? `até a venda (${new Date(venda.data_venda).toLocaleDateString('pt-BR')})` : 'até hoje';
-      box.innerHTML = cabec('Aplicável: financiamento de 1 parcela. Do dia 31 em diante, o juros do mês é cobrado dia a dia (juros do mês ÷ 30).')
-        + linha('Juros do mês (financiamento)', fmt(jm))
-        + linha('Juros diário a partir do dia 31', fmt(diario))
-        + linha(`Dias desde a aquisição (${rotuloFim})`, String(dias))
-        + linha('Dias cobrados após o dia 30', String(cobrados))
-        + linha('Juros diário acumulado', fmt(acumulado))
-        + linha('Total de juros considerado', fmt(jm + acumulado));
+    const cardJuros = () => {
+      const antigo = document.getElementById('juros-regra'); if (antigo) antigo.remove();
+      if (!g) return;
+      const resul = $$('h2').find(h => /resultado da opera/i.test(h.textContent))?.closest('section');
+      const modelo = secao('1. Identificação');
+      if (!resul || !modelo) return;
+      const box = modelo.cloneNode(true);
+      box.id = 'juros-regra';
+      const icone = $('.material-symbols-outlined', box); if (icone) icone.textContent = 'percent';
+      const titulo = $('h2', box); if (titulo) titulo.textContent = 'Juros após o 30º dia';
+      const botao = $('button', box); if (botao) botao.remove();
+      const grade = $('.grid', box);
+      if (!grade) return;
+      const r = regraJ;
+      grade.innerHTML = !r.aplica
+        ? linha('Situação', r.motivo, 'text-on-surface font-medium')
+        : linha('Juros do mês (financiamento)', brl(r.jm))
+          + linha('Juros diário a partir do dia 31', brl(r.diario))
+          + linha(`Dias desde a aquisição (${r.fimLabel})`, String(r.dias))
+          + linha('Dias cobrados após o dia 30', String(r.cobrados))
+          + linha('Juros diário acumulado', brl(r.acumulado), 'text-primary font-bold')
+          + linha('Total de juros considerado', brl(r.jm + r.acumulado), 'text-primary font-bold');
+      resul.parentNode.insertBefore(box, resul);
     };
-    renderJurosRegra(D);
+    cardJuros();
     if (placaTopo) placaTopo.textContent = g ? (v.placa || '—') : 'Restrito';
     const precoTopo = $$('div.text-2xl').find(e => /R\$/.test(e.textContent));
     if (precoTopo) precoTopo.textContent = brl(venda);

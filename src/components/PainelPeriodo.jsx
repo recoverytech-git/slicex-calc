@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import * as XLSX from "xlsx";
 
 export const PERIODOS = [[30, "30 dias"], [60, "60 dias"], [90, "90 dias"], [180, "180 dias"], [360, "360 dias (ano)"]];
+const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 export function inicioPeriodo(dias) {
   const d = new Date();
@@ -19,7 +20,7 @@ export function giroPorMes(veiculos, vendas, dias) {
   while (cur <= hoje) {
     meses.push({
       chave: `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}`,
-      rotulo: cur.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }).replace(".", ""),
+      rotulo: `${MESES[cur.getMonth()]}/${String(cur.getFullYear()).slice(2)}`,
       entradas: 0,
       saidas: 0,
     });
@@ -73,7 +74,13 @@ export function exportarExcel(veiculos, vendas, metricas, dias) {
   XLSX.writeFile(wb, `calcula-car_${dias}dias.xlsx`);
 }
 
-const cartao = { background: "#ffffff", border: "1px solid #d3e4fe", borderRadius: 16, padding: 20, marginTop: 16 };
+const cartao = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 20, marginBottom: 18 };
+const botaoPeriodo = (ativo) => ({
+  padding: "7px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: "pointer",
+  border: "1px solid var(--border)",
+  background: ativo ? "var(--accent)" : "var(--surface)",
+  color: ativo ? "#fff" : "var(--text-dim)",
+});
 
 export default function PainelPeriodo({ periodo, setPeriodo, veiculos, vendas, metricas }) {
   const meses = useMemo(() => giroPorMes(veiculos, vendas, periodo), [veiculos, vendas, periodo]);
@@ -85,26 +92,24 @@ export default function PainelPeriodo({ periodo, setPeriodo, veiculos, vendas, m
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
           {PERIODOS.map(([dias, rotulo]) => (
-            <button key={dias} type="button" onClick={() => setPeriodo(dias)}
-              style={{ padding: "7px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: "pointer", border: "1px solid #d3e4fe",
-                background: periodo === dias ? "#2563eb" : "#fff", color: periodo === dias ? "#fff" : "#434655" }}>
+            <button key={dias} type="button" onClick={() => setPeriodo(dias)} style={botaoPeriodo(periodo === dias)}>
               {rotulo}
             </button>
           ))}
         </div>
         <button type="button" onClick={() => exportarExcel(veiculos, vendas, mapaMetricas, periodo)}
-          style={{ padding: "9px 16px", borderRadius: 12, border: "1px solid #d3e4fe", background: "#fff", color: "#0f172a", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+          style={{ padding: "9px 16px", borderRadius: 12, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
           Exportar Excel (vendas e estoque)
         </button>
       </div>
-      <h3 style={{ margin: "16px 0 6px", fontSize: 15, fontWeight: 800, color: "#0f172a" }}>Giro mensal (últimos {periodo} dias)</h3>
-      <p style={{ margin: "0 0 10px", fontSize: 12, color: "#64748b" }}>
+      <h3 style={{ margin: "16px 0 6px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>Giro mensal (últimos {periodo} dias)</h3>
+      <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>
         Entradas pela data de aquisição e saídas pela data da venda. Total no período: {totEnt} entradas e {totSai} saídas.
       </p>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
           <thead>
-            <tr style={{ textAlign: "left", color: "#64748b", borderBottom: "1px solid #d3e4fe" }}>
+            <tr style={{ textAlign: "left", color: "var(--text-dim)", borderBottom: "1px solid var(--border)" }}>
               <th style={{ padding: "8px 6px" }}>Mês</th>
               <th style={{ padding: "8px 6px", textAlign: "right" }}>Entradas</th>
               <th style={{ padding: "8px 6px", textAlign: "right" }}>Saídas (vendas)</th>
@@ -112,18 +117,15 @@ export default function PainelPeriodo({ periodo, setPeriodo, veiculos, vendas, m
           </thead>
           <tbody>
             {meses.map((m) => (
-              <tr key={m.chave} style={{ borderBottom: "1px solid #eff4ff" }}>
-                <td style={{ padding: "8px 6px", textTransform: "capitalize" }}>{m.rotulo}</td>
-                <td style={{ padding: "8px 6px", textAlign: "right", fontWeight: 700, color: "#2563eb" }}>{m.entradas}</td>
+              <tr key={m.chave} style={{ borderBottom: "1px solid var(--border)" }}>
+                <td style={{ padding: "8px 6px", color: "var(--text)" }}>{m.rotulo}</td>
+                <td style={{ padding: "8px 6px", textAlign: "right", fontWeight: 700, color: "var(--accent)" }}>{m.entradas}</td>
                 <td style={{ padding: "8px 6px", textAlign: "right", fontWeight: 700, color: "#059669" }}>{m.saidas}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p style={{ margin: "14px 0 0", fontSize: 12, color: "#434655", lineHeight: 1.5 }}>
-        Juros diários após o 30º dia (financiamento de 1 parcela) entram no capital e na margem projetada do estoque, e no resultado das vendas até a data da venda.
-      </p>
     </section>
   );
 }

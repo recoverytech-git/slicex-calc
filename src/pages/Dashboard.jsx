@@ -119,8 +119,8 @@ export default function Dashboard() {
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: "22px 0 4px", color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
             <LayoutDashboard size={22} /> Dashboard
           </h1>
-          <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} />
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acesse as ferramentas e acompanhe a operação.</p>
+          <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} />
 
           <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Acessos</p>
           <div className="grid-3" style={{ marginBottom: 22 }}>
