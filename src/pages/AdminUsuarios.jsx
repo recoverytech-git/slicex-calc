@@ -194,7 +194,7 @@ export default function AdminUsuarios() {
           <section className="relative z-10 grid grid-cols-1 gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {[
               { titulo: "Total de Usuários", valor: kpis.total, icone: "badge" },
-            { titulo: "Administradores", valor: kpis.admins, icone: "shield_person" },
+            { titulo: "Administrador", valor: kpis.admins, icone: "shield_person" },
             { titulo: "Lojistas", valor: kpis.lojistas, icone: "storefront" },
             { titulo: "Gerentes", valor: kpis.gerentes, icone: "manage_accounts" },
             { titulo: "Vendedores", valor: kpis.vendedores, icone: "sell" },

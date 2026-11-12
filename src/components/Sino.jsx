@@ -4,6 +4,10 @@ import { Bell, Check, CheckCheck } from "lucide-react";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 
+const VINTE_QUATRO_HORAS = 24 * 60 * 60 * 1000;
+// Nao lida sempre aparece; lida aparece por 24 horas apos a leitura
+const visivel = (n) => !n.lida || (n.lida_em && Date.now() - new Date(n.lida_em).getTime() < VINTE_QUATRO_HORAS);
+
 export default function Sino() {
   const { sessao } = useAuth();
   const navigate = useNavigate();
@@ -13,8 +17,8 @@ export default function Sino() {
   const carregar = async () => {
     if (!supabaseConfigurado || !sessao) return;
     const { data } = await supabase.from("notificacoes")
-      .select("id, titulo, mensagem, link_ref, lida, criado_em")
-      .order("criado_em", { ascending: false }).limit(20);
+      .select("id, titulo, mensagem, link_ref, lida, lida_em, criado_em")
+      .order("criado_em", { ascending: false }).limit(50);
     setItens(data ?? []);
   };
 
@@ -27,19 +31,24 @@ export default function Sino() {
 
   if (!sessao) return null;
 
-  const naoLidas = itens.filter((i) => !i.lida).length;
+  const visiveis = itens.filter(visivel);
+  const naoLidas = visiveis.filter((i) => !i.lida).length;
 
-  // Marca como lida (a permissao do banco aceita apenas a coluna lida)
   const marcar = async (ids) => {
     if (!ids.length) return;
     const { error } = await supabase.from("notificacoes").update({ lida: true }).in("id", ids);
-    if (!error) setItens((prev) => prev.map((i) => (ids.includes(i.id) ? { ...i, lida: true } : i)));
+    if (!error) {
+      const agora = new Date().toISOString();
+      setItens((prev) => prev.map((i) => (ids.includes(i.id) ? { ...i, lida: true, lida_em: agora } : i)));
+    }
   };
 
   const abrir = async (n) => {
     if (!n.lida) await marcar([n.id]);
     setAberto(false);
-    if (n.link_ref) navigate(`/leads/${n.link_ref}`);
+    // notificacoes de ficha preenchida levam para a lista de leads
+    if (/ficha/i.test(n.titulo)) navigate("/leads");
+    else if (n.link_ref) navigate(`/leads/${n.link_ref}`);
   };
 
   const marcarUma = (n, e) => {
@@ -66,14 +75,14 @@ export default function Sino() {
               Notificações {naoLidas > 0 && <span style={{ color: "#4493F8" }}>· {naoLidas} nova{naoLidas > 1 ? "s" : ""}</span>}
             </span>
             {naoLidas > 0 && (
-              <button type="button" onClick={() => marcar(itens.filter((i) => !i.lida).map((i) => i.id))}
+              <button type="button" onClick={() => marcar(visiveis.filter((i) => !i.lida).map((i) => i.id))}
                 style={{ display: "inline-flex", alignItems: "center", gap: 4, border: "none", background: "transparent", color: "var(--accent)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                 <CheckCheck size={14} /> Marcar todas
               </button>
             )}
           </div>
-          {itens.length === 0 && <p style={{ margin: 0, padding: 16, fontSize: 13, color: "var(--text-mute)" }}>Nenhuma notificação.</p>}
-          {itens.map((n) => (
+          {visiveis.length === 0 && <p style={{ margin: 0, padding: 16, fontSize: 13, color: "var(--text-mute)" }}>Nenhuma notificação.</p>}
+          {visiveis.map((n) => (
             <div key={n.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px 10px 14px", borderBottom: "1px solid var(--border)", background: n.lida ? "transparent" : "rgba(68,147,248,0.08)" }}>
               <button type="button" onClick={() => abrir(n)}
                 style={{ flex: 1, minWidth: 0, textAlign: "left", background: "transparent", border: "none", padding: 0, cursor: "pointer", color: "var(--text)" }}>

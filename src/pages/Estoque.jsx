@@ -1,5 +1,4 @@
 import { calcularResumo } from "../lib/calculos";
-import BackLink from "../components/BackLink";
 // sem-rascunho: lista e resumo ficam no documento do design (iframe); os dados vem do banco pelo sistema
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -145,9 +144,7 @@ export default function Estoque() {
     <PageTransition>
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Estoque de veículos" />
-        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-          <BackLink />
-        </div>
+
         <iframe
           ref={frame}
           src="/calculadora-estoque.html"
