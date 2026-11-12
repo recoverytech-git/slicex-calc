@@ -69,8 +69,8 @@ export default function Dashboard() {
   useEffect(() => {
     if (!supabaseConfigurado || !gestao) return;
     Promise.all([
-      supabase.from("veiculos").select("id, status, modelo, placa, preco_compra, preco_venda_pretendido, data_aquisicao, criado_em"),
-      supabase.from("v_vendas_resultado").select("data_venda, modelo, placa, valor_venda, despesas_venda, descontos, juros_total, investimento_total, resultado_final"),
+      supabase.from("veiculos").select("id, status, modelo, placa, preco_compra, valor_fipe, preco_venda_pretendido, data_aquisicao, criado_em"),
+      supabase.from("v_vendas_resultado").select("data_venda, modelo, placa, valor_venda, despesas_venda, descontos, juros_total, investimento_total, resultado_final, preco_venda_pretendido"),
       supabase.from("veiculo_custos").select("veiculo_id, valor"),
       supabase.from("v_estoque_metricas").select("veiculo_id, dias_em_estoque, juros_diario_acumulado"),
     ]).then(([v, s, c, j]) => {
@@ -120,7 +120,7 @@ export default function Dashboard() {
             <LayoutDashboard size={22} /> Dashboard
           </h1>
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acesse as ferramentas e acompanhe a operação.</p>
-          <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} />
+          <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} custos={custos} />
 
           <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Acessos</p>
           <div className="grid-3" style={{ marginBottom: 22 }}>
