@@ -1,3 +1,4 @@
+import HistoricoVeiculos from "../components/HistoricoVeiculos";
 import { useEffect, useState } from "react";
 import { ScrollText, ChevronDown, RefreshCw, Search } from "lucide-react";
 import Header from "../components/Header";
@@ -85,6 +86,7 @@ export default function Logs() {
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: "22px 0 6px", color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
             <ScrollText size={22} /> Logs
           </h1>
+          <HistoricoVeiculos />
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Tudo o que foi criado, alterado ou excluído na plataforma, por quem e quando.</p>
 
           <div style={{ ...card, padding: 18, marginBottom: 14, display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>

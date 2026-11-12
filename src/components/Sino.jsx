@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell } from "lucide-react";
+import { Bell, Check, CheckCheck } from "lucide-react";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 
@@ -29,11 +29,22 @@ export default function Sino() {
 
   const naoLidas = itens.filter((i) => !i.lida).length;
 
+  // Marca como lida (a permissao do banco aceita apenas a coluna lida)
+  const marcar = async (ids) => {
+    if (!ids.length) return;
+    const { error } = await supabase.from("notificacoes").update({ lida: true }).in("id", ids);
+    if (!error) setItens((prev) => prev.map((i) => (ids.includes(i.id) ? { ...i, lida: true } : i)));
+  };
+
   const abrir = async (n) => {
-    if (!n.lida) await supabase.from("notificacoes").update({ lida: true }).eq("id", n.id);
+    if (!n.lida) await marcar([n.id]);
     setAberto(false);
     if (n.link_ref) navigate(`/leads/${n.link_ref}`);
-    carregar();
+  };
+
+  const marcarUma = (n, e) => {
+    e.stopPropagation();
+    marcar([n.id]);
   };
 
   return (
@@ -43,22 +54,47 @@ export default function Sino() {
         style={{ position: "relative", width: 36, height: 36, borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "var(--surface)", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
         <Bell size={16} />
         {naoLidas > 0 && (
-          <span style={{ position: "absolute", top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 999, background: "#4493F8", color: "#ffffff", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
+          <span style={{ position: "absolute", top: -4, right: -4, minWidth: 18, height: 18, padding: "0 4px", borderRadius: 999, background: "#4493F8", color: "#ffffff", fontSize: 10, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {naoLidas > 9 ? "9+" : naoLidas}
           </span>
         )}
       </button>
       {aberto && (
-        <div role="menu" style={{ position: "absolute", right: 0, top: 44, width: 320, maxHeight: 380, overflowY: "auto", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", boxShadow: "var(--shadow-lg)", zIndex: 50 }}>
-          <p style={{ margin: 0, padding: "12px 14px", fontSize: 12, fontWeight: 800, letterSpacing: 1, color: "var(--text-dim)", textTransform: "uppercase", borderBottom: "1px solid var(--border)" }}>Notificações</p>
+        <div role="menu" style={{ position: "absolute", right: 0, top: 44, width: 340, maxHeight: 400, overflowY: "auto", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", boxShadow: "var(--shadow-lg)", zIndex: 50 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "12px 14px", borderBottom: "1px solid var(--border)" }}>
+            <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1, color: "var(--text-dim)", textTransform: "uppercase" }}>
+              Notificações {naoLidas > 0 && <span style={{ color: "#4493F8" }}>· {naoLidas} nova{naoLidas > 1 ? "s" : ""}</span>}
+            </span>
+            {naoLidas > 0 && (
+              <button type="button" onClick={() => marcar(itens.filter((i) => !i.lida).map((i) => i.id))}
+                style={{ display: "inline-flex", alignItems: "center", gap: 4, border: "none", background: "transparent", color: "var(--accent)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                <CheckCheck size={14} /> Marcar todas
+              </button>
+            )}
+          </div>
           {itens.length === 0 && <p style={{ margin: 0, padding: 16, fontSize: 13, color: "var(--text-mute)" }}>Nenhuma notificação.</p>}
           {itens.map((n) => (
-            <button key={n.id} type="button" onClick={() => abrir(n)}
-              style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 14px", background: n.lida ? "transparent" : "rgba(68,147,248,0.08)", border: "none", borderBottom: "1px solid var(--border)", color: "var(--text)", cursor: "pointer" }}>
-              <span style={{ display: "block", fontSize: 13, fontWeight: n.lida ? 500 : 700 }}>{n.titulo}</span>
-              <span style={{ display: "block", fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{n.mensagem}</span>
-              <span style={{ display: "block", fontSize: 11, color: "var(--text-mute)", marginTop: 4 }}>{new Date(n.criado_em).toLocaleString("pt-BR")}</span>
-            </button>
+            <div key={n.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "10px 12px 10px 14px", borderBottom: "1px solid var(--border)", background: n.lida ? "transparent" : "rgba(68,147,248,0.08)" }}>
+              <button type="button" onClick={() => abrir(n)}
+                style={{ flex: 1, minWidth: 0, textAlign: "left", background: "transparent", border: "none", padding: 0, cursor: "pointer", color: "var(--text)" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: n.lida ? 500 : 700 }}>
+                  {!n.lida && <span style={{ width: 7, height: 7, borderRadius: 999, background: "#4493F8", flexShrink: 0 }} aria-hidden="true" />}
+                  {n.titulo}
+                </span>
+                <span style={{ display: "block", fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{n.mensagem}</span>
+                <span style={{ display: "block", fontSize: 11, color: "var(--text-mute)", marginTop: 4 }}>{new Date(n.criado_em).toLocaleString("pt-BR")}</span>
+              </button>
+              {n.lida ? (
+                <span title="Lida" aria-label="Lida" style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", color: "#059669", background: "#ecfdf5" }}>
+                  <Check size={14} />
+                </span>
+              ) : (
+                <button type="button" onClick={(e) => marcarUma(n, e)} title="Marcar como lida" aria-label="Marcar como lida"
+                  style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 999, border: "1px solid var(--border-strong)", background: "var(--surface)", color: "var(--text-dim)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                  <Check size={14} />
+                </button>
+              )}
+            </div>
           ))}
         </div>
       )}

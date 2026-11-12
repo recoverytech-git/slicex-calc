@@ -38,7 +38,7 @@ export default function Amortizacao() {
     <PageTransition>
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Simulador de Amortização Extraordinária" />
-        <div className="container" style={{ paddingTop: 8 }}>
+        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
           <BackLink />
         </div>
         <iframe

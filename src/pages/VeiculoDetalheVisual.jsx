@@ -268,7 +268,7 @@ export default function VeiculoDetalheVisual() {
     <PageTransition>
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Detalhes do veículo" />
-        <div className="container" style={{ paddingTop: 8 }}>
+        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
           <BackLink />
         </div>
         {erro && <div style={{ padding: 16, fontSize: 13, fontWeight: 600 }}>{erro}</div>}
