@@ -1,3 +1,4 @@
+import PainelPeriodo, { inicioPeriodo } from "../components/PainelPeriodo";
 import { ENTRADA } from "../lib/motion";
 // sem-rascunho: painel somente de consulta, sem formulário
 import { useEffect, useState } from "react";
@@ -63,14 +64,15 @@ export default function Dashboard() {
   const [custos, setCustos] = useState([]);
   const [jurosEst, setJurosEst] = useState([]);
   const [erro, setErro] = useState(null);
+  const [periodo, setPeriodo] = useState(90);
 
   useEffect(() => {
     if (!supabaseConfigurado || !gestao) return;
     Promise.all([
-      supabase.from("veiculos").select("id, status, preco_compra, preco_venda_pretendido"),
-      supabase.from("v_vendas_resultado").select("data_venda, valor_venda, resultado_final, investimento_total"),
+      supabase.from("veiculos").select("id, status, modelo, placa, preco_compra, preco_venda_pretendido, data_aquisicao, criado_em"),
+      supabase.from("v_vendas_resultado").select("data_venda, modelo, placa, valor_venda, despesas_venda, descontos, juros_total, investimento_total, resultado_final"),
       supabase.from("veiculo_custos").select("veiculo_id, valor"),
-      supabase.from("v_estoque_metricas").select("veiculo_id, juros_diario_acumulado"),
+      supabase.from("v_estoque_metricas").select("veiculo_id, dias_em_estoque, juros_diario_acumulado"),
     ]).then(([v, s, c, j]) => {
       setCustos(c.data ?? []);
       setJurosEst(j.data ?? []);
@@ -100,8 +102,10 @@ export default function Dashboard() {
   // Capital investido = valor de compra + custos adicionais de todo o estoque
   const capital = emEstoque.reduce((s, v) => s + Number(v.preco_compra ?? 0), 0) + totalCustosEstoque;
   const potencial = emEstoque.reduce((s, v) => s + Number(v.preco_venda_pretendido ?? 0), 0);
-  const faturamento = vendas.reduce((s, v) => s + Number(v.valor_venda ?? 0), 0);
-  const resultado = vendas.reduce((s, v) => s + Number(v.resultado_final ?? 0), 0);
+  const iniPer = inicioPeriodo(periodo);
+  const vendasPeriodo = vendas.filter((s) => new Date(s.data_venda) >= iniPer);
+  const faturamento = vendasPeriodo.reduce((s, v) => s + Number(v.valor_venda ?? 0), 0);
+  const resultado = vendasPeriodo.reduce((s, v) => s + Number(v.resultado_final ?? 0), 0);
   const investido = vendas.reduce((s, v) => s + Number(v.investimento_total ?? 0), 0);
   // Margem sobre investido = venda pretendida - custos adicionais, de todo o estoque
   // Margem = venda pretendida - compra - custos adicionais, somada para todo o estoque
@@ -115,6 +119,7 @@ export default function Dashboard() {
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: "22px 0 4px", color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
             <LayoutDashboard size={22} /> Dashboard
           </h1>
+          <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} />
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acesse as ferramentas e acompanhe a operação.</p>
 
           <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Acessos</p>
@@ -147,7 +152,7 @@ export default function Dashboard() {
               </div>
               <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Vendas</p>
               <div className="grid-4" style={{ marginBottom: 18 }}>
-                <Kpi i={0} rotulo="Vendas realizadas" valor={vendas.length} />
+                <Kpi i={0} rotulo="Vendas no período" valor={vendasPeriodo.length} />
                 <Kpi i={1} rotulo="Faturamento" valor={formatarBRL(faturamento)} />
                 <Kpi i={2} rotulo="Lucro realizado (vendas)" valor={formatarBRL(resultado)} />
                 <Kpi i={3} rotulo="Margem projetada (estoque)" valor={formatarBRL(margemValor)} />
