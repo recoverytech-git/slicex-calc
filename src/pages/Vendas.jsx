@@ -5,6 +5,7 @@ import { BadgeDollarSign } from "lucide-react";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
+import { BUCKET_FOTOS } from "../lib/fotos";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { formatarBRL } from "../lib/moeda";
 import { useAuth } from "../lib/auth";
@@ -33,6 +34,15 @@ export default function Vendas() {
   const excluirDefinitivo = async (l) => {
     const ok = window.confirm(`Excluir definitivamente ${l.modelo}${l.placa ? ` (${l.placa})` : ""}, sua venda e todos os dados ligados a ele? Esta ação não pode ser desfeita.`);
     if (!ok) return;
+    // 1) fotos: removidas pela API de armazenamento (o banco nao pode apagar arquivos)
+    const { data: fotos, error: erroFotos } = await supabase.from("veiculo_fotos").select("caminho_storage").eq("veiculo_id", l.veiculo_id);
+    if (erroFotos) { setErro(erroFotos.message); return; }
+    const caminhos = (fotos ?? []).map((f) => f.caminho_storage).filter(Boolean);
+    if (caminhos.length) {
+      const { error: erroArquivos } = await supabase.storage.from(BUCKET_FOTOS).remove(caminhos);
+      if (erroArquivos) { setErro(`Não foi possível remover as fotos: ${erroArquivos.message}`); return; }
+    }
+    // 2) registros: veiculo, venda, custos, financiamento, parcelas, historico e demais ligados (cascata)
     const { error } = await supabase.rpc("excluir_veiculo_definitivo", { p_veiculo: l.veiculo_id });
     if (error) { setErro(error.message); return; }
     setLinhas((prev) => prev.filter((x) => x.veiculo_id !== l.veiculo_id));
