@@ -239,7 +239,7 @@ export default function Ficha() {
 
   return (
     <PageTransition>
-      <div className="cc-novo relative min-h-screen overflow-x-clip bg-slate-50 font-sans text-slate-800 antialiased">
+      <div className="cc-novo relative min-h-screen overflow-x-clip bg-surface font-sans text-slate-800 antialiased">
         <style>{ESTILOS_FICHA}</style>
         <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
           <div className="orb-1 absolute -top-40 left-1/4 h-[560px] w-[560px] rounded-full bg-blue-300/35 blur-[90px]" />

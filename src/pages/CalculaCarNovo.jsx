@@ -239,7 +239,7 @@ export default function CalculaCarNovo() {
 
   return (
     <PageTransition>
-      <div className="cc-novo relative min-h-screen overflow-x-clip bg-slate-50 font-sans text-slate-800 antialiased">
+      <div className="cc-novo relative min-h-screen overflow-x-clip bg-surface font-sans text-slate-800 antialiased">
         
 
 <div aria-hidden="true" className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
