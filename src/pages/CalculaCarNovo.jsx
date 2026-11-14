@@ -596,13 +596,13 @@ export default function CalculaCarNovo() {
 </div>))}</div>
 <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3 text-xs sm:text-sm"><span className="font-extrabold uppercase text-slate-900">TOTAL DOS CUSTOS</span><span className="text-base font-extrabold text-slate-900 tabular-numbers">{fmt(totalCustosAdicionais)}</span></div>
 </div>)}
-{createPortal(<Modal open={modalOpen} onClose={closeModal} title="Adicionar novo custo" footer={<PrimaryButton onClick={closeModal} style={{ width: "100%" }}>Concluir</PrimaryButton>}>
+{createPortal(<div className="cc-novo"><Modal open={modalOpen} onClose={closeModal} title="Adicionar novo custo" footer={<PrimaryButton onClick={closeModal} style={{ width: "100%" }}>Concluir</PrimaryButton>}>
 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 <CnField label="Descrição do custo" val={draftDesc} set={setDraftDesc} hint="Ex.: Pneus, Revisão, Documentação…" />
 <CnMoney label="Valor" valor={draftCents / 100} onChange={(n) => setDraftCents(Math.round(n * 100))} />
 <PrimaryButton onClick={addOrUpdateCusto} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%" }}><Plus size={16} /> {editingId ? "Salvar alteração" : "Adicionar"}</PrimaryButton>
 </div>
-</Modal>, document.body)}
+</Modal></div>, document.body)}
 </section>)}
 {resultado && (<section className="depth-card rounded-2xl border-2 border-brand-300/80 bg-gradient-to-b from-blue-50/50 via-white to-white p-6 shadow-glow-md hover:shadow-glow-lg space-y-6" data-purpose="final-deal-outcome-summary">
 
