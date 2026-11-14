@@ -156,19 +156,14 @@ export default function Dashboard() {
             <>
               {erro && <p style={{ color: "var(--text-dim)", fontSize: 13 }}>Não foi possível carregar: {erro}</p>}
               <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Estoque</p>
-              <div className="grid-4" style={{ marginBottom: 14 }}>
+              <div className="grid-4" style={{ marginBottom: 14, gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))" }}>
                 <Kpi i={0} rotulo="Veículos cadastrados" valor={veiculos.length} />
                 <Kpi i={1} rotulo="Em estoque" valor={emEstoque.length} />
                 <Kpi i={2} rotulo="Capital investido (compra)" valor={formatarBRL(capital)} />
                 <Kpi i={3} rotulo="Potencial de venda" valor={formatarBRL(potencial)} />
+                <Kpi i={4} rotulo="Margem projetada (estoque)" valor={formatarBRL(margemValor)} />
               </div>
-              <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Vendas</p>
-              <div className="grid-4" style={{ marginBottom: 18 }}>
-                <Kpi i={0} rotulo="Vendas no período" valor={vendasPeriodo.length} />
-                <Kpi i={1} rotulo="Faturamento" valor={formatarBRL(faturamento)} />
-                <Kpi i={2} rotulo="Lucro realizado (vendas)" valor={formatarBRL(resultado)} />
-                <Kpi i={3} rotulo="Margem projetada (estoque)" valor={formatarBRL(margemValor)} />
-              </div>
+              
 
               <div className="grid-2" style={{ marginBottom: 14 }}>
                 <GraficoBarras titulo="Faturamento por mês (12 meses)" dados={fatMes} formatar={(v) => formatarBRL(v)} />

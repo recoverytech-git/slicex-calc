@@ -16,6 +16,7 @@ const pct = (r, base) => (base > 0 ? `${((r / base) * 100).toFixed(2)}%` : "—"
 export default function Vendas() {
   const { perfil } = useAuth();
   const gestao = perfil?.papel !== "vendedor";
+  const admin = perfil?.papel === "admin_master";
   const [linhas, setLinhas] = useState([]);
   const [erro, setErro] = useState(null);
 
@@ -27,6 +28,15 @@ export default function Vendas() {
 
   const faturamento = linhas.reduce((s, l) => s + Number(l.valor_venda ?? 0), 0);
   const resultado = linhas.reduce((s, l) => s + Number(l.resultado_final ?? 0), 0);
+
+
+  const excluirDefinitivo = async (l) => {
+    const ok = window.confirm(`Excluir definitivamente ${l.modelo}${l.placa ? ` (${l.placa})` : ""}, sua venda e todos os dados ligados a ele? Esta ação não pode ser desfeita.`);
+    if (!ok) return;
+    const { error } = await supabase.rpc("excluir_veiculo_definitivo", { p_veiculo: l.veiculo_id });
+    if (error) { setErro(error.message); return; }
+    setLinhas((prev) => prev.filter((x) => x.veiculo_id !== l.veiculo_id));
+  };
 
   return (
     <PageTransition>
@@ -59,6 +69,7 @@ export default function Vendas() {
                     {gestao && <th style={{ padding: "10px 12px", textAlign: "right" }}>Investimento</th>}
                     {gestao && <th style={{ padding: "10px 12px", textAlign: "right" }}>Resultado final</th>}
                     {gestao && <th style={{ padding: "10px 12px", textAlign: "right" }}>%</th>}
+                    {admin && <th style={{ padding: "10px 12px", textAlign: "right" }}>Ações</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -70,6 +81,7 @@ export default function Vendas() {
                       {gestao && <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--text-dim)" }}>{formatarBRL(l.investimento_total)}</td>}
                       {gestao && <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--text)", fontWeight: 700 }}>{formatarBRL(l.resultado_final)}</td>}
                       {gestao && <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--text-dim)" }}>{pct(l.resultado_final, l.investimento_total)}</td>}
+                      {admin && <td style={{ padding: "10px 12px", textAlign: "right" }}><button onClick={() => excluirDefinitivo(l)} style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #fca5a5", background: "#fee2e2", color: "#b91c1c", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Excluir definitivamente</button></td>}
                     </tr>
                   ))}
                 </tbody>
