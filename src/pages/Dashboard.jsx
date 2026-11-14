@@ -1,3 +1,4 @@
+import KpisVendidos from "../components/KpisVendidos";
 import JurosResumo from "../components/JurosResumo";
 import AlertaBaixaPendente from "../components/AlertaBaixaPendente";
 import VeiculosParados from "../components/VeiculosParados";
@@ -127,6 +128,7 @@ export default function Dashboard() {
             <LayoutDashboard size={22} /> Dashboard
           </h1>
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acesse as ferramentas e acompanhe a operação.</p>
+          <KpisVendidos />
           <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} custos={[...custos, ...finEst.map((f) => ({ veiculo_id: f.veiculo_id, valor: f.total_juros }))]} />
           <VeiculosParados veiculos={veiculos} metricas={jurosEst} />
           <JurosResumo jurosEst={jurosEst} vendas={vendas} periodo={periodo} />
