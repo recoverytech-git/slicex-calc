@@ -1,3 +1,5 @@
+import JurosResumo from "../components/JurosResumo";
+import AlertaBaixaPendente from "../components/AlertaBaixaPendente";
 import VeiculosParados from "../components/VeiculosParados";
 import PainelPeriodo, { inicioPeriodo } from "../components/PainelPeriodo";
 import { ENTRADA } from "../lib/motion";
@@ -127,6 +129,8 @@ export default function Dashboard() {
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acesse as ferramentas e acompanhe a operação.</p>
           <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} custos={[...custos, ...finEst.map((f) => ({ veiculo_id: f.veiculo_id, valor: f.total_juros }))]} />
           <VeiculosParados veiculos={veiculos} metricas={jurosEst} />
+          <JurosResumo jurosEst={jurosEst} vendas={vendas} periodo={periodo} />
+          <AlertaBaixaPendente />
 
           <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Acessos</p>
           <div className="grid-3" style={{ marginBottom: 22 }}>

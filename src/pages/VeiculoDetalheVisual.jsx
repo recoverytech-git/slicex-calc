@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import PopupVendaRegistrada from "../components/PopupVendaRegistrada";
+import { regraJuros as calcularRegraJuros } from "../lib/juros";
 import PageTransition from "../components/PageTransition";
 import Header from "../components/Header";
 import { ITENS, DOCUMENTACAO } from "../components/ChecklistVeiculo";
@@ -58,7 +59,7 @@ export default function VeiculoDetalheVisual() {
   const enviar = useCallback(() => {
     if (!cache.current) return;
     const vendido = (cache.current?.vendas?.length ?? 0) > 0 || cache.current?.veiculo?.status === "vendido";
-    frame.current?.contentWindow?.postMessage({ type: "dados", ...cache.current, gestao, vendido, itensChecklist: ITENS_CK, docLabels: DOC_LABELS }, window.location.origin);
+    frame.current?.contentWindow?.postMessage({ type: "dados", ...cache.current, gestao, vendido, regraJuros: calcularRegraJuros({ financiamento: cache.current?.financiamento, aquisicao: cache.current?.veiculo?.data_aquisicao || cache.current?.veiculo?.criado_em, venda: cache.current?.vendas?.[0]?.data_venda }), itensChecklist: ITENS_CK, docLabels: DOC_LABELS }, window.location.origin);
   }, [gestao]);
 
   const carregar = useCallback(async () => {
