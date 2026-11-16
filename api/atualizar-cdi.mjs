@@ -1,5 +1,6 @@
 // Atualiza o CDI (SGS 4389 - CDI anualizada base 252) no banco. Chamada pelo cron da Vercel.
-// Variaveis de ambiente (somente no painel da Vercel): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, CRON_SECRET.
+// Variaveis de ambiente (somente no painel da Vercel): SUPABASE_URL (ou VITE_SUPABASE_URL),
+// SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SECRET_KEY) e CRON_SECRET.
 export default async function handler(req, res) {
   const segredo = process.env.CRON_SECRET;
   if (!segredo || req.headers.authorization !== `Bearer ${segredo}`) {
@@ -16,8 +17,9 @@ export default async function handler(req, res) {
     const [dia, mes, ano] = String(ult.data).split('/');
     const referencia = `${ano}-${mes}-${dia}`;
 
-    const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+    if (!url || !key) throw new Error('variáveis do Supabase ausentes na Vercel');
     const up = await fetch(`${url}/rest/v1/indicadores_mercado?on_conflict=chave`, {
       method: 'POST',
       headers: {
