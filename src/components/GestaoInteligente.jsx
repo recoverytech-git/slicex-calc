@@ -6,6 +6,7 @@ import { prioridadeVenda } from "../lib/prioridade";
 import { riscosVeiculo } from "../lib/riscos";
 import { sugerirReducao } from "../lib/reprecificacao";
 import { faixaSugerida } from "../lib/precificacao";
+import { taxaMensalDeAnual, situacaoCdi } from "../lib/cdi";
 
 // Painel de gestao: prioridade de venda, alertas de risco e reprecificacao com faixa de mercado por modelo
 const GESTAO = ["admin_master", "proprietario", "gerente"];
@@ -20,9 +21,12 @@ export default function GestaoInteligente() {
   const gestao = GESTAO.includes(perfil?.papel);
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(null);
+  const [cdi, setCdi] = useState(null);
 
   useEffect(() => {
     if (!gestao || !supabaseConfigurado) return;
+    supabase.from("indicadores_mercado").select("valor, referencia, atualizado_em, fonte").eq("chave", "cdi_anual").maybeSingle()
+      .then(({ data }) => setCdi(data ?? null));
     (async () => {
       const [v, m, c, f, h, vd] = await Promise.all([
         supabase.from("veiculos").select("id, modelo, placa, status, ano_modelo, potencia_motor, preco_compra, preco_venda_pretendido, valor_fipe_atualizado_em"),
@@ -63,9 +67,11 @@ export default function GestaoInteligente() {
     });
   }, [dados]);
 
+  const situacao = situacaoCdi(cdi);
+  const taxaMensal = situacao.ok ? taxaMensalDeAnual(cdi.valor) : 0;
   const prioridade = useMemo(() => prioridadeVenda(linhas.map((l) => ({
     id: l.id, modelo: l.modelo, placa: l.placa, dias: l.dias, capital: l.capital, juros_acumulado: l.jurosAcum, pret: l.pret,
-  }))).slice(0, 8), [linhas]);
+  })), { taxaOportunidadeMensal: taxaMensal || 0 }).slice(0, 8), [linhas, taxaMensal]);
 
   if (!gestao) return null;
   if (erro) return <section style={cartao}><p style={{ color: "#b91c1c", fontSize: 13 }}>{erro}</p></section>;
@@ -77,7 +83,8 @@ export default function GestaoInteligente() {
     <>
       <section style={cartao}>
         <h3 style={titulo}>Prioridade de venda</h3>
-        <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>Ordenado pelo custo de carregamento: juros acumulado somado ao custo do capital parado (1% ao mês).</p>
+        <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>Ordenado pelo custo de carregamento: juros acumulado somado ao custo do capital parado, à taxa do CDI.</p>
+        {situacao.ok ? <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>CDI {String(cdi.valor).replace(".", ",")}% a.a. ({(taxaMensal * 100).toFixed(2).replace(".", ",")}% a.m.) · referência {new Date(cdi.referencia + "T00:00:00").toLocaleDateString("pt-BR")} · fonte: Banco Central (SGS 4389)</p> : <p style={{ margin: "0 0 10px", fontSize: 12, color: "#b45309" }}>{situacao.aviso}</p>}
         {prioridade.length === 0 ? <p style={{ fontSize: 13, color: "var(--text-dim)" }}>Nenhum veículo em estoque.</p> : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
