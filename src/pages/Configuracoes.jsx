@@ -1,3 +1,4 @@
+import AtualizarCdi from "../components/AtualizarCdi";
 // sem-rascunho: página de configuração, sem formulário de texto
 import { useEffect, useState } from "react";
 import { Settings, Upload, Trash2, Loader2 } from "lucide-react";
@@ -122,6 +123,7 @@ export default function Configuracoes() {
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: "22px 0 6px", color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
             <Settings size={22} /> Configurações
           </h1>
+          <AtualizarCdi />
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>
             Cada lugar da plataforma tem uma logomarca para o modo escuro e outra para o modo claro. Use o campo do lugar e do modo que você quer trocar.
           </p>

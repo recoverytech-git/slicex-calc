@@ -2,8 +2,23 @@
 // Variaveis de ambiente (somente no painel da Vercel): SUPABASE_URL (ou VITE_SUPABASE_URL),
 // SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SECRET_KEY) e CRON_SECRET.
 export default async function handler(req, res) {
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   const segredo = process.env.CRON_SECRET;
-  if (!segredo || req.headers.authorization !== `Bearer ${segredo}`) {
+  const urlBase = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const chaveServico = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+  const chaveAnon = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  // Aceita: segredo do cron (Vercel) OU login de administrador master (botao no sistema)
+  let autorizado = !!segredo && token === segredo;
+  if (!autorizado && token && urlBase && chaveAnon && chaveServico) {
+    const u = await fetch(`${urlBase}/auth/v1/user`, { headers: { apikey: chaveAnon, Authorization: `Bearer ${token}` } });
+    if (u.ok) {
+      const { id } = await u.json();
+      const pr = await fetch(`${urlBase}/rest/v1/perfis?id=eq.${id}&select=papel`, { headers: { apikey: chaveServico, Authorization: `Bearer ${chaveServico}` } });
+      const [perfil] = pr.ok ? await pr.json() : [];
+      autorizado = perfil?.papel === 'admin_master';
+    }
+  }
+  if (!autorizado) {
     return res.status(401).json({ ok: false, erro: 'não autorizado' });
   }
   try {
