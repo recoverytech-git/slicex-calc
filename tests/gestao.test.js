@@ -71,6 +71,12 @@ describe("prioridade de venda", () => {
     ]);
     expect(r[0].id).toBe("b");
   });
+  it("separa juros (caixa) e custo de oportunidade (CDI)", () => {
+    const r = prioridadeVenda([{ id: "x", capital: 100000, dias: 54, juros_acumulado: 1000, pret: 120000 }], { taxaOportunidadeMensal: 0.0107 });
+    expect(r[0].jurosAcumulado).toBe(1000);
+    expect(r[0].custoOportunidade).toBeCloseTo(100000 * 0.0107 * 54 / 30, 2);
+    expect(r[0].custoCarregamento).toBeCloseTo(1000 + 100000 * 0.0107 * 54 / 30, 2);
+  });
 });
 
 describe("reprecificacao", () => {

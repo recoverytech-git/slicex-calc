@@ -84,18 +84,18 @@ export default function GestaoInteligente() {
     <>
       <section style={cartao}>
         <h3 style={titulo}>Prioridade de venda</h3>
-        <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>Ordenado pelo custo de carregamento: juros acumulado somado ao custo do capital parado, à taxa do CDI.</p>
+        <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>Ordenado pelo total do carregamento. Juros acumulado é custo real (sai do caixa). Custo CDI é o rendimento que o capital deixou de ter: capital × taxa mensal × dias ÷ 30. Ele não é uma saída de caixa.</p>
         {situacao.ok ? <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>CDI {String(cdi.valor).replace(".", ",")}% a.a. ({(taxaMensal * 100).toFixed(2).replace(".", ",")}% a.m.) · referência {new Date(cdi.referencia + "T00:00:00").toLocaleDateString("pt-BR")} · fonte: Banco Central (SGS 4389)</p> : <p style={{ margin: "0 0 10px", fontSize: 12, color: "#b45309" }}>{erroCdi ? `Erro ao consultar o CDI: ${erroCdi}` : situacao.aviso}</p>}
         {prioridade.length === 0 ? <p style={{ fontSize: 13, color: "var(--text-dim)" }}>Nenhum veículo em estoque.</p> : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><th style={th}>#</th><th style={th}>Modelo</th><th style={th}>Placa</th><th style={{ ...th, textAlign: "right" }}>Dias</th><th style={{ ...th, textAlign: "right" }}>Custo de carregamento</th><th style={{ ...th, textAlign: "right" }}>Margem</th></tr></thead>
+              <thead><tr><th style={th}>#</th><th style={th}>Modelo</th><th style={th}>Placa</th><th style={{ ...th, textAlign: "right" }}>Dias</th><th style={{ ...th, textAlign: "right" }}>Capital</th><th style={{ ...th, textAlign: "right" }}>Juros acumulado (caixa)</th><th style={{ ...th, textAlign: "right" }}>Custo CDI (oportunidade)</th><th style={{ ...th, textAlign: "right" }}>Total do carregamento</th><th style={{ ...th, textAlign: "right" }}>Margem</th></tr></thead>
               <tbody>
                 {prioridade.map((p, i) => (
                   <tr key={p.id}>
                     <td style={td}>{i + 1}</td><td style={td}>{p.modelo}</td><td style={td}>{p.placa || "—"}</td>
                     <td style={{ ...td, textAlign: "right" }}>{p.dias}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{BRL(p.custoCarregamento)}</td>
+                    <td style={{ ...td, textAlign: "right" }}>{BRL(p.capital)}</td><td style={{ ...td, textAlign: "right", color: "#b45309" }}>{BRL(p.jurosAcumulado)}</td><td style={{ ...td, textAlign: "right", color: "var(--accent)" }}>{BRL(p.custoOportunidade)}</td><td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{BRL(p.custoCarregamento)}</td>
                     <td style={{ ...td, textAlign: "right", color: p.margem < 0 ? "#b91c1c" : "#059669" }}>{BRL(p.margem)}</td>
                   </tr>
                 ))}
