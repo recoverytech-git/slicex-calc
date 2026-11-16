@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { familiaModelo, motorModelo, comparaveis, faixaSugerida } from "../src/lib/precificacao";
+import { familiaModelo, motorModelo, motorDe, comparaveis, faixaSugerida } from "../src/lib/precificacao";
 import { riscosVeiculo } from "../src/lib/riscos";
 import { prioridadeVenda } from "../src/lib/prioridade";
 import { sugerirReducao, curvaPreco } from "../src/lib/reprecificacao";
-import { compararAVistaFinanciado } from "../src/lib/decisao";
+import { simularDecisao } from "../src/lib/decisao";
 
 const vendas = [
   { modelo: "GOL MPI 1.0", ano_modelo: 2022, valor_venda: 40000, preco_venda_pretendido: 42000 },
@@ -92,20 +92,51 @@ describe("reprecificacao", () => {
   });
 });
 
-describe("simulador a vista x financiado", () => {
-  it("1 parcela: juros = saldo x taxa, como no Calcula-Car", () => {
-    const r = compararAVistaFinanciado({ compra: 100000, custos: 2000, pretendido: 120000, entrada: 0, taxaMensal: 3.9, prazo: 1 });
+describe("simulador (logica do Calcula-Car)", () => {
+  it("financia Valor financiado menos entrada, com juros do mes em 1 parcela", () => {
+    const r = simularDecisao({ fipe: 120000, compra: 100000, pretendido: 118000, custos: 2000, tipoCapital: "Financiamento", valorFinanciado: 100000, entrada: 0, taxa: 3.9, meses: 1 });
     expect(r.financiado.juros).toBeCloseTo(3900, 2);
-    expect(r.avista.lucro).toBeCloseTo(18000, 2);
-    expect(r.financiado.lucro).toBeCloseTo(14100, 2);
+    expect(r.financiado.pv).toBe(100000);
   });
-  it("entrada reduz o juros", () => {
-    const sem = compararAVistaFinanciado({ compra: 100000, pretendido: 120000, taxaMensal: 3.9, prazo: 1 });
-    const com = compararAVistaFinanciado({ compra: 100000, pretendido: 120000, entrada: 50000, taxaMensal: 3.9, prazo: 1 });
+  it("venda pela FIPE: resultado a vista = FIPE - (compra + custos)", () => {
+    const r = simularDecisao({ fipe: 120000, compra: 100000, pretendido: 118000, custos: 2000, tipoCapital: "Próprio" });
+    expect(r.pelaFipe.avista.resultadoLiquido).toBeCloseTo(18000, 2);
+    expect(r.financiado).toBeNull();
+  });
+  it("entrada reduz o valor financiado e os juros", () => {
+    const sem = simularDecisao({ fipe: 1, compra: 100000, pretendido: 1, tipoCapital: "Financiamento", valorFinanciado: 100000, taxa: 3.9, meses: 12 });
+    const com = simularDecisao({ fipe: 1, compra: 100000, pretendido: 1, tipoCapital: "Financiamento", valorFinanciado: 100000, entrada: 50000, taxa: 3.9, meses: 12 });
     expect(com.financiado.juros).toBeLessThan(sem.financiado.juros);
   });
-  it("a vista ganha quando o juros supera a diferenca do preco", () => {
-    const r = compararAVistaFinanciado({ compra: 100000, pretendido: 101000, taxaMensal: 3.9, prazo: 1 });
-    expect(r.melhor).toBe("avista");
+  it("SAC tem menos juros que Price no mesmo prazo", () => {
+    const price = simularDecisao({ fipe: 1, compra: 1, pretendido: 1, tipoCapital: "Financiamento", valorFinanciado: 100000, taxa: 2, meses: 24, sistema: "Price" });
+    const sac = simularDecisao({ fipe: 1, compra: 1, pretendido: 1, tipoCapital: "Financiamento", valorFinanciado: 100000, taxa: 2, meses: 24, sistema: "SAC" });
+    expect(sac.financiado.juros).toBeLessThan(price.financiado.juros);
+  });
+  it("venda pelo pretendido com financiamento usa os juros no resultado", () => {
+    const r = simularDecisao({ fipe: 120000, compra: 100000, pretendido: 118000, custos: 0, tipoCapital: "Financiamento", valorFinanciado: 100000, taxa: 3.9, meses: 1 });
+    expect(r.pelaPretendido.comFin.resultadoLiquido).toBeCloseTo(118000 - (100000 + 3900), 2);
+  });
+});
+
+describe("motor pela potencia do cadastro", () => {
+  it("le o campo potencia_motor com virgula ou ponto", () => {
+    expect(motorDe({ potencia_motor: "1,6", modelo: "GOL MPI 1.0" })).toBe("1.6");
+    expect(motorDe({ potencia_motor: "1.0", modelo: "GOL 1.6 POWER" })).toBe("1.0");
+  });
+  it("sem potencia cadastrada, usa o nome do modelo", () => {
+    expect(motorDe({ potencia_motor: null, modelo: "GOL 1.6 POWER" })).toBe("1.6");
+  });
+  it("compara pelo campo de potencia mesmo com nomes diferentes", () => {
+    const vendas2 = [
+      { modelo: "GOL", potencia_motor: "1.0", ano_modelo: 2022, valor_venda: 40000, preco_venda_pretendido: 42000 },
+      { modelo: "GOL", potencia_motor: "1.0", ano_modelo: 2022, valor_venda: 41000, preco_venda_pretendido: 42000 },
+      { modelo: "GOL PowerTrain", potencia_motor: "1.0", ano_modelo: 2023, valor_venda: 43000, preco_venda_pretendido: 44000 },
+      { modelo: "GOL", potencia_motor: "1.6", ano_modelo: 2009, valor_venda: 20000, preco_venda_pretendido: 22000 },
+    ];
+    const alvo = { modelo: "GOL MPI", potencia_motor: "1.0", ano_modelo: 2022, preco_venda_pretendido: 50000 };
+    const r = comparaveis(alvo, vendas2);
+    expect(r.lista.length).toBe(3);
+    expect(r.lista.every((v) => motorDe(v) === "1.0")).toBe(true);
   });
 });

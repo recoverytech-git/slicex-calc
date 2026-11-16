@@ -25,7 +25,7 @@ export default function GestaoInteligente() {
     if (!gestao || !supabaseConfigurado) return;
     (async () => {
       const [v, m, c, f, h, vd] = await Promise.all([
-        supabase.from("veiculos").select("id, modelo, placa, status, ano_modelo, preco_compra, preco_venda_pretendido, valor_fipe_atualizado_em"),
+        supabase.from("veiculos").select("id, modelo, placa, status, ano_modelo, potencia_motor, preco_compra, preco_venda_pretendido, valor_fipe_atualizado_em"),
         supabase.from("v_estoque_metricas").select("veiculo_id, dias_em_estoque, juros_diario_acumulado"),
         supabase.from("veiculo_custos").select("veiculo_id, valor"),
         supabase.from("veiculo_financiamentos").select("veiculo_id, total_juros"),
@@ -45,7 +45,8 @@ export default function GestaoInteligente() {
     dados.custos.forEach((x) => { cu[x.veiculo_id] = (cu[x.veiculo_id] || 0) + Number(x.valor || 0); });
     const fi = Object.fromEntries(dados.fin.map((x) => [x.veiculo_id, Number(x.total_juros || 0)]));
     const anoPorId = Object.fromEntries(dados.veiculos.map((x) => [x.id, x.ano_modelo]));
-    const vendasComAno = dados.vendas.map((x) => ({ ...x, ano_modelo: anoPorId[x.veiculo_id] }));
+    const potPorId = Object.fromEntries(dados.veiculos.map((x) => [x.id, x.potencia_motor]));
+    const vendasComAno = dados.vendas.map((x) => ({ ...x, ano_modelo: anoPorId[x.veiculo_id], potencia_motor: potPorId[x.veiculo_id] }));
     return dados.veiculos.filter((v) => v.status !== "vendido").map((v) => {
       const m = mm[v.id] || {};
       const jd = Number(m.juros_diario_acumulado || 0);
@@ -56,7 +57,7 @@ export default function GestaoInteligente() {
         id: v.id, modelo: v.modelo, placa: v.placa, ano_modelo: v.ano_modelo,
         pret, capital, dias, jurosAcum: jd, margem: pret - capital,
         reducao: sugerirReducao({ dias, capital, preco: pret }),
-        faixa: faixaSugerida({ modelo: v.modelo, ano_modelo: v.ano_modelo, preco_venda_pretendido: pret }, vendasComAno),
+        faixa: faixaSugerida({ modelo: v.modelo, ano_modelo: v.ano_modelo, potencia_motor: v.potencia_motor, preco_venda_pretendido: pret }, vendasComAno),
         riscos: riscosVeiculo({ preco_venda_pretendido: pret, capital, juros_acumulado: jd, fipe_atualizada_em: v.valor_fipe_atualizado_em }),
       };
     });

@@ -8,6 +8,7 @@ export const NAV_PRINCIPAL = [
   { to: "/amortizacao", label: "Amortização", curto: "Amortiz.", icon: Scissors, grupo: "calculadoras" },
   { to: "/calcula-car-novo", label: "Calcula-Car", curto: "Carro", icon: Car },
   { to: "/estoque", label: "Estoque", curto: "Estoque", icon: Warehouse },
+  { to: "/simulador-decisao", label: "Simulador", curto: "Simul.", icon: Calculator },
   { to: "/ficha", label: "Ficha bancária", curto: "Ficha", icon: FileText },
   { to: "/leads", label: "Leads", curto: "Leads", icon: ClipboardList },
 ];
