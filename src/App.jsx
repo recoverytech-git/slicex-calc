@@ -1,3 +1,4 @@
+import SimuladorDecisao from "./pages/SimuladorDecisao";
 import { Suspense, lazy, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
@@ -64,6 +65,7 @@ function AnimatedRoutes() {
           <Route path="/admin/usuarios" element={<RotaPrivada><AdminUsuarios /></RotaPrivada>} />
           <Route path="/preencher/:token" element={<PreencherFicha />} />
           <Route path="/galeria/:token" element={<GaleriaPublica />} />
+          <Route path="/simulador-decisao" element={<RotaPrivada><SimuladorDecisao /></RotaPrivada>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

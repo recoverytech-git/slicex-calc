@@ -1,3 +1,4 @@
+import GestaoInteligente from "../components/GestaoInteligente";
 import KpisVendidos from "../components/KpisVendidos";
 import JurosResumo from "../components/JurosResumo";
 import AlertaBaixaPendente from "../components/AlertaBaixaPendente";
@@ -133,6 +134,7 @@ export default function Dashboard() {
           <VeiculosParados veiculos={veiculos} metricas={jurosEst} />
           <JurosResumo jurosEst={jurosEst} vendas={vendas} periodo={periodo} />
           <AlertaBaixaPendente />
+          <GestaoInteligente />
 
           <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Acessos</p>
           <div className="grid-3" style={{ marginBottom: 22 }}>
