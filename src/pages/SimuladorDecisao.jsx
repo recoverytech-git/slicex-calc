@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useRascunho } from "../lib/rascunho";
 import PageTransition from "../components/PageTransition";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
@@ -10,7 +11,7 @@ const rotulo = { display: "block", fontSize: 12, fontWeight: 700, color: "var(--
 const cartao = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 20 };
 
 export default function SimuladorDecisao() {
-  const [v, setV] = useState({ fipe: "", compra: "", custos: "", pretendido: "", entrada: "", taxa: "3.9", prazo: "1" });
+  const [v, setV] = useRascunho("simulador.form", { fipe: "", compra: "", custos: "", pretendido: "", entrada: "", taxa: "3.9", prazo: "1" });
   const num = (k) => Number(String(v[k]).replace(",", ".")) || 0;
   const r = useMemo(() => compararAVistaFinanciado({
     compra: num("compra"), custos: num("custos"), pretendido: num("pretendido"),
