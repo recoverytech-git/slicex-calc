@@ -190,7 +190,7 @@ export default function Custos() {
               <div className="db-chips">{DIAS_VENDA.map((d) => (
                 <button key={d} type="button" className={`db-chip ${diasVenda === d ? "on" : ""}`} onClick={() => setDiasVenda(d)}>{d === 360 ? "360 dias" : `${d} dias`}</button>
               ))}</div>} />
-            <div className="db-kgrid" style={{ marginBottom: 14 }}>
+            <div className="db-kgrid-5" style={{ marginBottom: 14 }}>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Veículos vendidos</span></div><div className="db-kpi-v">{resumoSel.n}</div><div className="db-kpi-s">no período</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Faturamento</span></div><div className="db-kpi-v">{BRL(resumoSel.fat)}</div><div className="db-kpi-s">soma dos valores vendidos</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Resultado final</span></div><div className="db-kpi-v" style={{ color: corLucro(resumoSel.res) }}>{BRL(resumoSel.res)}</div><div className="db-kpi-s">após custos de cada venda</div></div>
