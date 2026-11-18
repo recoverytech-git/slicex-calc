@@ -5,6 +5,13 @@ import BackLink from "../components/BackLink";
 import { useRascunho } from "../lib/rascunho";
 import { simularDecisao } from "../lib/decisao";
 
+const CSS_LAYOUT = `
+.sim-main{max-width:1440px;margin:0 auto;padding:24px 16px}
+.sim-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.sim-result{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:640px){.sim-main{padding:24px}.sim-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1024px){.sim-main{padding:24px 32px}.sim-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.sim-result{grid-template-columns:repeat(2,minmax(0,1fr))}}
+`;
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const PCT = (n) => (n == null ? "—" : `${Number(n).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`);
 const campo = { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid var(--border-strong)", background: "var(--surface)", color: "var(--text)", fontSize: 14 };
@@ -53,14 +60,15 @@ export default function SimuladorDecisao() {
   return (
     <PageTransition>
       <div className="page-bg min-h-screen">
+        <style>{CSS_LAYOUT}</style>
         <Header subtitle="Simulador: comprar à vista x financiar" />
-        <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+        <main className="sim-main">
           <BackLink />
           <h1 style={{ margin: "18px 0 4px", fontSize: 22, fontWeight: 800, color: "var(--text)" }}>Simulador de decisão</h1>
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Mesma lógica do Calcula-Car. Não salva nenhum veículo.</p>
 
           <section style={{ ...cartao, marginBottom: 18 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
+            <div className="sim-grid">
               <div><label style={rotulo}>Valor FIPE (R$)</label><input style={campo} inputMode="decimal" value={v.fipe} onChange={set("fipe")} /></div>
               <div><label style={rotulo}>Valor de compra (R$)</label><input style={campo} inputMode="decimal" value={v.compra} onChange={set("compra")} /></div>
               <div><label style={rotulo}>Valor de venda pretendido (R$)</label><input style={campo} inputMode="decimal" value={v.pretendido} onChange={set("pretendido")} /></div>
@@ -69,7 +77,7 @@ export default function SimuladorDecisao() {
                 <select style={campo} value={v.tipoCapital} onChange={set("tipoCapital")}><option>Próprio</option><option>Financiamento</option></select></div>
             </div>
             {v.tipoCapital === "Financiamento" && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginTop: 14 }}>
+              <div className="sim-grid" style={{ marginTop: 14 }}>
                 <div><label style={rotulo}>Valor financiado (R$)</label><input style={campo} inputMode="decimal" value={v.valorFinanciado} onChange={set("valorFinanciado")} /></div>
                 <div><label style={rotulo}>Entrada (R$)</label><input style={campo} inputMode="decimal" value={v.entrada} onChange={set("entrada")} /></div>
                 <div><label style={rotulo}>Taxa mensal (%)</label><input style={campo} inputMode="decimal" value={v.taxa} onChange={set("taxa")} /></div>
@@ -81,7 +89,7 @@ export default function SimuladorDecisao() {
           </section>
 
           {temValores ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 16 }}>
+            <div className="sim-result">
               {bloco("Venda pela FIPE", r.pelaFipe, num("fipe"))}
               {bloco("Venda pelo valor pretendido", r.pelaPretendido, num("pretendido"))}
             </div>
