@@ -27,9 +27,13 @@ const VD_CSS = `
 .vd-del{height:32px;padding:0 10px;font-size:11px;white-space:nowrap}
 .vd-del svg{flex-shrink:0}
 .vd-cell-acao{width:1%;white-space:nowrap}
-@container (max-width:880px){
+.vd-tabela .db-tbl th,.vd-tabela .db-tbl td{padding:10px 8px;font-size:12.5px}
+.vd-tabela .vd-cell-veic{white-space:normal;min-width:120px;line-height:1.3}
+.vd-tabela .db-tbl td.vd-data{white-space:nowrap}
+.vd-tabela .db-pill{padding:3px 8px;font-size:10.5px}
+@container (max-width:1040px){
   .vd-del-txt{display:none}
-  .vd-del{padding:0 9px}
+  .vd-del{padding:0 9px;height:30px}
   .vd-inv{display:none}
 }
 .vd-cell-veic{font-weight:700;color:var(--text)}
