@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { Calculator, Car, Target, Banknote, Percent, CalendarDays, Landmark, Scale } from "lucide-react";
+import { Calculator, Car, Target, Banknote, Percent, CalendarDays, Landmark, Scale, FileDown } from "lucide-react";
+import { gerarPdfSimulacao } from "../lib/simuladorPdf";
 import PageTransition from "../components/PageTransition";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
@@ -42,6 +43,8 @@ const CSS = `
 .sd-badge-ok{background:#ecfdf5;color:#059669;border:1px solid #a7f3d0}
 .sd-badge-warn{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
 .sd-best{box-shadow:0 0 0 2px #10b981,0 10px 25px -5px rgba(16,185,129,.2)}
+.sd-btn-pdf{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:12px;background:#2563eb;color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;box-shadow:0 8px 16px -4px rgba(37,99,235,.35)}
+.sd-btn-pdf:disabled{opacity:.5;cursor:not-allowed}
 .sd-empty{text-align:center;color:#64748b;font-size:14px;padding:28px 12px}
 `;
 
@@ -75,6 +78,22 @@ export default function SimuladorDecisao() {
     taxa: num("taxa"), meses: num("meses"), sistema: v.sistema,
   }), [v]);
   const temValores = num("compra") > 0 && (num("fipe") > 0 || num("pretendido") > 0);
+  const gerarPdf = () => gerarPdfSimulacao({
+    entradas: [
+      ["Valor FIPE", BRL(num("fipe"))],
+      ["Valor de compra", BRL(num("compra"))],
+      ["Valor pretendido", BRL(num("pretendido"))],
+      ["Custos adicionais", BRL(num("custos"))],
+      ["Tipo de capital", v.tipoCapital],
+      ...(v.tipoCapital === "Financiamento" ? [
+        ["Valor financiado", BRL(num("valorFinanciado"))],
+        ["Entrada", BRL(num("entrada"))],
+        ["Taxa mensal", PCT(num("taxa"))],
+        ["Parcelas", `${num("meses")}x (${v.sistema})`],
+      ] : []),
+    ],
+    r, BRL, PCT,
+  });
   const financiando = v.tipoCapital === "Financiamento";
 
   const bloco = (titulo, Icone, b, valorVenda) => {
@@ -138,6 +157,12 @@ export default function SimuladorDecisao() {
             <h1 className="sd-title">Simulador de decisão</h1>
             <p className="sd-sub">Mesma lógica do Calcula-Car. Nada é salvo no estoque.</p>
           </header>
+
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button type="button" className="sd-btn-pdf" disabled={!temValores} onClick={() => gerarPdf()}>
+              <FileDown size={16} /> Gerar PDF para o cliente
+            </button>
+          </div>
 
           <section className="sd-card">
             <div className="sd-head">
