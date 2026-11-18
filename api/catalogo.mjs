@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
   const slug = String(req.query?.slug || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 80);
   if (!slug) return res.status(400).json({ erro: 'Loja não informada' });
-  const orgs = await (await fetch(`${url}/rest/v1/organizacoes?slug=eq.${slug}&ativa=eq.true&select=id,nome,slug`, { headers: h })).json();
+  const orgs = await (await fetch(`${url}/rest/v1/organizacoes?slug=eq.${slug}&ativa=eq.true&select=id,nome,slug,whatsapp`, { headers: h })).json();
   if (!Array.isArray(orgs) || !orgs[0]) return res.status(404).json({ erro: 'Loja não encontrada' });
   const loja = orgs[0];
 
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   let q = `${url}/rest/v1/veiculos?organizacao_id=eq.${loja.id}&publicado_catalogo=eq.true&status=in.(${STATUS_VISIVEIS})&select=id,modelo,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em&order=criado_em.desc`;
   if (id) q += `&id=eq.${id}`;
   const vs = await (await fetch(q, { headers: h })).json();
-  if (!Array.isArray(vs)) return res.status(502).json({ erro: 'falha ao consultar' });
+  if (!Array.isArray(vs)) return res.status(502).json({ erro: 'falha ao consultar', detalhe: vs?.message || vs?.hint || vs?.code || 'sem detalhe' });
   if (id && !vs[0]) return res.status(404).json({ erro: 'Veículo não encontrado' });
 
   const ids = vs.map((v) => v.id);
@@ -56,6 +56,6 @@ export default async function handler(req, res) {
     out.push({ ...camposPublicos(v), fotos: links, capa: links[0] || null });
   }
   res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=300');
-  if (id) return res.status(200).json({ loja: { nome: loja.nome, slug: loja.slug }, veiculo: out[0] });
-  return res.status(200).json({ loja: { nome: loja.nome, slug: loja.slug }, veiculos: out });
+  if (id) return res.status(200).json({ loja: { nome: loja.nome, slug: loja.slug, whatsapp: loja.whatsapp || null }, veiculo: out[0] });
+  return res.status(200).json({ loja: { nome: loja.nome, slug: loja.slug, whatsapp: loja.whatsapp || null }, veiculos: out });
 }
