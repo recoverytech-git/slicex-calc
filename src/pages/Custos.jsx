@@ -7,7 +7,7 @@ import DbCabeca from "../components/DbCabeca";
 import { DB_CSS } from "../components/dbEstilos";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
-import { CATEGORIAS_CUSTO, custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal, cenariosMeta } from "../lib/custos";
+import { CATEGORIAS_CUSTO, custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal, cenariosMeta, margemReal } from "../lib/custos";
 import { useRascunho } from "../lib/rascunho";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -40,7 +40,7 @@ export default function Custos() {
       supabase.from("veiculo_custos").select("veiculo_id, valor"),
       supabase.from("veiculo_financiamentos").select("veiculo_id, total_juros"),
       supabase.from("v_estoque_metricas").select("veiculo_id, juros_diario_acumulado"),
-      supabase.from("v_vendas_resultado").select("data_venda, valor_venda, resultado_final").gte("data_venda", desde90),
+      supabase.from("v_vendas_resultado").select("data_venda, valor_venda, resultado_final, juros_total").gte("data_venda", desde90),
     ]);
     const falha = [c, cf, v, vc, f, m, vd].find((r) => r.error);
     if (falha) { setErro(falha.error.message); return; }
@@ -68,7 +68,11 @@ export default function Custos() {
   const margemMedia = resumo.margemMedia;
   const precoMedio = resumo.precoMedio;
   const analise = analisarMeta({ custoFixoMensal: fixo, vendas30, margemMedia, precoMedio, meta: Number(String(meta).replace(",", ".")) || 0 });
-  const cenarios = cenariosMeta({ meta: Number(String(meta).replace(",", ".")) || 0, custoFixoMensal: fixo, margemMedia, jurosPorCarro: resumo.jurosPorCarro, precoMedio, vendas30, mediaMensal90 });
+  const rCarro = margemReal(vendasMes);
+  const margemBase = rCarro.n ? rCarro.margem : margemMedia;
+  const jurosBase = rCarro.n ? rCarro.juros : resumo.jurosPorCarro;
+  const fonteBase = rCarro.n ? "vendas reais dos últimos 90 dias" : "estimativa do estoque atual (sem vendas nos últimos 90 dias)";
+  const cenarios = cenariosMeta({ meta: Number(String(meta).replace(",", ".")) || 0, custoFixoMensal: fixo, margemMedia: margemBase, jurosPorCarro: jurosBase, precoMedio, vendas30, mediaMensal90 });
   const alerta = alertaExcesso({ custoFixoMensal: fixo, margemBrutaMes: analise.margemBrutaMes ?? 0 });
 
   const adicionar = async (e) => {
@@ -188,7 +192,7 @@ export default function Custos() {
                 </div>
               ))}
             </div>
-            <p className="db-note" style={{ marginTop: 12 }}>Como calculamos: lucro líquido = carros × (margem média por carro − juros por carro) − custos fixos. Margem média {BRL(margemMedia)}; juros por carro {BRL(resumo.jurosPorCarro)}; custos fixos {BRL(fixo)} por mês.</p>
+            <p className="db-note" style={{ marginTop: 12 }}>Como calculamos: lucro líquido = carros × (margem real por carro − juros por carro) − custos fixos.<br />Margem real por carro {BRL(margemBase)} · juros por carro {BRL(jurosBase)} · custos fixos {BRL(fixo)} por mês.<br />Fonte da margem: {fonteBase}.</p>
           </section>
 
           <section className="db-card">

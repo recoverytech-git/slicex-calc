@@ -102,3 +102,13 @@ export function resumoReal(vendas = []) {
   return { n, fat, res, ticket: n ? fat / n : 0, margem: fat > 0 ? (res / fat) * 100 : 0 };
 }
 
+// Margem real por carro: vendas reais, antes dos juros.
+// resultado_final ja desconta os juros; por isso somamos de volta o juros_total de cada venda.
+export function margemReal(vendas = []) {
+  const n = vendas.length;
+  if (!n) return { n: 0, margem: null, juros: null };
+  const margem = vendas.reduce((s, v) => s + Number(v.resultado_final || 0) + Number(v.juros_total || 0), 0) / n;
+  const juros = vendas.reduce((s, v) => s + Number(v.juros_total || 0), 0) / n;
+  return { n, margem, juros };
+}
+

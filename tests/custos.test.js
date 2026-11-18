@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal, cenariosMeta } from "../src/lib/custos";
+import { custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal, cenariosMeta, margemReal } from "../src/lib/custos";
 
 describe("custos recorrentes", () => {
   it("soma somente os custos ativos", () => {
@@ -98,5 +98,17 @@ describe("cenarios da meta de lucro liquido", () => {
   it("sem margem liquida positiva, informa que nao atinge", () => {
     const r = cenariosMeta({ ...base, margemMedia: 400, jurosPorCarro: 500 });
     expect(r.c.impossivel).toBe(true);
+  });
+});
+
+describe("margem real por carro", () => {
+  it("soma os juros de volta ao resultado final (evita desconto duplo)", () => {
+    const r = margemReal([{ resultado_final: 100, juros_total: 20 }, { resultado_final: 300, juros_total: 40 }]);
+    expect(r.n).toBe(2);
+    expect(r.margem).toBe(230);
+    expect(r.juros).toBe(30);
+  });
+  it("sem vendas nao calcula", () => {
+    expect(margemReal([]).margem).toBeNull();
   });
 });
