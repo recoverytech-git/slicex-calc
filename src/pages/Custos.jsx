@@ -142,7 +142,7 @@ export default function Custos() {
 
           <section className="db-card">
             <DbCabeca Icone={Car} titulo="Estoque (valores atuais)" sub="Mesma base da tela Estoque: capital = compra + custos + juros do financiamento + juros acumulado" />
-            <div className="db-kgrid">
+            <div className="db-kgrid-4">
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Total no pátio</span></div><div className="db-kpi-v">{estoque.total}</div><div className="db-kpi-s">unidades não vendidas</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Venda pela FIPE</span></div><div className="db-kpi-v">{BRL(estoque.potFipe)}</div><div className="db-kpi-s">potencial somando os valores FIPE</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Venda acima da FIPE</span></div><div className="db-kpi-v">{BRL(estoque.potPret)}</div><div className="db-kpi-s">potencial somando os valores pretendidos</div></div>

@@ -83,4 +83,8 @@ export const DB_CSS = `
 @media (min-width:1100px){.db-scen{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .db-scen .db-kpi{min-height:100%;justify-content:flex-start}
 .db-alerta-linha{flex-basis:100%;font-size:13px;color:var(--text-dim);margin-top:4px}
+
+.db-kgrid-4{display:grid;gap:14px;width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:640px){.db-kgrid-4{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:1000px){.db-kgrid-4{grid-template-columns:repeat(4,minmax(0,1fr))}}
 `;
