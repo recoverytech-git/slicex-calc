@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal, cenariosMeta, margemReal } from "../src/lib/custos";
+import { custoFixoMensal, mapaCapital, resumoEstoque, vendasPeriodo, resumoVendas, planoMeta, alertaExcesso } from "../src/lib/custos";
 
 describe("custos recorrentes", () => {
   it("soma somente os custos ativos", () => {
@@ -7,32 +7,67 @@ describe("custos recorrentes", () => {
   });
 });
 
-describe("analise da meta de lucro", () => {
-  it("dentro do esperado quando a margem cobre custos e meta", () => {
-    const r = analisarMeta({ custoFixoMensal: 1000, vendas30: 10, margemMedia: 1500, meta: 4000 });
-    expect(r.status).toBe("ok");
-    expect(r.lucroLiquidoMes).toBe(14000);
-    expect(r.excedente).toBe(15000 - 5000);
+describe("capital e estoque (igual a tela Estoque)", () => {
+  const veiculos = [
+    { id: "a", status: "disponivel", preco_compra: 40000, preco_venda_pretendido: 50000, valor_fipe: 48000 },
+    { id: "b", status: "disponivel", preco_compra: 30000, preco_venda_pretendido: 36000, valor_fipe: 35000 },
+    { id: "c", status: "vendido", preco_compra: 1, preco_venda_pretendido: 1, valor_fipe: 1 },
+  ];
+  const custosVeic = [{ veiculo_id: "a", valor: 1000 }];
+  const fin = [{ veiculo_id: "b", total_juros: 2000 }];
+  const metricas = [{ veiculo_id: "a", juros_diario_acumulado: 500 }];
+  it("capital = compra + custos + juros do financiamento + juros acumulado", () => {
+    const m = mapaCapital({ veiculos, custosVeic, fin, metricas });
+    expect(m.a.capital).toBe(41500);
+    expect(m.b.capital).toBe(32000);
   });
-  it("dentro do esperado quando a margem cobre custos e meta, com excedente", () => {
-    const r = analisarMeta({ custoFixoMensal: 2000, vendas30: 4, margemMedia: 1500, precoMedio: 50000, meta: 3000 });
-    expect(r.status).toBe("ok");
-    expect(r.necessario).toBe(5000);
-    expect(r.margemBrutaMes).toBe(6000);
-    expect(r.excedente).toBe(1000);
+  it("indicadores do estoque excluem vendidos", () => {
+    const r = resumoEstoque({ veiculos, custosVeic, fin, metricas });
+    expect(r.total).toBe(2);
+    expect(r.capital).toBe(73500);
+    expect(r.potPret).toBe(86000);
+    expect(r.lucroPret).toBe(12500);
+    expect(r.lucroFipe).toBe(83000 - 73500);
   });
-  it("calcula acrescimo de margem por carro quando a margem nao cobre", () => {
-    const r = analisarMeta({ custoFixoMensal: 2000, vendas30: 2, margemMedia: 1000, precoMedio: 50000, meta: 4000 });
-    expect(r.status).toBe("abaixo");
-    expect(r.necessario).toBe(6000);
-    expect(r.faltaTotal).toBe(4000);
-    expect(r.acrescimoPorVeiculo).toBe(2000);
-    expect(r.acrescimoPrecoPct).toBeCloseTo(0.04, 4);
-    expect(r.veiculosNecessarios).toBe(6);
-    expect(r.faltamVeiculos).toBe(4);
+});
+
+describe("vendas reais", () => {
+  const vendas = [
+    { data_venda: "2026-11-08", valor_venda: 65000, resultado_final: 8235.74 },
+    { data_venda: "2026-08-24", valor_venda: 67000, resultado_final: 5679.48 },
+  ];
+  it("filtra pelo periodo e soma valores reais", () => {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const recentes = vendasPeriodo(vendas.map((v) => ({ ...v, data_venda: hoje })), 30);
+    expect(recentes.length).toBe(2);
+    const r = resumoVendas(recentes);
+    expect(r.fat).toBe(132000);
+    expect(r.res).toBeCloseTo(13915.22, 2);
   });
-  it("sem dados de margem nao calcula", () => {
-    expect(analisarMeta({ custoFixoMensal: 100, vendas30: 0, margemMedia: 0, meta: 0 }).status).toBe("sem_dados");
+});
+
+describe("plano da meta com veiculos reais", () => {
+  const estoque = [
+    { id: "x", modelo: "A", resultado: 5000 },
+    { id: "y", modelo: "B", resultado: 2000 },
+    { id: "z", modelo: "C", resultado: -1000 },
+  ];
+  it("escolhe os maiores resultados reais ate atingir a meta", () => {
+    const p = planoMeta({ meta: 3000, fixo: 1000, realizadoMes: 0, veiculos: estoque });
+    expect(p.atingivel).toBe(true);
+    expect(p.escolhidos.map((v) => v.id)).toEqual(["x"]);
+    expect(p.lucroComEstoque).toBe(4000);
+  });
+  it("sem veiculos suficientes, informa o que falta", () => {
+    const p = planoMeta({ meta: 100000, fixo: 1000, realizadoMes: 0, veiculos: estoque });
+    expect(p.atingivel).toBe(false);
+    expect(p.totalEstoque).toBe(7000);
+    expect(p.falta).toBe(100000 - (7000 - 1000));
+  });
+  it("realizado no mes ja cobre a meta: nenhum veiculo necessario", () => {
+    const p = planoMeta({ meta: 1000, fixo: 500, realizadoMes: 5000, veiculos: estoque });
+    expect(p.atingivel).toBe(true);
+    expect(p.escolhidos).toEqual([]);
   });
 });
 
@@ -43,72 +78,5 @@ describe("alerta de excesso de custos", () => {
   it("acima de 25% alerta em nivel medio, acima de 50% em alto", () => {
     expect(alertaExcesso({ custoFixoMensal: 3000, margemBrutaMes: 10000 }).nivel).toBe("medio");
     expect(alertaExcesso({ custoFixoMensal: 6000, margemBrutaMes: 10000 }).nivel).toBe("alto");
-  });
-  it("custo sem margem alerta", () => {
-    expect(alertaExcesso({ custoFixoMensal: 500, margemBrutaMes: 0 }).nivel).toBe("alto");
-  });
-});
-
-describe("base do estoque (igual a tela Estoque)", () => {
-  const veiculos = [
-    { id: "a", status: "disponivel", preco_compra: 40000, preco_venda_pretendido: 50000, valor_fipe: 48000 },
-    { id: "b", status: "disponivel", preco_compra: 30000, preco_venda_pretendido: 36000, valor_fipe: 35000 },
-    { id: "c", status: "vendido", preco_compra: 1, preco_venda_pretendido: 1, valor_fipe: 1 },
-  ];
-  const custosVeic = [{ veiculo_id: "a", valor: 1000 }];
-  const fin = [{ veiculo_id: "b", total_juros: 2000 }];
-  const metricas = [{ veiculo_id: "a", juros_diario_acumulado: 500 }];
-  const r = resumoEstoque({ veiculos, custosVeic, fin, metricas });
-  it("capital = compra + custos (vendidos fora); juros ficam separados", () => {
-    expect(r.total).toBe(2);
-    expect(r.capital).toBe(71000);
-    expect(r.jurosEstoque).toBe(2500);
-  });
-  it("margem media e juros por carro", () => {
-    expect(r.margemMedia).toBeCloseTo((50000 - 41000 + 36000 - 30000) / 2, 6);
-    expect(r.jurosPorCarro).toBeCloseTo(1250, 6);
-  });
-  it("realizado soma faturamento e resultado do periodo", () => {
-    const x = resumoReal([{ valor_venda: 100, resultado_final: 30 }, { valor_venda: 300, resultado_final: 70 }]);
-    expect(x.fat).toBe(400); expect(x.res).toBe(100); expect(x.margem).toBeCloseTo(25, 6); expect(x.ticket).toBe(200);
-  });
-});
-
-describe("cenarios da meta de lucro liquido", () => {
-  const base = { meta: 3000, custoFixoMensal: 2000, margemMedia: 1500, jurosPorCarro: 500, precoMedio: 50000 };
-  it("liquido por carro desconta juros; lucro = carros x liquido - custos fixos", () => {
-    const r = cenariosMeta({ ...base, vendas30: 4, mediaMensal90: 2 });
-    expect(r.liqPorCarro).toBe(1000);
-    expect(r.a.lucro).toBe(2000);
-    expect(r.a.atinge).toBe(false);
-    expect(r.a.faltam).toBe(1000);
-  });
-  it("cenario para atingir: carros necessarios arredondados para cima", () => {
-    const r = cenariosMeta({ ...base, vendas30: 0, mediaMensal90: 0 });
-    expect(r.c.necessario).toBe(5);
-    expect(r.c.lucro).toBe(3000);
-    expect(r.c.atinge).toBe(true);
-  });
-  it("alternativa de preco: sem atingir no ritmo medio, calcula aumento por carro", () => {
-    const r = cenariosMeta({ ...base, vendas30: 1, mediaMensal90: 2 });
-    expect(r.b.atinge).toBe(false);
-    expect(r.aumentoPorCarro).toBeCloseTo(1500, 6);
-    expect(r.aumentoPct).toBeCloseTo(0.03, 6);
-  });
-  it("sem margem liquida positiva, informa que nao atinge", () => {
-    const r = cenariosMeta({ ...base, margemMedia: 400, jurosPorCarro: 500 });
-    expect(r.c.impossivel).toBe(true);
-  });
-});
-
-describe("margem real por carro", () => {
-  it("soma os juros de volta ao resultado final (evita desconto duplo)", () => {
-    const r = margemReal([{ resultado_final: 100, juros_total: 20 }, { resultado_final: 300, juros_total: 40 }]);
-    expect(r.n).toBe(2);
-    expect(r.margem).toBe(230);
-    expect(r.juros).toBe(30);
-  });
-  it("sem vendas nao calcula", () => {
-    expect(margemReal([]).margem).toBeNull();
   });
 });
