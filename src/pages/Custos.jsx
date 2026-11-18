@@ -72,7 +72,9 @@ export default function Custos() {
     meta: metaNumero, fixo, realizadoMes: vendas30.res,
     veiculos: veiculos.filter((v) => v.status !== "vendido").map((v) => ({ id: v.id, modelo: v.modelo, placa: v.placa, resultado: mapa[v.id]?.resultado ?? 0 })),
   }), [metaNumero, fixo, vendas30.res, veiculos, mapa]);
-  const alerta = alertaExcesso({ custoFixoMensal: fixo, margemBrutaMes: vendas30.res + vendas30.n * 0 });
+  // resultado bruto real do mes = resultado final + juros de cada venda (antes dos juros)
+  const brutoMes = vendasPeriodo(vendas, 30).reduce((s, v) => s + Number(v.resultado_final || 0) + Number(v.juros_total || 0), 0);
+  const alerta = alertaExcesso({ custoFixoMensal: fixo, margemBrutaMes: brutoMes });
 
   const adicionar = async (e) => {
     e.preventDefault();
