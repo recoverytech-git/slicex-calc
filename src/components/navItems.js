@@ -1,4 +1,4 @@
-import { Store, LayoutDashboard, Landmark, Percent, Scissors, Car, Warehouse, BadgeDollarSign, Users, Settings, ScrollText, FileText, ClipboardList, Calculator } from "lucide-react";
+import { Store, Wallet, LayoutDashboard, Landmark, Percent, Scissors, Car, Warehouse, BadgeDollarSign, Users, Settings, ScrollText, FileText, ClipboardList, Calculator } from "lucide-react";
 
 export const NAV_PRINCIPAL = [
   { to: "/dashboard", label: "Dashboard", curto: "Dashboard", icon: LayoutDashboard },
@@ -20,6 +20,8 @@ export function itensNav(papel) {
     extra.push({ to: "/vendas", label: "Vendidos", curto: "Vendidos", icon: BadgeDollarSign });
   if (["admin_master", "proprietario", "gerente"].includes(papel))
     extra.push({ to: "/catalogo-publico", label: "Catálogo público", curto: "Catálogo", icon: Store });
+  if (["admin_master", "proprietario", "gerente"].includes(papel))
+    extra.push({ to: "/custos", label: "Custos", curto: "Custos", icon: Wallet });
   if (["admin_master", "proprietario"].includes(papel))
     extra.push({ to: "/admin/usuarios", label: "Usuários", curto: "Usuários", icon: Users });
   if (["admin_master", "proprietario"].includes(papel))

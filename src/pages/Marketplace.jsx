@@ -1,12 +1,22 @@
-// sem-rascunho: pagina publica do visitante; nada e guardado no navegador
-import { useEffect, useState } from "react";
+// sem-rascunho: pagina publica do visitante; favoritos ficam so no navegador (sem dados pessoais)
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Search, Car, Store, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Car, Store, ChevronLeft, ChevronRight, Heart, TrendingDown, X, GitCompare } from "lucide-react";
 import { CATALOGO_CSS } from "./catalogo-estilos";
 import useLogoPublica from "../lib/logoPublica";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const VAZIO = { busca: "", loja: "", precoMax: "", anoMin: "", combustivel: "", cambio: "" };
+const FAV_KEY = "calculacar.favoritos";
+const MAX_COMPARAR = 3;
+
+function lerFavoritos() {
+  try { const v = JSON.parse(localStorage.getItem(FAV_KEY) || "[]"); return Array.isArray(v) ? v.slice(0, 100) : []; } catch { return []; }
+}
+function fipeTexto(v) {
+  if (!v.abaixo_fipe || v.diferenca_fipe_pct == null) return null;
+  return `${Math.abs(v.diferenca_fipe_pct).toLocaleString("pt-BR")}% abaixo da FIPE`;
+}
 
 export default function Marketplace() {
   const logo = useLogoPublica();
@@ -17,23 +27,50 @@ export default function Marketplace() {
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(null);
   const [carregando, setCarregando] = useState(false);
+  const [favoritos, setFavoritos] = useState(lerFavoritos);
+  const [soFavoritos, setSoFavoritos] = useState(false);
+  const [selecionados, setSelecionados] = useState([]);
+  const [comparando, setComparando] = useState(false);
 
-  // filtros vao ao servidor: a busca cobre todo o marketplace, nao so a pagina aberta
   useEffect(() => {
+    if (soFavoritos) {
+      if (!favoritos.length) { setDados({ lojas: [], veiculos: [], total: 0, paginas: 1, porPagina: 30, pagina: 1 }); return; }
+      setCarregando(true); setErro(null);
+      fetch(`/api/marketplace?ids=${encodeURIComponent(favoritos.join(","))}`)
+        .then(async (r) => { const b = await r.json(); if (!r.ok) throw new Error(b.detalhe || b.erro || "Falha ao carregar"); return b; })
+        .then((b) => setDados({ ...b, paginas: 1, porPagina: 30 }))
+        .catch((e) => setErro(e.message))
+        .finally(() => setCarregando(false));
+      return;
+    }
     const qs = new URLSearchParams({ pagina: String(pagina) });
     Object.entries(f).forEach(([k, v]) => { if (v) qs.set(k, v); });
-    setCarregando(true);
-    setErro(null);
+    setCarregando(true); setErro(null);
     fetch(`/api/marketplace?${qs.toString()}`)
       .then(async (r) => { const b = await r.json(); if (!r.ok) throw new Error([b.erro, b.detalhe].filter(Boolean).join(" — ") || "Falha ao carregar"); return b; })
       .then((b) => setDados(b))
       .catch((e) => setErro(e.message))
       .finally(() => setCarregando(false));
-  }, [pagina, f]);
+  }, [pagina, f, soFavoritos, favoritos.join(",")]);
 
-  const set = (k) => (e) => { setF({ ...f, [k]: e.target.value }); if (pagina > 1) navigate("/marketplace"); };
+  const alternarFavorito = (id) => {
+    setFavoritos((prev) => {
+      const nova = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      localStorage.setItem(FAV_KEY, JSON.stringify(nova));
+      return nova;
+    });
+  };
+  const alternarComparar = (v) => {
+    setSelecionados((prev) => {
+      if (prev.some((x) => x.id === v.id)) return prev.filter((x) => x.id !== v.id);
+      if (prev.length >= MAX_COMPARAR) return prev;
+      return [...prev, v];
+    });
+  };
+
+  const set = (k) => (e) => { setSoFavoritos(false); setF({ ...f, [k]: e.target.value }); if (pagina > 1) navigate("/marketplace"); };
   const irPagina = (p) => navigate(p <= 1 ? "/marketplace" : `/marketplace/pagina/${p}`);
-  const totalPaginas = dados?.paginas ?? 1;
+  const totalPaginas = !soFavoritos ? (dados?.paginas ?? 1) : 1;
   const temFiltro = Object.values(f).some(Boolean);
 
   return (
@@ -55,6 +92,9 @@ export default function Marketplace() {
             <input placeholder="Busque por marca, modelo ou cidade" value={f.busca} onChange={set("busca")} aria-label="Buscar veículo" />
           </label>
           <div className="cat-chips" role="group" aria-label="Filtros">
+            <button type="button" className={`cat-sel cat-toggle ${soFavoritos ? "on" : ""}`} onClick={() => setSoFavoritos(!soFavoritos)}>
+              <Heart size={14} fill={soFavoritos ? "currentColor" : "none"} /> Favoritos ({favoritos.length})
+            </button>
             <select className="cat-sel" value={f.loja} onChange={set("loja")} aria-label="Loja">
               <option value="">Todas as lojas</option>
               {(dados?.lojas ?? []).map((l) => <option key={l.slug} value={l.slug}>{l.nome}</option>)}
@@ -86,32 +126,49 @@ export default function Marketplace() {
           <>
             <p className="cat-count">
               {dados.total === 0
-                ? (dados.lojas.length === 0 ? "Nenhuma loja ativou o marketplace ainda." : "Nenhum veículo com esses filtros.")
-                : `Mostrando ${(pagina - 1) * dados.porPagina + 1}–${Math.min(pagina * dados.porPagina, dados.total)} de ${dados.total}`}
+                ? (soFavoritos ? "Você ainda não favoritou veículos." : (dados.lojas.length === 0 ? "Nenhuma loja ativou o marketplace ainda." : "Nenhum veículo com esses filtros."))
+                : `Mostrando ${soFavoritos ? dados.veiculos.length : (pagina - 1) * dados.porPagina + 1}${soFavoritos ? "" : `–${Math.min(pagina * dados.porPagina, dados.total)}`} de ${dados.total}`}
             </p>
             {dados.total === 0 ? (
-              <div className="cat-empty"><Car size={32} style={{ marginBottom: 8 }} /><div>{dados.lojas.length === 0 ? "Volte em breve: as lojas parceiras estão chegando." : "Tente outros filtros."}</div></div>
+              <div className="cat-empty"><Car size={32} style={{ marginBottom: 8 }} /><div>{soFavoritos ? "Toque no coração em um veículo para guardá-lo aqui." : (dados.lojas.length === 0 ? "Volte em breve: as lojas parceiras estão chegando." : "Tente outros filtros.")}</div></div>
             ) : (
               <div className="cat-grid" style={{ opacity: carregando ? 0.6 : 1 }}>
-                {dados.veiculos.map((v) => (
-                  <Link key={v.id} to={`/loja/${v.loja_slug}/veiculo/${v.id}`} className="cat-card">
-                    <div className="cat-img">
-                      {v.capa ? <img src={v.capa} alt={`${v.marca ?? ""} ${v.modelo}`} loading="lazy" /> : <div className="cat-ph">Sem foto</div>}
-                      <span className="cat-badge">{v.status === "reservado" ? "Reservado" : "Disponível"}</span>
-                    </div>
-                    <div className="cat-body">
-                      <h2 className="cat-name">{v.marca ? `${v.marca} ` : ""}{v.modelo}</h2>
-                      <div className="cat-meta">
-                        <span className="cat-tag">{v.ano_fabricacao}/{v.ano_modelo}</span>
-                        {v.quilometragem != null && <span className="cat-tag">{Number(v.quilometragem).toLocaleString("pt-BR")} km</span>}
-                        {v.combustivel && <span className="cat-tag">{v.combustivel}</span>}
-                        {v.cambio && <span className="cat-tag">{v.cambio}</span>}
+                {dados.veiculos.map((v) => {
+                  const fav = favoritos.includes(v.id);
+                  const cmp = selecionados.some((x) => x.id === v.id);
+                  const bloqueado = !cmp && selecionados.length >= MAX_COMPARAR;
+                  const fipe = fipeTexto(v);
+                  return (
+                    <div key={v.id} className="cat-card-wrap">
+                      <Link to={`/loja/${v.loja_slug}/veiculo/${v.id}`} className="cat-card">
+                        <div className="cat-img">
+                          {v.capa ? <img src={v.capa} alt={`${v.marca ?? ""} ${v.modelo}`} loading="lazy" /> : <div className="cat-ph">Sem foto</div>}
+                          <span className="cat-badge">{v.status === "reservado" ? "Reservado" : "Disponível"}</span>
+                          {fipe && <span className="cat-fipe"><TrendingDown size={12} /> {fipe}</span>}
+                        </div>
+                        <div className="cat-body">
+                          <h2 className="cat-name">{v.marca ? `${v.marca} ` : ""}{v.modelo}</h2>
+                          <div className="cat-meta">
+                            <span className="cat-tag">{v.ano_fabricacao}/{v.ano_modelo}</span>
+                            {v.quilometragem != null && <span className="cat-tag">{Number(v.quilometragem).toLocaleString("pt-BR")} km</span>}
+                            {v.combustivel && <span className="cat-tag">{v.combustivel}</span>}
+                            {v.cambio && <span className="cat-tag">{v.cambio}</span>}
+                          </div>
+                          <div className="cat-price">{BRL(v.preco_venda_pretendido)}</div>
+                          <div style={{ fontSize: 12, color: "#64748b", display: "flex", alignItems: "center", gap: 6 }}><Store size={13} /> {v.loja_nome}{v.cidade ? ` · ${v.cidade}${v.uf ? `/${v.uf}` : ""}` : ""}</div>
+                        </div>
+                      </Link>
+                      <div className="cat-card-acoes">
+                        <button type="button" className={`cat-fav ${fav ? "on" : ""}`} onClick={() => alternarFavorito(v.id)} aria-label={fav ? "Remover dos favoritos" : "Favoritar"} aria-pressed={fav}>
+                          <Heart size={16} fill={fav ? "currentColor" : "none"} />
+                        </button>
+                        <label className={`cat-cmp ${cmp ? "on" : ""} ${bloqueado ? "off" : ""}`}>
+                          <input type="checkbox" checked={cmp} disabled={bloqueado} onChange={() => alternarComparar(v)} /> <GitCompare size={13} /> Comparar
+                        </label>
                       </div>
-                      <div className="cat-price">{BRL(v.preco_venda_pretendido)}</div>
-                      <div style={{ fontSize: 12, color: "#64748b", display: "flex", alignItems: "center", gap: 6 }}><Store size={13} /> {v.loja_nome}{v.cidade ? ` · ${v.cidade}${v.uf ? `/${v.uf}` : ""}` : ""}</div>
                     </div>
-                  </Link>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -126,6 +183,45 @@ export default function Marketplace() {
         )}
         <p className="cat-foot">Marketplace Calcula.car · veículos das lojas parceiras</p>
       </main>
+
+      {selecionados.length >= 2 && !comparando && (
+        <div className="cat-bar">
+          <span style={{ fontSize: 14, fontWeight: 700 }}>{selecionados.length} veículos selecionados</span>
+          <button type="button" className="cat-btn" onClick={() => setComparando(true)} style={{ height: 42 }}><GitCompare size={16} /> Comparar</button>
+        </div>
+      )}
+
+      {comparando && (
+        <div className="cat-modal" role="dialog" aria-label="Comparar veículos" onClick={(e) => { if (e.target === e.currentTarget) setComparando(false); }}>
+          <div className="cat-modal-in">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <h2 className="cat-h2" style={{ fontSize: 20 }}>Comparar veículos</h2>
+              <button type="button" className="cat-fav on" onClick={() => setComparando(false)} aria-label="Fechar"><X size={16} /></button>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table className="cat-table">
+                <thead><tr><th></th>{selecionados.map((v) => <th key={v.id}>{v.marca ? `${v.marca} ` : ""}{v.modelo}</th>)}</tr></thead>
+                <tbody>
+                  {[
+                    ["Preço", (v) => BRL(v.preco_venda_pretendido)],
+                    ["Ano", (v) => `${v.ano_fabricacao}/${v.ano_modelo}`],
+                    ["Quilometragem", (v) => v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString("pt-BR")} km` : "—"],
+                    ["Combustível", (v) => v.combustivel || "—"],
+                    ["Câmbio", (v) => v.cambio || "—"],
+                    ["Cor", (v) => v.cor || "—"],
+                    ["Localização", (v) => v.cidade ? `${v.cidade}${v.uf ? "/" + v.uf : ""}` : "—"],
+                    ["Loja", (v) => v.loja_nome || "—"],
+                    ["Em relação à FIPE", (v) => fipeTexto(v) || "Preço na média"],
+                  ].map(([rotulo, fn]) => (
+                    <tr key={rotulo}><th>{rotulo}</th>{selecionados.map((v) => <td key={v.id}>{fn(v)}</td>)}</tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p style={{ fontSize: 12, color: "#64748b", margin: "12px 0 0" }}>Toque em um veículo na lista para ver fotos e falar com a loja.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

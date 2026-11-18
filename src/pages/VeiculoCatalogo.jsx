@@ -110,6 +110,7 @@ export default function VeiculoCatalogo() {
               <div>
                 <div className="cat-eyebrow">Preço</div>
                 <div className="cat-bigprice">{BRL(v.preco_venda_pretendido)}</div>
+                {v.abaixo_fipe && <span className="cat-fipe" style={{ position: "static", display: "inline-flex", marginTop: 8, width: "fit-content" }}>{Math.abs(v.diferenca_fipe_pct).toLocaleString("pt-BR")}% abaixo da FIPE</span>}
               </div>
 
               <div className="cat-spec">
