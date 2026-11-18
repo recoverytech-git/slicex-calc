@@ -22,7 +22,16 @@ const VD_CSS = `
 @keyframes vdIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .vd-del{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:10px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
 .vd-del:hover{background:#fee2e2;box-shadow:0 6px 14px -6px rgba(185,28,28,.35)}
-.vd-tabela table{min-width:760px}
+.vd-tabela{container-type:inline-size;width:100%}
+.vd-tabela table{min-width:0;width:100%}
+.vd-del{height:32px;padding:0 10px;font-size:11px;white-space:nowrap}
+.vd-del svg{flex-shrink:0}
+.vd-cell-acao{width:1%;white-space:nowrap}
+@container (max-width:880px){
+  .vd-del-txt{display:none}
+  .vd-del{padding:0 9px}
+  .vd-inv{display:none}
+}
 .vd-cell-veic{font-weight:700;color:var(--text)}
 .vd-data{color:var(--text-mute);font-variant-numeric:tabular-nums}
 @media (max-width:639px){.vd-hide-sm{display:none}.vd-tabela table{min-width:0}}
@@ -107,10 +116,10 @@ export default function Vendas() {
                     <th>Veículo</th>
                     <th>Data</th>
                     <th className="db-r">Venda</th>
-                    {gestao && <th className="db-r vd-hide-sm">Investimento</th>}
+                    {gestao && <th className="db-r vd-inv vd-hide-sm">Investimento</th>}
                     {gestao && <th className="db-r">Resultado final</th>}
                     {gestao && <th className="db-r">%</th>}
-                    {admin && <th className="db-r">Ações</th>}
+                    {admin && <th className="db-r vd-cell-acao">Ações</th>}
                   </tr></thead>
                   <tbody>
                     {linhas.map((l, i) => {
@@ -120,10 +129,10 @@ export default function Vendas() {
                           <td className="vd-cell-veic">{l.modelo}{gestao && l.placa ? ` · ${l.placa}` : ""}</td>
                           <td className="vd-data">{dataBR(l.data_venda)}</td>
                           <td className="db-r">{formatarBRL(l.valor_venda)}</td>
-                          {gestao && <td className="db-r vd-hide-sm" style={{ color: "var(--text-mute)" }}>{formatarBRL(l.investimento_total)}</td>}
+                          {gestao && <td className="db-r vd-inv vd-hide-sm" style={{ color: "var(--text-mute)" }}>{formatarBRL(l.investimento_total)}</td>}
                           {gestao && <td className="db-r" style={{ fontWeight: 800, color: positivo ? "#059669" : "#b91c1c" }}>{formatarBRL(l.resultado_final)}</td>}
                           {gestao && <td className="db-r"><span className={`db-pill ${positivo ? "db-pill-verde" : "db-pill-verm"}`}>{pct(l.resultado_final, l.investimento_total)}</span></td>}
-                          {admin && <td className="db-r"><button type="button" className="vd-del" onClick={() => excluirDefinitivo(l)}><Trash2 size={13} /> Excluir definitivamente</button></td>}
+                          {admin && <td className="db-r vd-cell-acao"><button type="button" className="vd-del" title="Excluir definitivamente" aria-label="Excluir definitivamente" onClick={() => excluirDefinitivo(l)}><Trash2 size={13} /> <span className="vd-del-txt">Excluir definitivamente</span></button></td>}
                         </tr>
                       );
                     })}
