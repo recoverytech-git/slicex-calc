@@ -1,3 +1,4 @@
+import Marketplace from "./pages/Marketplace";
 import CatalogoPublicoAdmin from "./pages/CatalogoPublicoAdmin";
 import Catalogo from "./pages/Catalogo";
 import VeiculoCatalogo from "./pages/VeiculoCatalogo";
@@ -72,6 +73,8 @@ function AnimatedRoutes() {
           <Route path="/loja/:slug" element={<Catalogo />} />
           <Route path="/loja/:slug/veiculo/:id" element={<VeiculoCatalogo />} />
           <Route path="/catalogo-publico" element={<RotaPrivada><CatalogoPublicoAdmin /></RotaPrivada>} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/marketplace/pagina/:n" element={<Marketplace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

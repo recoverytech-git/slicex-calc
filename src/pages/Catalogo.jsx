@@ -4,12 +4,13 @@ import { useParams, Link } from "react-router-dom";
 import { Search, Car } from "lucide-react";
 import { filtrarCatalogo, opcoesFiltro } from "../lib/catalogo";
 import { CATALOGO_CSS } from "./catalogo-estilos";
-import logo from "../assets/logo.png";
+import useLogoPublica from "../lib/logoPublica";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const VAZIO = { busca: "", precoMax: "", anoMin: "", combustivel: "", cambio: "" };
 
 export default function Catalogo() {
+  const logo = useLogoPublica();
   const { slug } = useParams();
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(null);

@@ -36,6 +36,7 @@ function MarketplaceOptIn() {
           <input type="checkbox" checked={ativo} onChange={(e) => alternar(e.target.checked)} /> {ativo ? "Ativo" : "Inativo"}
         </label>
       </div>
+      <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-dim)" }}>Link do marketplace: <a href="/marketplace" target="_blank" rel="noreferrer" style={{ color: "#2563eb", fontWeight: 700 }}>{window.location.origin}/marketplace</a></div>
       {msg && <p style={{ margin: "10px 0 0", fontSize: 12, color: msg.tipo === "ok" ? "#059669" : "#b91c1c" }}>{msg.texto}</p>}
     </section>
   );

@@ -1,6 +1,30 @@
 {
   "rewrites": [
     {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/marketplace/pagina/:n",
+      "destination": "/api/seo?p=/marketplace/pagina/:n"
+    },
+    {
+      "source": "/marketplace",
+      "destination": "/api/seo?p=/marketplace"
+    },
+    {
+      "source": "/loja/:slug/veiculo/:id",
+      "destination": "/api/seo?p=/loja/:slug/veiculo/:id"
+    },
+    {
+      "source": "/foto/:id",
+      "destination": "/api/foto?id=:id"
+    },
+    {
+      "source": "/icone/:t",
+      "destination": "/api/icone?t=:t"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

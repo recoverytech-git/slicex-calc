@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Gauge, Fuel, Cog, MapPin, Hash, Users, DoorOpen, Send, CheckCircle2 } from "lucide-react";
 import { CATALOGO_CSS } from "./catalogo-estilos";
-import logo from "../assets/logo.png";
+import useLogoPublica from "../lib/logoPublica";
 import { formatarCPF, soDigitos } from "../lib/mascaras";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export default function VeiculoCatalogo() {
+  const logo = useLogoPublica();
   const { slug, id } = useParams();
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(null);
