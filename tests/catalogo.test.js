@@ -12,6 +12,11 @@ describe("filtros do catalogo", () => {
     expect(filtrarCatalogo(lista, { busca: "corolla" }).map((v) => v.id)).toEqual(["2"]);
     expect(filtrarCatalogo(lista, { busca: "goiânia" }).map((v) => v.id)).toEqual(["1"]);
   });
+  it("busca pela marca e pela loja (marketplace)", () => {
+    const m = [{ id: "a", marca: "Volkswagen", modelo: "GOL", loja_nome: "Auto Silva" }, { id: "b", marca: "Toyota", modelo: "COROLLA", loja_nome: "Centro Motors" }];
+    expect(filtrarCatalogo(m, { busca: "toyota" }).map((v) => v.id)).toEqual(["b"]);
+    expect(filtrarCatalogo(m, { busca: "silva" }).map((v) => v.id)).toEqual(["a"]);
+  });
   it("faixa de preco e ano", () => {
     expect(filtrarCatalogo(lista, { precoMax: 60000 }).map((v) => v.id)).toEqual(["1"]);
     expect(filtrarCatalogo(lista, { anoMin: 2023 }).map((v) => v.id)).toEqual(["1"]);

@@ -90,7 +90,7 @@ function Shell() {
     if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
     link.href = marca.favicon;
   }, [marca.favicon]);
-  const publico = pathname === "/" || pathname === "/login" || pathname.startsWith("/preencher/") || pathname.startsWith("/galeria/") || pathname.startsWith("/loja/");
+  const publico = pathname === "/" || pathname === "/login" || pathname.startsWith("/preencher/") || pathname.startsWith("/galeria/") || pathname.startsWith("/loja/") || pathname.startsWith("/marketplace");
   const comNav = Boolean(sessao) && !publico;
   const classes = ["app-shell", comNav && "com-nav", comNav && !menuAberto && "menu-fechado"].filter(Boolean).join(" ");
 

@@ -4,7 +4,7 @@ const STATUS_VISIVEIS = 'disponivel,reservado,em_preparacao';
 
 export function camposPublicos(v) {
   const base = {
-    id: v.id, modelo: v.modelo, ano_fabricacao: v.ano_fabricacao, ano_modelo: v.ano_modelo,
+    id: v.id, marca: v.marca, modelo: v.modelo, ano_fabricacao: v.ano_fabricacao, ano_modelo: v.ano_modelo,
     quilometragem: v.quilometragem, combustivel: v.combustivel, cambio: v.cambio, cor: v.cor,
     cidade: v.cidade, uf: v.uf, preco_venda_pretendido: v.preco_venda_pretendido,
     potencia_motor: v.potencia_motor, portas: v.portas, lugares: v.lugares, categoria: v.categoria,
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
   const loja = orgs[0];
 
   const id = req.query?.id ? String(req.query.id).replace(/[^0-9a-f-]/g, '') : null;
-  let q = `${url}/rest/v1/veiculos?organizacao_id=eq.${loja.id}&publicado_catalogo=eq.true&status=in.(${STATUS_VISIVEIS})&select=id,modelo,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em&order=criado_em.desc`;
+  let q = `${url}/rest/v1/veiculos?organizacao_id=eq.${loja.id}&publicado_catalogo=eq.true&status=in.(${STATUS_VISIVEIS})&select=id,marca,modelo,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em&order=criado_em.desc`;
   if (id) q += `&id=eq.${id}`;
   const vs = await (await fetch(q, { headers: h })).json();
   if (!Array.isArray(vs)) return res.status(502).json({ erro: 'falha ao consultar', detalhe: vs?.message || vs?.hint || vs?.code || 'sem detalhe' });

@@ -10,6 +10,37 @@ import { useAuth } from "../lib/auth";
 
 const cartao = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 20, marginBottom: 18 };
 
+function MarketplaceOptIn() {
+  const { perfil } = useAuth();
+  const [ativo, setAtivo] = useState(false);
+  const [msg, setMsg] = useState(null);
+  useEffect(() => {
+    if (!supabaseConfigurado || !perfil?.organizacao_id) return;
+    supabase.from("organizacoes").select("marketplace_ativo").eq("id", perfil.organizacao_id).maybeSingle()
+      .then(({ data }) => setAtivo(!!data?.marketplace_ativo));
+  }, [perfil?.organizacao_id]);
+  const alternar = async (v) => {
+    const { error } = await supabase.from("organizacoes").update({ marketplace_ativo: v }).eq("id", perfil.organizacao_id);
+    if (error) { setMsg({ tipo: "erro", texto: error.message }); return; }
+    setAtivo(v);
+    setMsg({ tipo: "ok", texto: v ? "Sua loja aparece no Marketplace. Só os veículos publicados no catálogo são exibidos." : "Sua loja saiu do Marketplace." });
+  };
+  return (
+    <section style={cartao}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "var(--text)" }}>Aparecer no Marketplace geral</h2>
+          <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--text-dim)" }}>Opcional. Os veículos da sua loja aparecem junto com os de outras lojas que aceitaram.</p>
+        </div>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+          <input type="checkbox" checked={ativo} onChange={(e) => alternar(e.target.checked)} /> {ativo ? "Ativo" : "Inativo"}
+        </label>
+      </div>
+      {msg && <p style={{ margin: "10px 0 0", fontSize: 12, color: msg.tipo === "ok" ? "#059669" : "#b91c1c" }}>{msg.texto}</p>}
+    </section>
+  );
+}
+
 function WhatsAppLoja() {
   const { perfil } = useAuth();
   const [numero, setNumero] = useState("");
@@ -51,6 +82,7 @@ export default function CatalogoPublicoAdmin() {
           <BackLink />
           <h1 style={{ margin: "18px 0 4px", fontSize: 24, fontWeight: 800, color: "var(--text)" }}>Catálogo público</h1>
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Escolha quais veículos aparecem no catálogo da sua loja e configure o contato.</p>
+          <MarketplaceOptIn />
           <WhatsAppLoja />
           <CatalogoConfig />
         </main>

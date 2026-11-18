@@ -2,7 +2,7 @@
 export function filtrarCatalogo(lista, f = {}) {
   const t = String(f.busca || '').trim().toLowerCase();
   return lista.filter((v) =>
-    (!t || `${v.modelo || ''} ${v.cor || ''} ${v.cidade || ''} ${v.categoria || ''}`.toLowerCase().includes(t)) &&
+    (!t || `${v.marca || ''} ${v.modelo || ''} ${v.cor || ''} ${v.cidade || ''} ${v.categoria || ''} ${v.loja_nome || ''}`.toLowerCase().includes(t)) &&
     (!f.precoMax || Number(v.preco_venda_pretendido) <= Number(f.precoMax)) &&
     (!f.anoMin || Number(v.ano_modelo) >= Number(f.anoMin)) &&
     (!f.combustivel || v.combustivel === f.combustivel) &&
