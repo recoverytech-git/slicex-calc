@@ -1,3 +1,4 @@
+import BotaoInstalar from "../components/BotaoInstalar";
 // sem-rascunho: painel somente de consulta, sem formulário
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -165,7 +166,7 @@ export default function Dashboard() {
               <h1 className="db-title"><LayoutDashboard size={24} /> Dashboard</h1>
               <p className="db-sub">Acompanhe a operação e acesse o simulador.</p>
             </div>
-            <Link to="/simulador-decisao" className="db-btn"><Calculator size={16} /> Simulador</Link>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}><BotaoInstalar /><Link to="/simulador-decisao" className="db-btn"><Calculator size={16} /> Simulador</Link></div>
           </header>
 
           <Secao icone={Target} titulo="Vendas" />
