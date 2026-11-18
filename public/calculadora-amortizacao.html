@@ -840,7 +840,7 @@ function calcAmortizacaoExtra({ saldoDevedor, taxaMensal, parcelasRestantes, apo
       [bal, extra].forEach(el => {
         if (!el) return;
         el.addEventListener('input', () => { mascaraMoeda(el); onInputChanged(); });
-        el.addEventListener('blur', () => { el.value = formatCurrencySimple(parseCurrency(el.value)); });
+        // sem reformatacao ao sair do campo: mesmo comportamento do campo Valor FIPE
       });
       const parc = $('input-months');
       if (parc) parc.addEventListener('input', onInputChanged);

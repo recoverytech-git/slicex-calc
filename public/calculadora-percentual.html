@@ -514,7 +514,7 @@ function calcPercentual(a, b) {
       [a, b].forEach(el => {
         if (!el) return;
         el.addEventListener('input', () => { mascaraMoeda(el); onInputChanged(); });
-        el.addEventListener('blur', () => { el.value = formatCurrencySimple(parseCurrency(el.value)); });
+        // sem reformatacao ao sair do campo: mesmo comportamento do campo Valor FIPE
         el.addEventListener('keydown', (e) => { if (e.key === 'Enter') calcularPercentual(); });
       });
       const calc = $('calculate-btn');
