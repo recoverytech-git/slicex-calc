@@ -1,3 +1,4 @@
+import { useCampoMoeda } from "../lib/moeda";
 // Layout gerado a partir do design (HTML e DESIGN.md) da ficha publica
 // sem-rascunho: dados de cliente externo; nada fica guardado no navegador
 import { createContext, useContext, useEffect, useState } from "react";
@@ -106,10 +107,11 @@ function Slot({ k, id, cls, ph, type }) {
   const tipo = MASC[k] ?? "texto";
   const classe = cls + (invalidos.includes(k) ? " !border-error" : "");
   const v = form[k];
+  const [txtMoeda, onTxtMoeda] = useCampoMoeda(form[k], (n) => setForm({ ...form, [k]: n }));
   if (tipo === "bool") return <input id={id} type="checkbox" checked={v === true} onChange={(e) => setForm({ ...form, [k]: e.target.checked })} className={cls} />;
   if (tipo === "money") {
-    return <input id={id} inputMode="numeric" placeholder={ph} className={classe} value={dinheiro(v)}
-      onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); setForm({ ...form, [k]: d ? Number(d) / 100 : 0 }); }} />;
+    return <input id={id} inputMode="numeric" placeholder={ph} className={classe} value={txtMoeda}
+      onChange={onTxtMoeda} />;
   }
   let valor = v ?? "";
   let set = (t) => setForm({ ...form, [k]: t });

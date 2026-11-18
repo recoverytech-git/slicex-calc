@@ -343,11 +343,15 @@ function calcPercentual(a, b) {
       const sign = withSign && num > 0 ? '+' : '';
       return `${sign}${num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`;
     }
-    function mascaraMoeda(el) {
-      let d = el.value.replace(/\D/g, '');
-      if (!d) d = '0';
-      el.value = formatCurrencySimple(parseInt(d, 10) / 100);
+    function mascaraMoedaTexto(valor) {
+      const limpo = String(valor || '').replace(/[^\d,]/g, '');
+      const i = limpo.indexOf(',');
+      const inteiro = (i >= 0 ? limpo.slice(0, i) : limpo).replace(/^0+(?=\d)/, '').slice(0, 12);
+      const dec = i >= 0 ? limpo.slice(i + 1).replace(/,/g, '').slice(0, 2) : null;
+      const intFmt = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return dec !== null ? `${intFmt || '0'},${dec}` : intFmt;
     }
+    function mascaraMoeda(el) { el.value = mascaraMoedaTexto(el.value); }
 
     const CLASSE_BASE = 'font-headline font-extrabold text-2xl lg:text-3xl tracking-tight tabular-nums transition-all duration-300';
     function corMetrica(el, v) {

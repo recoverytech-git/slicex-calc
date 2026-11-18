@@ -1,3 +1,4 @@
+import { parseMoeda, mascararReais } from "../lib/moeda";
 import { useMemo } from "react";
 import { Calculator, Car, Target, Banknote, Percent, CalendarDays, Landmark, Scale, FileDown } from "lucide-react";
 import { gerarPdfSimulacao } from "../lib/simuladorPdf";
@@ -70,8 +71,9 @@ function Seletor({ rotulo, value, onChange, opcoes }) {
 
 export default function SimuladorDecisao() {
   const [v, setV] = useRascunho("simulador.form", { fipe: "", compra: "", pretendido: "", custos: "", tipoCapital: "Próprio", valorFinanciado: "", entrada: "", taxa: "3.9", meses: "48", sistema: "Price" });
-  const num = (k) => Number(String(v[k]).replace(",", ".")) || 0;
+  const num = (k) => { const x = parseMoeda(v[k]); return Number.isFinite(x) ? x : 0; };
   const set = (k) => (e) => setV({ ...v, [k]: e.target.value });
+  const setMoeda = (k) => (e) => setV({ ...v, [k]: mascararReais(e.target.value).exibicao });
   const r = useMemo(() => simularDecisao({
     fipe: num("fipe"), compra: num("compra"), pretendido: num("pretendido"), custos: num("custos"),
     tipoCapital: v.tipoCapital, valorFinanciado: num("valorFinanciado"), entrada: num("entrada"),
@@ -173,10 +175,10 @@ export default function SimuladorDecisao() {
               </div>
             </div>
             <div className="sd-row sd-row-5">
-              <Campo rotulo="Valor FIPE (R$)" value={v.fipe} onChange={set("fipe")} />
-              <Campo rotulo="Valor de compra (R$)" value={v.compra} onChange={set("compra")} />
-              <Campo rotulo="Valor pretendido (R$)" value={v.pretendido} onChange={set("pretendido")} />
-              <Campo rotulo="Custos adicionais (R$)" value={v.custos} onChange={set("custos")} />
+              <Campo rotulo="Valor FIPE (R$)" value={mascararReais(v.fipe).exibicao} onChange={setMoeda("fipe")} />
+              <Campo rotulo="Valor de compra (R$)" value={mascararReais(v.compra).exibicao} onChange={setMoeda("compra")} />
+              <Campo rotulo="Valor pretendido (R$)" value={mascararReais(v.pretendido).exibicao} onChange={setMoeda("pretendido")} />
+              <Campo rotulo="Custos adicionais (R$)" value={mascararReais(v.custos).exibicao} onChange={setMoeda("custos")} />
               <Seletor rotulo="Tipo de capital" value={v.tipoCapital} onChange={set("tipoCapital")} opcoes={["Próprio", "Financiamento"]} />
             </div>
 
@@ -190,8 +192,8 @@ export default function SimuladorDecisao() {
                   </div>
                 </div>
                 <div className="sd-row sd-row-5">
-                  <Campo rotulo="Valor financiado (R$)" value={v.valorFinanciado} onChange={set("valorFinanciado")} />
-                  <Campo rotulo="Entrada (R$)" value={v.entrada} onChange={set("entrada")} />
+                  <Campo rotulo="Valor financiado (R$)" value={mascararReais(v.valorFinanciado).exibicao} onChange={setMoeda("valorFinanciado")} />
+                  <Campo rotulo="Entrada (R$)" value={mascararReais(v.entrada).exibicao} onChange={setMoeda("entrada")} />
                   <Campo rotulo="Taxa mensal (%)" value={v.taxa} onChange={set("taxa")} />
                   <Campo rotulo="Parcelas (meses)" value={v.meses} onChange={set("meses")} inputMode="numeric" />
                   <Seletor rotulo="Sistema" value={v.sistema} onChange={set("sistema")} opcoes={["Price", "SAC"]} />

@@ -1,3 +1,4 @@
+import { useCampoMoeda } from "../lib/moeda";
 import { Component as ComponentCn } from "react";
 import { Gauge as GaugeCn, Percent as PercentCn, Lightbulb as LightbulbCn, SlidersHorizontal as SlidersCn, ArrowUpDown as ArrowUpDownCn, TrendingDown as TrendingDownCn } from "lucide-react";
 import { useEffect as useEffectCn, useRef as useRefCn } from "react";
@@ -781,18 +782,14 @@ function CnField({ label, val, set, hint }) {
 }
 
 function CnMoney({ label, valor, onChange }) {
-  const texto = valor ? Number(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "";
+  const [texto, onTexto] = useCampoMoeda(Number(valor) || 0, onChange);
   return (
     <div>
       <label className={labelCls}>{label}</label>
       <div className="relative">
         <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-semibold text-slate-400">R$</span>
         <input className="tactile-input w-full rounded-xl border-slate-200 bg-slate-50/60 pl-10 pr-3.5 py-2.5 text-xs font-semibold text-slate-800 tabular-numbers focus:outline-none"
-          inputMode="numeric" placeholder="0,00" value={texto}
-          onChange={(e) => {
-            const digitos = e.target.value.replace(/\D/g, "");
-            onChange(digitos ? Number(digitos) / 100 : 0);
-          }} />
+          inputMode="numeric" placeholder="0,00" value={texto} onChange={onTexto} />
       </div>
     </div>
   );

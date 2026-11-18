@@ -1,34 +1,11 @@
-import { useState, useEffect } from "react";
-import { formatarNumeroBR, parseMoeda, mascararDigitacao } from "../lib/moeda";
+import { useCampoMoeda } from "../lib/moeda";
 
 /**
- * Campo monetário padrão do sistema (R$ 0,00).
- *
- * - `valor` é o NÚMERO usado nos cálculos (ex.: 50000).
- * - `onChange(numero)` devolve sempre o número, nunca a string formatada.
- * - A máscara é só apresentação e preserva o cursor ao final, como em
- *   caixas eletrônicos (digitos entram pela direita).
- *
- * Visual idêntico aos demais campos (Field) do design system.
+ * Campo monetário padrão do sistema (R$). Digitação com milhar automático:
+ * 65000 -> 65.000; centavos com vírgula. `onChange(numero)` devolve sempre o número.
  */
 export default function MoneyField({ label, valor, onChange, hint = "0,00", style }) {
-  const [texto, setTexto] = useState(() => formatarNumeroBR(Number.isFinite(valor) ? valor : 0));
-
-  // Sincroniza quando o valor muda por fora (ex.: edição de um custo).
-  useEffect(() => {
-    const atual = parseMoeda(texto);
-    if (!Number.isFinite(valor) || Math.abs((Number.isFinite(atual) ? atual : 0) - valor) > 0.001) {
-      setTexto(formatarNumeroBR(Number.isFinite(valor) ? valor : 0));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [valor]);
-
-  const handleChange = (e) => {
-    const { valor: numero, exibicao } = mascararDigitacao(e.target.value);
-    setTexto(exibicao);
-    onChange?.(numero);
-  };
-
+  const [texto, onTexto] = useCampoMoeda(valor, onChange);
   return (
     <div style={style}>
       {label && (
@@ -46,7 +23,7 @@ export default function MoneyField({ label, valor, onChange, hint = "0,00", styl
           aria-label={label}
           placeholder={hint}
           value={texto}
-          onChange={handleChange}
+          onChange={onTexto}
           onFocus={(e) => { e.target.style.borderColor = "var(--border-focus)"; e.target.style.background = "var(--surface-2)"; }}
           onBlur={(e) => { e.target.style.borderColor = "var(--border-strong)"; e.target.style.background = "var(--surface)"; }}
           style={{

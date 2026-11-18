@@ -1122,12 +1122,15 @@ function calcSAC(pv, taxa, n) {
     }
     function fmtBRL(v) { return 'R$ ' + formatBrCurrency(v); }
     function fmtBRLSigned(v) { return (v < 0 ? '-R$ ' : 'R$ ') + formatBrCurrency(Math.abs(v)); }
-    function formatCurrencyInput(input) {
-      let value = input.value.replace(/\D/g, '');
-      if (!value) value = '0';
-      let floatVal = (parseFloat(value) / 100).toFixed(2);
-      input.value = formatBrCurrency(floatVal);
+    function mascaraMoedaTexto(valor) {
+      const limpo = String(valor || '').replace(/[^\d,]/g, '');
+      const i = limpo.indexOf(',');
+      const inteiro = (i >= 0 ? limpo.slice(0, i) : limpo).replace(/^0+(?=\d)/, '').slice(0, 12);
+      const dec = i >= 0 ? limpo.slice(i + 1).replace(/,/g, '').slice(0, 2) : null;
+      const intFmt = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return dec !== null ? `${intFmt || '0'},${dec}` : intFmt;
     }
+    function formatCurrencyInput(input) { input.value = mascaraMoedaTexto(input.value); }
 
     /* Mascara da taxa: numeros com ponto decimal, ex.: 3.9 e 21.5 */
     function mascaraTaxa(el) {

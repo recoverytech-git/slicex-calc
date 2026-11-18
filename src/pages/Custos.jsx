@@ -1,3 +1,4 @@
+import { parseMoeda, mascararReais } from "../lib/moeda";
 import { useEffect, useMemo, useState } from "react";
 import { Wallet, Plus, Trash2, Target, TrendingUp, Car, AlertTriangle, CheckCircle2 } from "lucide-react";
 import Header from "../components/Header";
@@ -65,7 +66,7 @@ export default function Custos() {
   const vendasSel = useMemo(() => vendasPeriodo(vendas, diasVenda), [vendas, diasVenda]);
   const resumoSel = useMemo(() => resumoVendas(vendasSel), [vendasSel]);
   const fixo = custoFixoMensal(custos);
-  const metaNumero = Number(String(meta).replace(",", ".")) || 0;
+  const metaNumero = parseMoeda(meta) || 0;
   const cenario1 = vendas30.res - fixo;
   const cenario2 = cenario1 + estoque.lucroPret;
   const plano = useMemo(() => planoMeta({
@@ -78,7 +79,7 @@ export default function Custos() {
   const adicionar = async (e) => {
     e.preventDefault();
     setAviso(null);
-    const valor = Number(String(novo.valor).replace(",", "."));
+    const valor = parseMoeda(novo.valor);
     if (novo.descricao.trim().length < 2) return setAviso({ tipo: "erro", texto: "Descreva o custo (ex.: Seguro da frota)." });
     if (!(valor >= 0)) return setAviso({ tipo: "erro", texto: "Informe o valor mensal." });
     const { error } = await supabase.from("custos_recorrentes").insert({ organizacao_id: perfil.organizacao_id, descricao: novo.descricao.trim(), categoria: novo.categoria, valor_mensal: valor });
@@ -131,7 +132,7 @@ export default function Custos() {
                 <select className="db-input" value={novo.categoria} onChange={(e) => setNovo({ ...novo, categoria: e.target.value })}>
                   {CATEGORIAS_CUSTO.map((c) => <option key={c}>{c}</option>)}
                 </select></div>
-              <div><label className="db-label">Valor mensal (R$)</label><input className="db-input" inputMode="decimal" value={novo.valor} onChange={(e) => setNovo({ ...novo, valor: e.target.value })} placeholder="0,00" /></div>
+              <div><label className="db-label">Valor mensal (R$)</label><input className="db-input" inputMode="decimal" value={novo.valor} onChange={(e) => setNovo({ ...novo, valor: mascararReais(e.target.value).exibicao })} placeholder="0,00" /></div>
               <button type="submit" className="db-btn-prim" style={{ justifyContent: "center" }}><Plus size={16} /> Adicionar custo</button>
             </form>
             {custos.length === 0 ? <p className="db-note">Nenhum custo cadastrado.</p> : (
@@ -228,7 +229,7 @@ export default function Custos() {
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end", marginBottom: 16 }}>
               <div style={{ flex: "1 1 240px", maxWidth: 320 }}>
                 <label className="db-label">Lucro líquido desejado (R$ / mês)</label>
-                <input className="db-input" inputMode="decimal" value={meta} onChange={(e) => setMeta(e.target.value)} placeholder="Ex.: 20000" />
+                <input className="db-input" inputMode="decimal" value={meta} onChange={(e) => setMeta(mascararReais(e.target.value).exibicao)} placeholder="Ex.: 20000" />
               </div>
               <button type="button" className="db-btn-prim" onClick={salvarMeta}><CheckCircle2 size={16} /> Salvar meta</button>
             </div>

@@ -1,3 +1,4 @@
+import { useCampoMoeda } from "../lib/moeda";
 import { URL_PUBLICA } from "../lib/urls";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -45,6 +46,7 @@ function Campo({ chave, form, setForm }) {
   const id = `campo-${chave}`;
   const exemplo = EXEMPLOS[chave] ?? "";
   const set = (v) => setForm({ ...form, [chave]: v });
+  const [txtMoeda, onTxtMoeda] = useCampoMoeda(form[chave], (n) => setForm({ ...form, [chave]: n }));
 
   if (tipo === "money") {
     return (
@@ -52,8 +54,8 @@ function Campo({ chave, form, setForm }) {
         <label htmlFor={id} className={rotuloCls}>{rotulo}</label>
         <div className="relative">
           <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-semibold text-slate-500">R$</span>
-          <input id={id} inputMode="numeric" placeholder="0,00" className={moedaCls} value={dinheiro(form[chave])}
-            onChange={(e) => { const d = e.target.value.replace(/\D/g, ""); setForm({ ...form, [chave]: d ? Number(d) / 100 : 0 }); }} />
+          <input id={id} inputMode="numeric" placeholder="0,00" className={moedaCls} value={txtMoeda}
+            onChange={onTxtMoeda} />
         </div>
       </div>
     );
