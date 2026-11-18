@@ -1,53 +1,98 @@
-import { Calculator as CalculatorIcon } from "lucide-react";
+// sem-rascunho: painel somente de consulta, sem formulário
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Calculator, LayoutDashboard, Warehouse, Car, Boxes, Coins, Target, BarChart3, Percent, Layers } from "lucide-react";
 import GestaoInteligente from "../components/GestaoInteligente";
 import KpisVendidos from "../components/KpisVendidos";
 import JurosResumo from "../components/JurosResumo";
 import AlertaBaixaPendente from "../components/AlertaBaixaPendente";
 import VeiculosParados from "../components/VeiculosParados";
 import PainelPeriodo, { inicioPeriodo } from "../components/PainelPeriodo";
-import { ENTRADA } from "../lib/motion";
-// sem-rascunho: painel somente de consulta, sem formulário
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Landmark, Percent, Scissors, Car, Warehouse, ArrowRight, LayoutDashboard, BadgeDollarSign } from "lucide-react";
 import Header from "../components/Header";
 import PageTransition from "../components/PageTransition";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 import { formatarBRL } from "../lib/moeda";
 
-const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" };
 const GESTAO = ["admin_master", "proprietario", "gerente"];
 const ROTULO = { em_preparacao: "Em preparação", disponivel: "Disponível", reservado: "Reservado", vendido: "Vendido", retirado: "Retirado" };
 
+const CSS = `
+.db-wrap{max-width:1440px;margin:0 auto;padding:24px 16px 56px;display:flex;flex-direction:column;gap:22px}
+@media (min-width:640px){.db-wrap{padding:24px 24px 56px}}
+@media (min-width:1024px){.db-wrap{padding:28px 32px 56px}}
+.db-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+.db-eyebrow{font-family:Inter,system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b}
+.db-title{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:clamp(22px,4vw,28px);font-weight:800;letter-spacing:-.02em;color:var(--text);margin:4px 0 2px;display:flex;align-items:center;gap:10px}
+.db-sub{font-size:13px;color:var(--text-dim);margin:0}
+.db-btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:12px;background:#2563eb;color:#fff;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 8px 16px -4px rgba(37,99,235,.35);transition:background .2s,transform .15s;white-space:nowrap}
+.db-btn:hover{background:#1d4ed8;transform:translateY(-1px)}
+.db-card{background:var(--surface);border:1px solid rgba(226,232,240,.8);border-radius:20px;box-shadow:0 1px 3px rgba(15,23,42,.03),0 10px 25px -5px rgba(15,23,42,.04);padding:20px;min-width:0}
+.db-sec{display:flex;align-items:center;gap:10px;margin:6px 0 -6px}
+.db-sec-ic{width:36px;height:36px;border-radius:12px;background:#eff6ff;color:#2563eb;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.db-sec-t{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:15px;font-weight:800;color:var(--text);letter-spacing:.01em;text-transform:uppercase}
+.db-kgrid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:1024px){.db-kgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.db-kpi{background:var(--surface);border:1px solid rgba(226,232,240,.8);border-radius:18px;box-shadow:0 1px 3px rgba(15,23,42,.03),0 10px 25px -5px rgba(15,23,42,.04);padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.db-kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.db-kpi-l{font-family:Inter,system-ui,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;line-height:1.3}
+.db-kpi-v{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:clamp(17px,3.6vw,24px);font-weight:800;color:var(--text);letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.15}
+.db-kpi-ic{width:34px;height:34px;min-width:34px;border-radius:11px;background:#eff6ff;color:#2563eb;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center}
+.db-kpi-s{font-size:11.5px;color:var(--text-mute)}
+.db-charts{display:grid;gap:16px;grid-template-columns:1fr}
+@media (min-width:1024px){.db-charts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.db-bars{display:flex;align-items:flex-end;gap:clamp(3px,1.2vw,10px);height:180px;padding-top:22px}
+.db-bar{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;position:relative}
+.db-bar-v{font-size:10px;font-weight:700;color:var(--text-dim);white-space:nowrap;font-variant-numeric:tabular-nums}
+.db-bar-fill{width:100%;max-width:44px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#2563eb,rgba(37,99,235,.28));box-shadow:0 8px 18px rgba(37,99,235,.22);transition:height .6s cubic-bezier(.16,1,.3,1)}
+.db-bar-l{font-size:10px;color:var(--text-mute);text-transform:capitalize;white-space:nowrap;overflow:hidden;text-overflow:clip;max-width:100%}
+.db-status{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.db-stat{border:1px solid #e2e8f0;border-radius:14px;padding:12px;background:#f8fafc;min-width:0}
+.db-stat-v{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:20px;font-weight:800;color:var(--text)}
+.db-stat-l{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b;overflow-wrap:anywhere}
+.db-note{font-size:11.5px;color:var(--text-mute);margin:0}
+@media (max-width:639px){
+  .db-bar-v{display:none}
+  .db-bars{height:150px;padding-top:6px}
+  .db-bar-l{font-size:9px}
+  .db-status{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .db-btn{height:40px;padding:0 14px}
+}
+`;
 
-
-function Kpi({ rotulo, valor, i = 0 }) {
+function KpiCard({ rotulo, valor, icone: Icone, sub }) {
   return (
-    <motion.div {...ENTRADA}
-      style={{ ...card, padding: 16 }}>
-      <p style={{ margin: 0, fontSize: 12, color: "var(--text-mute)" }}>{rotulo}</p>
-      <p style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text)" }}>{valor}</p>
-    </motion.div>
+    <div className="db-kpi">
+      <div className="db-kpi-top">
+        <span className="db-kpi-l">{rotulo}</span>
+        <span className="db-kpi-ic"><Icone size={16} /></span>
+      </div>
+      <div className="db-kpi-v">{valor}</div>
+      {sub && <div className="db-kpi-s">{sub}</div>}
+    </div>
   );
 }
 
-/** Gráfico de barras em CSS, com a altura animada. Sem dependências externas. */
+function Secao({ icone: Icone, titulo }) {
+  return (
+    <div className="db-sec">
+      <span className="db-sec-ic"><Icone size={18} /></span>
+      <span className="db-sec-t">{titulo}</span>
+    </div>
+  );
+}
+
 function GraficoBarras({ titulo, dados, formatar = (v) => v }) {
   const max = Math.max(...dados.map((d) => d.valor), 1);
   return (
-    <div style={{ ...card, padding: 18 }}>
-      <p style={{ margin: "0 0 14px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>{titulo}</p>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 170 }}>
+    <div className="db-card">
+      <p className="db-kpi-l" style={{ margin: "0 0 4px" }}>{titulo}</p>
+      <div className="db-bars">
         {dados.map((d, i) => (
-          <div key={d.rotulo + i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, height: "100%", justifyContent: "flex-end" }}>
-            <span style={{ fontSize: 10, color: "var(--text-mute)", whiteSpace: "nowrap" }}>{d.valor ? formatar(d.valor) : ""}</span>
-            <motion.div title={`${d.rotulo}: ${formatar(d.valor)}`}
-              initial={{ height: 0 }} animate={{ height: `${(d.valor / max) * 100}%` }}
-              transition={{ duration: 0.6, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-              style={{ width: "100%", minHeight: d.valor ? 4 : 0, borderRadius: "6px 6px 2px 2px", background: "linear-gradient(180deg, var(--accent), rgba(68,147,248,0.35))", boxShadow: "0 6px 16px rgba(68,147,248,0.25)" }} />
-            <span style={{ fontSize: 10, color: "var(--text-mute)" }}>{d.rotulo}</span>
+          <div key={d.rotulo + i} className="db-bar" title={`${d.rotulo}: ${formatar(d.valor)}`}>
+            <span className="db-bar-v">{d.valor ? formatar(d.valor) : ""}</span>
+            <div className="db-bar-fill" style={{ height: `${(d.valor / max) * 100}%`, minHeight: d.valor ? 4 : 0 }} />
+            <span className="db-bar-l">{d.rotulo}</span>
           </div>
         ))}
       </div>
@@ -84,7 +129,7 @@ export default function Dashboard() {
     });
   }, [gestao]);
 
-  // Últimos 12 meses
+  // Ultimos 12 meses
   const meses = Array.from({ length: 12 }, (_, i) => {
     const d = new Date();
     d.setDate(1);
@@ -105,57 +150,66 @@ export default function Dashboard() {
   // Capital investido = valor de compra + custos adicionais de todo o estoque
   const capital = emEstoque.reduce((s, v) => s + Number(v.preco_compra ?? 0), 0) + totalCustosEstoque;
   const potencial = emEstoque.reduce((s, v) => s + Number(v.preco_venda_pretendido ?? 0), 0);
-  const iniPer = inicioPeriodo(periodo);
-  const vendasPeriodo = vendas.filter((s) => new Date(s.data_venda) >= iniPer);
-  const faturamento = vendasPeriodo.reduce((s, v) => s + Number(v.valor_venda ?? 0), 0);
-  const resultado = vendasPeriodo.reduce((s, v) => s + Number(v.resultado_final ?? 0), 0);
-  const investido = vendas.reduce((s, v) => s + Number(v.investimento_total ?? 0), 0);
-  // Margem sobre investido = venda pretendida - custos adicionais, de todo o estoque
   // Margem = venda pretendida - compra - custos adicionais, somada para todo o estoque
   const margemValor = emEstoque.reduce((s, v) => s + Number(v.preco_venda_pretendido ?? 0) - Number(v.preco_compra ?? 0) - (custosPorVeiculo[v.id] || 0), 0);
 
   return (
     <PageTransition>
       <div className="page-bg">
+        <style>{CSS}</style>
         <Header subtitle="Dashboard" />
-        <div className="container" style={{ paddingTop: 8 }}>
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "22px 0 6px" }}><h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
-            <LayoutDashboard size={22} /> Dashboard
-          </h1><Link to="/simulador-decisao" style={{ display: "inline-flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", borderRadius: 12, background: "#2563eb", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none", boxShadow: "0 8px 16px -4px rgba(37,99,235,.35)" }}><CalculatorIcon size={16} /> Simulador</Link></div>
-          <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acompanhe a operação e acesse o simulador.</p>
+        <main className="db-wrap">
+          <header className="db-head">
+            <div>
+              <div className="db-eyebrow">Visão geral da operação</div>
+              <h1 className="db-title"><LayoutDashboard size={24} /> Dashboard</h1>
+              <p className="db-sub">Acompanhe a operação e acesse o simulador.</p>
+            </div>
+            <Link to="/simulador-decisao" className="db-btn"><Calculator size={16} /> Simulador</Link>
+          </header>
+
+          <Secao icone={Target} titulo="Vendas" />
           <KpisVendidos />
           <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} custos={[...custos, ...finEst.map((f) => ({ veiculo_id: f.veiculo_id, valor: f.total_juros }))]} />
-          <VeiculosParados veiculos={veiculos} metricas={jurosEst} />
           <JurosResumo jurosEst={jurosEst} vendas={vendas} periodo={periodo} />
-          <AlertaBaixaPendente />
-          <GestaoInteligente />
 
-          
+          <Secao icone={BarChart3} titulo="Gestão" />
+          <GestaoInteligente />
+          <VeiculosParados veiculos={veiculos} metricas={jurosEst} />
+          <AlertaBaixaPendente />
 
           {gestao && (
             <>
-              {erro && <p style={{ color: "var(--text-dim)", fontSize: 13 }}>Não foi possível carregar: {erro}</p>}
-              <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Estoque</p>
-              <div className="grid-4" style={{ marginBottom: 14, gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))" }}>
-                <Kpi i={0} rotulo="Veículos cadastrados" valor={veiculos.length} />
-                <Kpi i={1} rotulo="Em estoque" valor={emEstoque.length} />
-                <Kpi i={2} rotulo="Capital investido (compra)" valor={formatarBRL(capital)} />
-                <Kpi i={3} rotulo="Potencial de venda" valor={formatarBRL(potencial)} />
-                <Kpi i={4} rotulo="Margem projetada (estoque)" valor={formatarBRL(margemValor)} />
+              {erro && <p className="db-note" style={{ color: "#b91c1c" }}>Não foi possível carregar: {erro}</p>}
+              <Secao icone={Warehouse} titulo="Estoque" />
+              <div className="db-kgrid">
+                <KpiCard rotulo="Veículos cadastrados" valor={veiculos.length} icone={Car} />
+                <KpiCard rotulo="Em estoque" valor={emEstoque.length} icone={Boxes} />
+                <KpiCard rotulo="Capital investido" valor={formatarBRL(capital)} icone={Coins} sub="compra + custos" />
+                <KpiCard rotulo="Potencial de venda" valor={formatarBRL(potencial)} icone={Target} sub="valor pretendido" />
+                <KpiCard rotulo="Margem projetada" valor={formatarBRL(margemValor)} icone={Percent} sub="estoque" />
               </div>
-              
 
-              <div className="grid-2" style={{ marginBottom: 14 }}>
+              <div className="db-charts">
                 <GraficoBarras titulo="Faturamento por mês (12 meses)" dados={fatMes} formatar={(v) => formatarBRL(v)} />
                 <GraficoBarras titulo="Resultado final por mês (12 meses)" dados={resMes} formatar={(v) => formatarBRL(v)} />
               </div>
-              <GraficoBarras titulo="Veículos por status" dados={statusDados} formatar={(v) => String(v)} />
-              <p style={{ margin: "14px 0 0", fontSize: 11, color: "var(--text-faint)" }}>
-                Capital e potencial consideram o preço de compra e o valor de venda pretendido dos veículos em estoque.
-              </p>
+
+              <div className="db-card">
+                <p className="db-kpi-l" style={{ margin: "0 0 12px" }}>Veículos por status</p>
+                <div className="db-status">
+                  {statusDados.map((s) => (
+                    <div key={s.rotulo} className="db-stat">
+                      <div className="db-stat-v">{s.valor}</div>
+                      <div className="db-stat-l">{s.rotulo}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="db-note"><Layers size={12} style={{ verticalAlign: "-2px", marginRight: 4 }} />Capital e potencial consideram o preço de compra e o valor de venda pretendido dos veículos em estoque.</p>
             </>
           )}
-        </div>
+        </main>
       </div>
     </PageTransition>
   );
