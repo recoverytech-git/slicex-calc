@@ -1,3 +1,5 @@
+import Catalogo from "./pages/Catalogo";
+import VeiculoCatalogo from "./pages/VeiculoCatalogo";
 import SimuladorDecisao from "./pages/SimuladorDecisao";
 import { Suspense, lazy, useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
@@ -66,6 +68,8 @@ function AnimatedRoutes() {
           <Route path="/preencher/:token" element={<PreencherFicha />} />
           <Route path="/galeria/:token" element={<GaleriaPublica />} />
           <Route path="/simulador-decisao" element={<RotaPrivada><SimuladorDecisao /></RotaPrivada>} />
+          <Route path="/loja/:slug" element={<Catalogo />} />
+          <Route path="/loja/:slug/veiculo/:id" element={<VeiculoCatalogo />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
@@ -84,7 +88,7 @@ function Shell() {
     if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
     link.href = marca.favicon;
   }, [marca.favicon]);
-  const publico = pathname === "/" || pathname === "/login" || pathname.startsWith("/preencher/") || pathname.startsWith("/galeria/");
+  const publico = pathname === "/" || pathname === "/login" || pathname.startsWith("/preencher/") || pathname.startsWith("/galeria/") || pathname.startsWith("/loja/");
   const comNav = Boolean(sessao) && !publico;
   const classes = ["app-shell", comNav && "com-nav", comNav && !menuAberto && "menu-fechado"].filter(Boolean).join(" ");
 

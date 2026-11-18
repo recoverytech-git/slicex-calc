@@ -1,3 +1,4 @@
+import CatalogoConfig from "../components/CatalogoConfig";
 import AtualizarCdi from "../components/AtualizarCdi";
 // sem-rascunho: página de configuração, sem formulário de texto
 import { useEffect, useState } from "react";
@@ -124,6 +125,7 @@ export default function Configuracoes() {
             <Settings size={22} /> Configurações
           </h1>
           <AtualizarCdi />
+          <CatalogoConfig />
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>
             Cada lugar da plataforma tem uma logomarca para o modo escuro e outra para o modo claro. Use o campo do lugar e do modo que você quer trocar.
           </p>
