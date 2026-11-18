@@ -1,9 +1,9 @@
 // Marketplace geral: veiculos de lojas que ativaram a opcao (opt-in), com filtros no servidor e paginas de 30.
-import { camposPublicos } from './catalogo.mjs';
+import { camposPublicos, indicadoresPublicos } from './catalogo.mjs';
 
 const STATUS = 'disponivel,reservado,em_preparacao';
 export const POR_PAGINA = 30;
-const CAMPOS = 'id,organizacao_id,marca,modelo,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em';
+const CAMPOS = 'id,organizacao_id,valor_fipe,marca,modelo,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em';
 
 // Remove caracteres que podem quebrar a consulta (virgula, parenteses, aspas, asterisco)
 export function limparBusca(t) {
@@ -22,7 +22,9 @@ export async function buscarMarketplace({ url, key, pagina = 1, filtros = {} }) 
   if (!orgs.length) return { lojas, veiculos: [], total: 0, pagina: 1, porPagina: POR_PAGINA, paginas: 1 };
 
   const porOrg = Object.fromEntries(orgs.map((o) => [o.id, o]));
-  let q = `${url}/rest/v1/veiculos?organizacao_id=in.(${orgs.map((o) => o.id).join(',')})&publicado_catalogo=eq.true&status=in.(${STATUS})&select=${CAMPOS}&order=criado_em.desc&limit=${POR_PAGINA}&offset=${(pagina - 1) * POR_PAGINA}`;
+  const idsFiltro = Array.isArray(filtros.ids) ? filtros.ids.filter((x) => /^[0-9a-f-]{36}$/.test(x)).slice(0, 50) : null;
+  let q = `${url}/rest/v1/veiculos?organizacao_id=in.(${orgs.map((o) => o.id).join(',')})&publicado_catalogo=eq.true&status=in.(${STATUS})&select=${CAMPOS}&order=criado_em.desc&limit=${idsFiltro ? 50 : POR_PAGINA}&offset=${idsFiltro ? 0 : (pagina - 1) * POR_PAGINA}`;
+  if (idsFiltro) q += `&id=in.(${idsFiltro.join(',')})`;
   if (Number(filtros.precoMax) > 0) q += `&preco_venda_pretendido=lte.${Number(filtros.precoMax)}`;
   if (Number(filtros.anoMin) > 0) q += `&ano_modelo=gte.${Number(filtros.anoMin)}`;
   if (filtros.combustivel) q += `&combustivel=eq.${encodeURIComponent(filtros.combustivel)}`;
@@ -57,7 +59,7 @@ export async function buscarMarketplace({ url, key, pagina = 1, filtros = {} }) 
   for (const v of vs) {
     const loja = porOrg[v.organizacao_id];
     const capa = await assinar(primeira[v.id]);
-    out.push({ ...camposPublicos(v), capa, fotos: capa ? [capa] : [], loja_nome: loja?.nome, loja_slug: loja?.slug });
+    out.push({ ...camposPublicos(v), ...indicadoresPublicos(v), capa, fotos: capa ? [capa] : [], loja_nome: loja?.nome, loja_slug: loja?.slug });
   }
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
   return { lojas, veiculos: out, total, pagina, porPagina: POR_PAGINA, paginas };
@@ -69,7 +71,7 @@ export default async function handler(req, res) {
   if (!url || !key) return res.status(500).json({ erro: 'configuração ausente' });
   const q = req.query || {};
   const pagina = Math.max(1, Math.min(10000, parseInt(q.pagina, 10) || 1));
-  const filtros = { busca: q.busca, loja: q.loja, precoMax: q.precoMax, anoMin: q.anoMin, combustivel: q.combustivel, cambio: q.cambio };
+  const filtros = { busca: q.busca, loja: q.loja, precoMax: q.precoMax, anoMin: q.anoMin, combustivel: q.combustivel, cambio: q.cambio, ids: q.ids ? String(q.ids).split(',').map((x) => x.trim()).slice(0, 50) : null };
   const temFiltro = Object.values(filtros).some(Boolean);
   try {
     const dados = await buscarMarketplace({ url, key, pagina, filtros });

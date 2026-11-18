@@ -14,6 +14,15 @@ export function camposPublicos(v) {
   return base;
 }
 
+// Indicador publico: se o preco esta abaixo da FIPE (sem expor o valor da FIPE)
+export function indicadoresPublicos(v) {
+  const f = Number(v.valor_fipe);
+  const p = Number(v.preco_venda_pretendido);
+  if (!(f > 0) || !(p > 0)) return { abaixo_fipe: false, diferenca_fipe_pct: null };
+  const pct = Math.round(((p - f) / f) * 1000) / 10;
+  return { abaixo_fipe: pct < 0, diferenca_fipe_pct: pct };
+}
+
 export default async function handler(req, res) {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
@@ -27,7 +36,7 @@ export default async function handler(req, res) {
   const loja = orgs[0];
 
   const id = req.query?.id ? String(req.query.id).replace(/[^0-9a-f-]/g, '') : null;
-  let q = `${url}/rest/v1/veiculos?organizacao_id=eq.${loja.id}&publicado_catalogo=eq.true&status=in.(${STATUS_VISIVEIS})&select=id,marca,modelo,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em&order=criado_em.desc`;
+  let q = `${url}/rest/v1/veiculos?organizacao_id=eq.${loja.id}&publicado_catalogo=eq.true&status=in.(${STATUS_VISIVEIS})&select=id,marca,modelo,valor_fipe,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em&order=criado_em.desc`;
   if (id) q += `&id=eq.${id}`;
   const vs = await (await fetch(q, { headers: h })).json();
   if (!Array.isArray(vs)) return res.status(502).json({ erro: 'falha ao consultar', detalhe: vs?.message || vs?.hint || vs?.code || 'sem detalhe' });
@@ -53,7 +62,7 @@ export default async function handler(req, res) {
   for (const v of vs) {
     const cams = (porVeiculo[v.id] || []).slice(0, id ? 12 : 1);
     const links = (await Promise.all(cams.map(assinar))).filter(Boolean);
-    out.push({ ...camposPublicos(v), fotos: links, capa: links[0] || null });
+    out.push({ ...camposPublicos(v), ...indicadoresPublicos(v), fotos: links, capa: links[0] || null });
   }
   res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=300');
   if (id) return res.status(200).json({ loja: { nome: loja.nome, slug: loja.slug, whatsapp: loja.whatsapp || null }, veiculo: out[0] });
