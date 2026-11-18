@@ -40,3 +40,39 @@ export function alertaExcesso({ custoFixoMensal = 0, margemBrutaMes = 0, limite 
   if (pct <= limite) return null;
   return { nivel: pct > 0.5 ? 'alto' : 'medio', pct, texto: `Os custos fixos consomem ${Math.round(pct * 100)}% da margem bruta do mês` };
 }
+
+// Base unica do estoque: capital = compra + custos adicionais + juros do financiamento + juros acumulado.
+// Usada pelos indicadores da pagina e pela meta de lucro (mesma margem media e mesmo preco medio).
+export function resumoEstoque({ veiculos = [], custosVeic = [], fin = [], metricas = [] }) {
+  const cv = {}; custosVeic.forEach((c) => { cv[c.veiculo_id] = (cv[c.veiculo_id] || 0) + Number(c.valor || 0); });
+  const ft = {}; fin.forEach((f) => { ft[f.veiculo_id] = (ft[f.veiculo_id] || 0) + Number(f.total_juros || 0); });
+  const jd = {}; metricas.forEach((m) => { jd[m.veiculo_id] = Number(m.juros_diario_acumulado || 0); });
+  const patio = veiculos.filter((v) => v.status !== "vendido");
+  const capitalDe = (v) => Number(v.preco_compra || 0) + (cv[v.id] || 0) + (ft[v.id] || 0) + (jd[v.id] || 0);
+  const fipes = patio.map((v) => Number(v.valor_fipe || 0)).filter((x) => x > 0);
+  const potFipe = patio.reduce((s, v) => s + Number(v.valor_fipe || 0), 0);
+  const potPret = patio.reduce((s, v) => s + Number(v.preco_venda_pretendido || 0), 0);
+  const capital = patio.reduce((s, v) => s + capitalDe(v), 0);
+  const n = patio.length;
+  const lucroFipe = potFipe - capital;
+  const lucroPret = potPret - capital;
+  const minFipe = fipes.length ? Math.min(...fipes) : 0;
+  const maxFipe = fipes.length ? Math.max(...fipes) : 0;
+  return {
+    total: n, capital, potFipe, potPret, lucroFipe, lucroPret,
+    margemFipe: potFipe > 0 ? (lucroFipe / potFipe) * 100 : null,
+    margemPret: potPret > 0 ? (lucroPret / potPret) * 100 : null,
+    margemMedia: n ? lucroPret / n : 0,
+    precoMedio: n ? potPret / n : 0,
+    ticketFipe: (minFipe + maxFipe) / 2, minFipe, maxFipe,
+  };
+}
+
+// Vendas reais no periodo
+export function resumoReal(vendas = []) {
+  const fat = vendas.reduce((s, v) => s + Number(v.valor_venda || 0), 0);
+  const res = vendas.reduce((s, v) => s + Number(v.resultado_final || 0), 0);
+  const n = vendas.length;
+  return { n, fat, res, ticket: n ? fat / n : 0, margem: fat > 0 ? (res / fat) * 100 : 0 };
+}
+

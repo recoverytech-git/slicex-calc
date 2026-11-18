@@ -7,9 +7,8 @@ import DbCabeca from "../components/DbCabeca";
 import { DB_CSS } from "../components/dbEstilos";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
-import { CATEGORIAS_CUSTO, custoFixoMensal, analisarMeta, alertaExcesso } from "../lib/custos";
+import { CATEGORIAS_CUSTO, custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal } from "../lib/custos";
 import { useRascunho } from "../lib/rascunho";
-import { calcularResumo } from "../lib/calculos";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const PCT = (n) => `${(Number(n || 0) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
@@ -58,39 +57,14 @@ export default function Custos() {
   };
   useEffect(() => { carregar(); }, [gestao]);
 
-  // Margem projetada por veiculo: mesma regra do painel (preco pretendido - capital investido)
-  const estoque = useMemo(() => {
-    const cv = {}; custosVeic.forEach((c) => { cv[c.veiculo_id] = (cv[c.veiculo_id] || 0) + Number(c.valor || 0); });
-    const ft = Object.fromEntries(fin.map((f) => [f.veiculo_id, Number(f.total_juros || 0)]));
-    const jd = Object.fromEntries(metricas.map((m) => [m.veiculo_id, Number(m.juros_diario_acumulado || 0)]));
-    return veiculos.filter((v) => v.status !== "vendido").map((v) => {
-      const capital = Number(v.preco_compra || 0) + (cv[v.id] || 0) + (ft[v.id] || 0) + (jd[v.id] || 0);
-      const pret = Number(v.preco_venda_pretendido || 0);
-      return { id: v.id, modelo: v.modelo, pret, margem: pret - capital };
-    });
-  }, [veiculos, custosVeic, fin, metricas]);
-
-  // Indicadores do estoque: mesma funcao usada na pagina Estoque (calcularResumo)
-  const resumo = useMemo(() => {
-    const extras = Object.fromEntries(veiculos.map((v) => [v.id, { preco_compra: v.preco_compra }]));
-    const cmap = {};
-    custosVeic.forEach((c) => { cmap[c.veiculo_id] = (cmap[c.veiculo_id] || 0) + Number(c.valor || 0); });
-    const itens = veiculos.map((v) => ({ id: v.id, status: v.status, valor_fipe: v.valor_fipe, preco: v.preco_venda_pretendido }));
-    return calcularResumo(itens, extras, cmap, null, null);
-  }, [veiculos, custosVeic]);
-  // Vendas reais dos ultimos 30 dias
-  const real = useMemo(() => {
-    const fat = vendasMes.reduce((s, v) => s + Number(v.valor_venda || 0), 0);
-    const res = vendasMes.reduce((s, v) => s + Number(v.resultado_final || 0), 0);
-    const n = vendasMes.length;
-    return { fat, res, n, ticket: n ? fat / n : 0, margem: fat > 0 ? (res / fat) * 100 : 0 };
-  }, [vendasMes]);
+  const resumo = useMemo(() => resumoEstoque({ veiculos, custosVeic, fin, metricas }), [veiculos, custosVeic, fin, metricas]);
+  const real = useMemo(() => resumoReal(vendasMes), [vendasMes]);
   const pctTxt = (n) => (n == null || Number.isNaN(n) ? "—" : `${Number(n).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`);
   const corLucro = (n) => (Number(n) < 0 ? "#b91c1c" : "#059669");
 
   const fixo = custoFixoMensal(custos);
-  const margemMedia = estoque.length ? estoque.reduce((s, e) => s + e.margem, 0) / estoque.length : 0;
-  const precoMedio = estoque.length ? estoque.reduce((s, e) => s + e.pret, 0) / estoque.length : 0;
+  const margemMedia = resumo.margemMedia;
+  const precoMedio = resumo.precoMedio;
   const analise = analisarMeta({ custoFixoMensal: fixo, vendas30, margemMedia, precoMedio, meta: Number(String(meta).replace(",", ".")) || 0 });
   const alerta = alertaExcesso({ custoFixoMensal: fixo, margemBrutaMes: analise.margemBrutaMes ?? 0 });
 
@@ -143,7 +117,7 @@ export default function Custos() {
           </header>
 
           <section className="db-card">
-            <DbCabeca Icone={Car} titulo="Estoque (valores atuais)" sub="Mesma matemática da página Estoque" />
+            <DbCabeca Icone={Car} titulo="Estoque (valores atuais)" sub="Mesma base da meta de lucro: capital = compra + custos + juros do financiamento + juros acumulado" />
             <div className="db-kgrid">
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Total no pátio</span></div><div className="db-kpi-v">{resumo.total}</div><div className="db-kpi-s">unidades não vendidas</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Venda pela FIPE</span></div><div className="db-kpi-v">{BRL(resumo.potFipe)}</div><div className="db-kpi-s">potencial somando os valores FIPE</div></div>
@@ -158,7 +132,7 @@ export default function Custos() {
           <section className="db-card">
             <DbCabeca Icone={TrendingUp} titulo="Vendas reais (30 dias)" sub="Valores efetivamente vendidos no período" />
             <div className="db-kgrid">
-              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Veículos vendidos</span></div><div className="db-kpi-v">{real.n}</div><div className="db-kpi-s">no período</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Veículos vendidos</span></div><div className="db-kpi-v">{real.n}</div><div className="db-kpi-s">últimos 30 dias</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Faturamento</span></div><div className="db-kpi-v">{BRL(real.fat)}</div><div className="db-kpi-s">soma dos valores vendidos</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Resultado final</span></div><div className="db-kpi-v" style={{ color: corLucro(real.res) }}>{BRL(real.res)}</div><div className="db-kpi-s">após custos de cada venda</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Ticket médio real</span></div><div className="db-kpi-v">{BRL(real.ticket)}</div><div className="db-kpi-s">faturamento ÷ veículos vendidos</div></div>

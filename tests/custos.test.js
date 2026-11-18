@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { custoFixoMensal, analisarMeta, alertaExcesso } from "../src/lib/custos";
+import { custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal } from "../src/lib/custos";
 
 describe("custos recorrentes", () => {
   it("soma somente os custos ativos", () => {
@@ -46,5 +46,30 @@ describe("alerta de excesso de custos", () => {
   });
   it("custo sem margem alerta", () => {
     expect(alertaExcesso({ custoFixoMensal: 500, margemBrutaMes: 0 }).nivel).toBe("alto");
+  });
+});
+
+describe("base unica do estoque (indicadores = meta)", () => {
+  const veiculos = [
+    { id: "a", status: "disponivel", preco_compra: 40000, preco_venda_pretendido: 50000, valor_fipe: 48000 },
+    { id: "b", status: "disponivel", preco_compra: 30000, preco_venda_pretendido: 36000, valor_fipe: 35000 },
+    { id: "c", status: "vendido", preco_compra: 1, preco_venda_pretendido: 1, valor_fipe: 1 },
+  ];
+  const custosVeic = [{ veiculo_id: "a", valor: 1000 }];
+  const fin = [{ veiculo_id: "b", total_juros: 2000 }];
+  const metricas = [{ veiculo_id: "a", juros_diario_acumulado: 500 }];
+  const r = resumoEstoque({ veiculos, custosVeic, fin, metricas });
+  it("capital inclui compra, custos, juros do financiamento e juros acumulado; vendidos ficam de fora", () => {
+    expect(r.total).toBe(2);
+    expect(r.capital).toBe(40000 + 1000 + 500 + 30000 + 2000);
+  });
+  it("margem media do indicador e a mesma usada na meta (pretendido - capital, por veiculo)", () => {
+    const margemIndividual = (50000 - 41500 + 36000 - 32000) / 2;
+    expect(r.margemMedia).toBeCloseTo(margemIndividual, 6);
+    expect(r.margemMedia).toBeCloseTo(r.lucroPret / r.total, 6);
+  });
+  it("realizado soma faturamento e resultado do periodo", () => {
+    const x = resumoReal([{ valor_venda: 100, resultado_final: 30 }, { valor_venda: 300, resultado_final: 70 }]);
+    expect(x.fat).toBe(400); expect(x.res).toBe(100); expect(x.margem).toBeCloseTo(25, 6); expect(x.ticket).toBe(200);
   });
 });
