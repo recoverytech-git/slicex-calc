@@ -4,6 +4,44 @@ import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 
 // Controle do catalogo publico: quais veiculos aparecem e se a placa e exibida
+function InfoAdicional({ veiculos, onSaved }) {
+  const [id, setId] = useState("");
+  const [texto, setTexto] = useState("");
+  const [ativo, setAtivo] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const atual = veiculos.find((x) => x.id === id);
+  useEffect(() => { if (atual) { setTexto(atual.info_adicional || ""); setAtivo(!!atual.mostrar_info_adicional); } }, [id]);
+  const salvar = async () => {
+    const campos = { info_adicional: texto.trim() || null, mostrar_info_adicional: ativo };
+    const { error } = await supabase.from("veiculos").update(campos).eq("id", id);
+    if (error) { setMsg({ tipo: "erro", texto: error.message }); return; }
+    onSaved(id, campos);
+    setMsg({ tipo: "ok", texto: ativo ? "Informação salva e exibida no marketplace." : "Informação salva (não exibida no marketplace)." });
+  };
+  return (
+    <div style={{ marginTop: 18, paddingTop: 18, borderTop: "1px solid var(--border)" }}>
+      <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text)", marginBottom: 8 }}>Informações adicionais do veículo</div>
+      <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>Texto livre (equipamentos, histórico, observações). Só aparece no marketplace quando você ativar.</p>
+      <select value={id} onChange={(e) => setId(e.target.value)} style={{ height: 40, padding: "0 12px", borderRadius: 10, border: "1px solid #cbd5e1", fontSize: 13, width: "100%", maxWidth: 420, marginBottom: 10 }}>
+        <option value="">Selecione um veículo</option>
+        {veiculos.map((v) => <option key={v.id} value={v.id}>{v.modelo}{v.placa ? ` · ${v.placa}` : ""}</option>)}
+      </select>
+      {atual && (
+        <div style={{ display: "grid", gap: 10 }}>
+          <textarea value={texto} onChange={(e) => setTexto(e.target.value)} rows={4} maxLength={2000} placeholder="Ex.: Único dono, revisões na concessionária, ar-condicionado digital, 2 chaves" style={{ width: "100%", padding: 12, borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 13, fontFamily: "inherit", resize: "vertical", boxSizing: "border-box" }} />
+          <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+            <label style={{ display: "inline-flex", gap: 8, alignItems: "center", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+              <input type="checkbox" checked={ativo} onChange={(e) => setAtivo(e.target.checked)} /> Exibir no marketplace
+            </label>
+            <button type="button" onClick={salvar} style={{ height: 40, padding: "0 16px", borderRadius: 12, border: "none", background: "#2563eb", color: "#fff", fontWeight: 700, cursor: "pointer" }}>Salvar informação</button>
+          </div>
+          {msg && <p style={{ margin: 0, fontSize: 12, color: msg.tipo === "ok" ? "#059669" : "#b91c1c" }}>{msg.texto}</p>}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CatalogoConfig() {
   const { perfil } = useAuth();
   const [loja, setLoja] = useState(null);
@@ -15,7 +53,7 @@ export default function CatalogoConfig() {
     if (!supabaseConfigurado || !gestao) return;
     supabase.from("organizacoes").select("nome, slug").eq("id", perfil?.organizacao_id).maybeSingle()
       .then(({ data }) => setLoja(data ?? null));
-    supabase.from("veiculos").select("id, modelo, placa, status, publicado_catalogo, mostrar_placa, preco_venda_pretendido, cidade, uf")
+    supabase.from("veiculos").select("id, modelo, placa, status, publicado_catalogo, mostrar_placa, preco_venda_pretendido, cidade, uf, info_adicional, mostrar_info_adicional")
       .neq("status", "vendido").order("criado_em", { ascending: false })
       .then(({ data }) => setVeiculos(data ?? []));
   }, [gestao, perfil?.organizacao_id]);
@@ -72,6 +110,7 @@ export default function CatalogoConfig() {
           </div>
         ))}
       </div>
+      <InfoAdicional veiculos={veiculos} onSaved={(id, c) => setVeiculos((prev) => prev.map((x) => (x.id === id ? { ...x, ...c } : x)))} />
     </section>
   );
 }

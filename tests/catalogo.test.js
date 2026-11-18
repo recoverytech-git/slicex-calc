@@ -45,3 +45,11 @@ describe("privacidade do catalogo publico", () => {
     expect(camposPublicos({ ...completo, mostrar_placa: true }).placa).toBe("ABC1D23");
   });
 });
+
+describe("informacao adicional", () => {
+  it("so aparece quando a loja ativa", () => {
+    const base = { id: "1", modelo: "GOL", info_adicional: "Único dono, revisões em dia", mostrar_info_adicional: false };
+    expect(camposPublicos(base)).not.toHaveProperty("info_adicional");
+    expect(camposPublicos({ ...base, mostrar_info_adicional: true }).info_adicional).toBe("Único dono, revisões em dia");
+  });
+});

@@ -6,6 +6,14 @@ import { CATALOGO_CSS } from "./catalogo-estilos";
 import useLogoPublica from "../lib/logoPublica";
 import { formatarCPF, soDigitos } from "../lib/mascaras";
 
+function IconeWhatsApp({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <path d="M19.1 4.9C17.2 3 14.7 2 12 2 6.5 2 2 6.5 2 12c0 1.8.5 3.5 1.3 5L2 22l5.1-1.3c1.5.8 3.2 1.3 4.9 1.3 5.5 0 10-4.5 10-10 0-2.7-1-5.2-2.9-7.1zM12 20.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3c-.8-1.3-1.2-2.8-1.2-4.4 0-4.5 3.7-8.2 8.2-8.2 2.2 0 4.2.9 5.8 2.4 1.5 1.5 2.4 3.6 2.4 5.8 0 4.5-3.7 8.2-8.2 8.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.4c.1-.1.2-.3.3-.5.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.2 1.6 2.5 3.9 3.5 2.3.9 2.3.6 2.7.6.4 0 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z" />
+    </svg>
+  );
+}
+
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 export default function VeiculoCatalogo() {
@@ -18,6 +26,19 @@ export default function VeiculoCatalogo() {
   const [enviando, setEnviando] = useState(false);
   const [ok, setOk] = useState(false);
   const [msgErro, setMsgErro] = useState(null);
+  const [zoom, setZoom] = useState(false);
+  const totalFotos = dados?.veiculo?.fotos?.length || 0;
+  useEffect(() => {
+    if (!zoom) return;
+    const tecla = (e) => {
+      if (e.key === "Escape") setZoom(false);
+      if (e.key === "ArrowRight") setFoto((f) => Math.min(f + 1, totalFotos - 1));
+      if (e.key === "ArrowLeft") setFoto((f) => Math.max(f - 1, 0));
+    };
+    window.addEventListener("keydown", tecla);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", tecla); document.body.style.overflow = ""; };
+  }, [zoom, totalFotos]);
 
   useEffect(() => {
     setDados(null); setErro(null); setFoto(0); setOk(false);
@@ -74,14 +95,24 @@ export default function VeiculoCatalogo() {
         </div>
       </header>
 
+      {zoom && fotos[foto] && (
+        <div className="cat-lightbox" role="dialog" aria-label="Foto ampliada" onClick={(e) => { if (e.target === e.currentTarget) setZoom(false); }}>
+          <button type="button" className="cat-lb-btn cat-lb-x" onClick={() => setZoom(false)} aria-label="Fechar">✕</button>
+          {foto > 0 && <button type="button" className="cat-lb-btn cat-lb-prev" onClick={() => setFoto(foto - 1)} aria-label="Foto anterior">‹</button>}
+          <img src={fotos[foto]} alt={`${v.modelo} foto ${foto + 1}`} className="cat-lb-img" />
+          {foto < fotos.length - 1 && <button type="button" className="cat-lb-btn cat-lb-next" onClick={() => setFoto(foto + 1)} aria-label="Próxima foto">›</button>}
+          <span className="cat-lb-count">{foto + 1} / {fotos.length}</span>
+        </div>
+      )}
       <main className="cat-wrap">
         {erro && <div className="cat-err">{erro}</div>}
         {!erro && !v && <div className="cat-empty">Carregando veículo…</div>}
 
         {v && (
           <div className="cat-det">
+            <div className="cat-left">
             <section className="cat-gal">
-              <div className="cat-main">
+              <div className="cat-main" role="button" tabIndex={0} onClick={() => fotos[foto] && setZoom(true)} onKeyDown={(e) => { if (e.key === "Enter" && fotos[foto]) setZoom(true); }} style={{ cursor: fotos[foto] ? "zoom-in" : "default" }} aria-label="Ampliar foto">
                 {fotos[foto] ? <img src={fotos[foto]} alt={`${v.modelo} foto ${foto + 1}`} /> : <div className="cat-ph">Sem fotos</div>}
               </div>
               {fotos.length > 1 && (
@@ -94,6 +125,13 @@ export default function VeiculoCatalogo() {
                 </div>
               )}
             </section>
+            {v.info_adicional && (
+              <section className="cat-gal cat-info-ext">
+                <div className="cat-eyebrow">Informações adicionais</div>
+                <p style={{ margin: "8px 0 0", fontSize: 14, color: "#334155", lineHeight: 1.7, whiteSpace: "pre-line" }}>{v.info_adicional}</p>
+              </section>
+            )}
+            </div>
 
             <aside className="cat-info">
               <div>
@@ -121,7 +159,7 @@ export default function VeiculoCatalogo() {
 
               {v.descricao && <p style={{ margin: 0, fontSize: 14, color: "#334155", lineHeight: 1.6 }}>{v.descricao}</p>}
 
-              {waLink && <a href={waLink} target="_blank" rel="noreferrer" className="cat-btn" style={{ background: "#16a34a", boxShadow: "0 8px 16px -4px rgba(22,163,74,.35)", marginBottom: 4 }}>Chamar no WhatsApp</a>}
+              {waLink && <a href={waLink} target="_blank" rel="noreferrer" className="cat-btn" style={{ background: "#16a34a", boxShadow: "0 8px 16px -4px rgba(22,163,74,.35)", marginBottom: 4 }}><IconeWhatsApp /> Chamar no WhatsApp</a>}
               {ok ? (
                 <div className="cat-ok"><CheckCircle2 size={18} style={{ verticalAlign: "-4px", marginRight: 6 }} />Recebemos seu interesse. A loja vai entrar em contato em breve.</div>
               ) : (

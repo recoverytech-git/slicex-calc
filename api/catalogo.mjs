@@ -11,6 +11,7 @@ export function camposPublicos(v) {
     descricao: v.descricao, status: v.status,
   };
   if (v.mostrar_placa) base.placa = v.placa;
+  if (v.mostrar_info_adicional && v.info_adicional) base.info_adicional = v.info_adicional;
   return base;
 }
 
@@ -36,7 +37,7 @@ export default async function handler(req, res) {
   const loja = orgs[0];
 
   const id = req.query?.id ? String(req.query.id).replace(/[^0-9a-f-]/g, '') : null;
-  let q = `${url}/rest/v1/veiculos?organizacao_id=eq.${loja.id}&publicado_catalogo=eq.true&status=in.(${STATUS_VISIVEIS})&select=id,marca,modelo,valor_fipe,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em&order=criado_em.desc`;
+  let q = `${url}/rest/v1/veiculos?organizacao_id=eq.${loja.id}&publicado_catalogo=eq.true&status=in.(${STATUS_VISIVEIS})&select=id,marca,modelo,valor_fipe,info_adicional,mostrar_info_adicional,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em&order=criado_em.desc`;
   if (id) q += `&id=eq.${id}`;
   const vs = await (await fetch(q, { headers: h })).json();
   if (!Array.isArray(vs)) return res.status(502).json({ erro: 'falha ao consultar', detalhe: vs?.message || vs?.hint || vs?.code || 'sem detalhe' });

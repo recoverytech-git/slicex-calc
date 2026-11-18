@@ -139,8 +139,8 @@ export default function Marketplace() {
                   const bloqueado = !cmp && selecionados.length >= MAX_COMPARAR;
                   const fipe = fipeTexto(v);
                   return (
-                    <div key={v.id} className="cat-card-wrap">
-                      <Link to={`/loja/${v.loja_slug}/veiculo/${v.id}`} className="cat-card">
+                    <div key={v.id} className="cat-card cat-card-box">
+                      <Link to={`/loja/${v.loja_slug}/veiculo/${v.id}`} className="cat-card-link">
                         <div className="cat-img">
                           {v.capa ? <img src={v.capa} alt={`${v.marca ?? ""} ${v.modelo}`} loading="lazy" /> : <div className="cat-ph">Sem foto</div>}
                           <span className="cat-badge">{v.status === "reservado" ? "Reservado" : "Disponível"}</span>

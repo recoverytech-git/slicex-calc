@@ -3,7 +3,7 @@ import { camposPublicos, indicadoresPublicos } from './catalogo.mjs';
 
 const STATUS = 'disponivel,reservado,em_preparacao';
 export const POR_PAGINA = 30;
-const CAMPOS = 'id,organizacao_id,valor_fipe,marca,modelo,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em';
+const CAMPOS = 'id,organizacao_id,valor_fipe,info_adicional,mostrar_info_adicional,marca,modelo,ano_fabricacao,ano_modelo,quilometragem,combustivel,cambio,cor,cidade,uf,preco_venda_pretendido,potencia_motor,portas,lugares,categoria,descricao,status,placa,mostrar_placa,criado_em';
 
 // Remove caracteres que podem quebrar a consulta (virgula, parenteses, aspas, asterisco)
 export function limparBusca(t) {

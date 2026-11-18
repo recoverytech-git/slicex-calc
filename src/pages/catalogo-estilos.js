@@ -83,4 +83,18 @@ textarea.cat-in{height:auto;min-height:76px;padding:12px 14px;resize:vertical}
 .cat-table th,.cat-table td{padding:11px 12px;border-bottom:1px solid #f1f5f9;text-align:left;vertical-align:top;min-width:150px}
 .cat-table thead th{font-family:"Plus Jakarta Sans",Inter,sans-serif;font-size:14px;font-weight:800;color:#0f172a}
 .cat-table tbody th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;white-space:nowrap}
+
+.cat-card-box{display:flex;flex-direction:column;overflow:hidden;padding:0}
+.cat-card-link{display:flex;flex-direction:column;flex:1;color:inherit;text-decoration:none}
+.cat-card-acoes{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px 16px;border-top:1px solid #f1f5f9}
+.cat-left{display:flex;flex-direction:column;gap:18px;min-width:0}
+.cat-info-ext{padding:20px}
+.cat-lightbox{position:fixed;inset:0;z-index:60;background:rgba(2,6,23,.94);display:flex;align-items:center;justify-content:center;padding:24px}
+.cat-lb-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:12px}
+.cat-lb-btn{position:absolute;width:52px;height:52px;border-radius:16px;border:1px solid rgba(255,255,255,.2);background:rgba(15,23,42,.6);color:#fff;font-size:26px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.cat-lb-btn:hover{background:rgba(37,99,235,.7)}
+.cat-lb-x{top:18px;right:18px;font-size:18px}
+.cat-lb-prev{left:18px;top:50%;transform:translateY(-50%)}
+.cat-lb-next{right:18px;top:50%;transform:translateY(-50%)}
+.cat-lb-count{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:#fff;font-size:13px;font-weight:700;background:rgba(15,23,42,.6);padding:6px 14px;border-radius:999px}
 `;

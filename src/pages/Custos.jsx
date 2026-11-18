@@ -9,6 +9,7 @@ import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 import { CATEGORIAS_CUSTO, custoFixoMensal, analisarMeta, alertaExcesso } from "../lib/custos";
 import { useRascunho } from "../lib/rascunho";
+import { calcularResumo } from "../lib/calculos";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const PCT = (n) => `${(Number(n || 0) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
@@ -25,6 +26,7 @@ export default function Custos() {
   const [fin, setFin] = useState([]);
   const [metricas, setMetricas] = useState([]);
   const [vendas30, setVendas30] = useState(0);
+  const [vendasMes, setVendasMes] = useState([]);
   const [novo, setNovo] = useRascunho("custos.novo", VAZIO_CUSTO);
   const [aviso, setAviso] = useState(null);
   const [erro, setErro] = useState(null);
@@ -36,11 +38,11 @@ export default function Custos() {
     const [c, cf, v, vc, f, m, vd] = await Promise.all([
       supabase.from("custos_recorrentes").select("id, descricao, categoria, valor_mensal, ativo").order("criado_em", { ascending: true }),
       supabase.from("custos_config").select("meta_lucro_mensal").maybeSingle(),
-      supabase.from("veiculos").select("id, status, modelo, preco_compra, preco_venda_pretendido"),
+      supabase.from("veiculos").select("id, status, modelo, preco_compra, preco_venda_pretendido, valor_fipe"),
       supabase.from("veiculo_custos").select("veiculo_id, valor"),
       supabase.from("veiculo_financiamentos").select("veiculo_id, total_juros"),
       supabase.from("v_estoque_metricas").select("veiculo_id, juros_diario_acumulado"),
-      supabase.from("v_vendas_resultado").select("data_venda").gte("data_venda", desde),
+      supabase.from("v_vendas_resultado").select("data_venda, valor_venda, resultado_final").gte("data_venda", desde),
     ]);
     const falha = [c, cf, v, vc, f, m, vd].find((r) => r.error);
     if (falha) { setErro(falha.error.message); return; }
@@ -52,6 +54,7 @@ export default function Custos() {
     setFin(f.data ?? []);
     setMetricas(m.data ?? []);
     setVendas30((vd.data ?? []).length);
+    setVendasMes(vd.data ?? []);
   };
   useEffect(() => { carregar(); }, [gestao]);
 
@@ -66,6 +69,24 @@ export default function Custos() {
       return { id: v.id, modelo: v.modelo, pret, margem: pret - capital };
     });
   }, [veiculos, custosVeic, fin, metricas]);
+
+  // Indicadores do estoque: mesma funcao usada na pagina Estoque (calcularResumo)
+  const resumo = useMemo(() => {
+    const extras = Object.fromEntries(veiculos.map((v) => [v.id, { preco_compra: v.preco_compra }]));
+    const cmap = {};
+    custosVeic.forEach((c) => { cmap[c.veiculo_id] = (cmap[c.veiculo_id] || 0) + Number(c.valor || 0); });
+    const itens = veiculos.map((v) => ({ id: v.id, status: v.status, valor_fipe: v.valor_fipe, preco: v.preco_venda_pretendido }));
+    return calcularResumo(itens, extras, cmap, null, null);
+  }, [veiculos, custosVeic]);
+  // Vendas reais dos ultimos 30 dias
+  const real = useMemo(() => {
+    const fat = vendasMes.reduce((s, v) => s + Number(v.valor_venda || 0), 0);
+    const res = vendasMes.reduce((s, v) => s + Number(v.resultado_final || 0), 0);
+    const n = vendasMes.length;
+    return { fat, res, n, ticket: n ? fat / n : 0, margem: fat > 0 ? (res / fat) * 100 : 0 };
+  }, [vendasMes]);
+  const pctTxt = (n) => (n == null || Number.isNaN(n) ? "—" : `${Number(n).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`);
+  const corLucro = (n) => (Number(n) < 0 ? "#b91c1c" : "#059669");
 
   const fixo = custoFixoMensal(custos);
   const margemMedia = estoque.length ? estoque.reduce((s, e) => s + e.margem, 0) / estoque.length : 0;
@@ -120,6 +141,30 @@ export default function Custos() {
               <p className="db-sub">Cadastre os custos fixos da operação e veja quanto eles reduzem o lucro líquido.</p>
             </div>
           </header>
+
+          <section className="db-card">
+            <DbCabeca Icone={Car} titulo="Estoque (valores atuais)" sub="Mesma matemática da página Estoque" />
+            <div className="db-kgrid">
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Total no pátio</span></div><div className="db-kpi-v">{resumo.total}</div><div className="db-kpi-s">unidades não vendidas</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Venda pela FIPE</span></div><div className="db-kpi-v">{BRL(resumo.potFipe)}</div><div className="db-kpi-s">potencial somando os valores FIPE</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Venda acima da FIPE</span></div><div className="db-kpi-v">{BRL(resumo.potPret)}</div><div className="db-kpi-s">potencial somando os valores pretendidos</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Ticket médio FIPE</span></div><div className="db-kpi-v">{BRL(resumo.ticketFipe)}</div><div className="db-kpi-s">faixa {BRL(resumo.minFipe)} – {BRL(resumo.maxFipe)}</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Lucro atual na FIPE</span></div><div className="db-kpi-v" style={{ color: corLucro(resumo.lucroFipe) }}>{BRL(resumo.lucroFipe)}</div><div className="db-kpi-s">potencial FIPE − capital investido</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Lucro atual acima da FIPE</span></div><div className="db-kpi-v" style={{ color: corLucro(resumo.lucroPret) }}>{BRL(resumo.lucroPret)}</div><div className="db-kpi-s">potencial pretendido − capital investido</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Margem estimada na FIPE</span></div><div className="db-kpi-v" style={{ color: corLucro(resumo.margemFipe) }}>{pctTxt(resumo.margemFipe)}</div><div className="db-kpi-s">lucro FIPE ÷ potencial FIPE</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Margem estimada acima da FIPE</span></div><div className="db-kpi-v" style={{ color: corLucro(resumo.margemPret) }}>{pctTxt(resumo.margemPret)}</div><div className="db-kpi-s">lucro pretendido ÷ potencial pretendido</div></div>
+            </div>
+          </section>
+          <section className="db-card">
+            <DbCabeca Icone={TrendingUp} titulo="Vendas reais (30 dias)" sub="Valores efetivamente vendidos no período" />
+            <div className="db-kgrid">
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Veículos vendidos</span></div><div className="db-kpi-v">{real.n}</div><div className="db-kpi-s">no período</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Faturamento</span></div><div className="db-kpi-v">{BRL(real.fat)}</div><div className="db-kpi-s">soma dos valores vendidos</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Resultado final</span></div><div className="db-kpi-v" style={{ color: corLucro(real.res) }}>{BRL(real.res)}</div><div className="db-kpi-s">após custos de cada venda</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Ticket médio real</span></div><div className="db-kpi-v">{BRL(real.ticket)}</div><div className="db-kpi-s">faturamento ÷ veículos vendidos</div></div>
+              <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Margem real</span></div><div className="db-kpi-v" style={{ color: corLucro(real.res) }}>{pctTxt(real.margem)}</div><div className="db-kpi-s">resultado final ÷ faturamento</div></div>
+            </div>
+          </section>
 
           {erro && <section className="db-card"><p className="db-note" style={{ color: "#b91c1c" }}>{erro}</p></section>}
           {aviso && <p className="db-note" style={{ color: aviso.tipo === "ok" ? "#059669" : "#b91c1c", fontWeight: 700 }}>{aviso.texto}</p>}
