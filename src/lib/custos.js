@@ -71,12 +71,13 @@ export function planoMeta({ meta = 0, fixo = 0, realizadoMes = 0, veiculos = [] 
   return { atingivel: false, base, alvo, escolhidos: [], totalEstoque, lucroComEstoque: base + totalEstoque, falta: alvo - (base + totalEstoque) };
 }
 
-// Alerta quando os custos fixos passam de uma fracao do resultado bruto real do mes
-export function alertaExcesso({ custoFixoMensal = 0, margemBrutaMes = 0, limite = 0.25 }) {
+// Alerta quando os custos fixos passam de uma fracao do resultado liquido realizado no mes
+export function alertaExcesso({ custoFixoMensal = 0, resultadoLiquidoMes = 0, limite = 0.25 }) {
   const custo = Number(custoFixoMensal) || 0;
   if (!(custo > 0)) return null;
-  if (!(margemBrutaMes > 0)) return { nivel: 'alto', texto: 'Há custos fixos e nenhum resultado realizado nos últimos 30 dias' };
-  const pct = custo / margemBrutaMes;
+  const base = Number(resultadoLiquidoMes) || 0;
+  if (!(base > 0)) return { nivel: 'alto', texto: 'Há custos fixos e o resultado líquido realizado nos últimos 30 dias não é positivo' };
+  const pct = custo / base;
   if (pct <= limite) return null;
-  return { nivel: pct > 0.5 ? 'alto' : 'medio', pct, texto: `Os custos fixos consomem ${Math.round(pct * 100)}% do resultado bruto realizado no mês` };
+  return { nivel: pct > 0.5 ? 'alto' : 'medio', pct, texto: `Os custos fixos consomem ${Math.round(pct * 100)}% do resultado líquido realizado no mês` };
 }

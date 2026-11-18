@@ -73,10 +73,10 @@ describe("plano da meta com veiculos reais", () => {
 
 describe("alerta de excesso de custos", () => {
   it("sem excesso nao alerta", () => {
-    expect(alertaExcesso({ custoFixoMensal: 1000, margemBrutaMes: 10000 })).toBeNull();
+    expect(alertaExcesso({ custoFixoMensal: 1000, resultadoLiquidoMes: 10000 })).toBeNull();
   });
   it("acima de 25% alerta em nivel medio, acima de 50% em alto", () => {
-    expect(alertaExcesso({ custoFixoMensal: 3000, margemBrutaMes: 10000 }).nivel).toBe("medio");
-    expect(alertaExcesso({ custoFixoMensal: 6000, margemBrutaMes: 10000 }).nivel).toBe("alto");
+    expect(alertaExcesso({ custoFixoMensal: 3000, resultadoLiquidoMes: 10000 }).nivel).toBe("medio");
+    expect(alertaExcesso({ custoFixoMensal: 6000, resultadoLiquidoMes: 10000 }).nivel).toBe("alto");
   });
 });

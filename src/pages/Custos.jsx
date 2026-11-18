@@ -72,9 +72,8 @@ export default function Custos() {
     meta: metaNumero, fixo, realizadoMes: vendas30.res,
     veiculos: veiculos.filter((v) => v.status !== "vendido").map((v) => ({ id: v.id, modelo: v.modelo, placa: v.placa, resultado: mapa[v.id]?.resultado ?? 0 })),
   }), [metaNumero, fixo, vendas30.res, veiculos, mapa]);
-  // resultado bruto real do mes = resultado final + juros de cada venda (antes dos juros)
-  const brutoMes = vendasPeriodo(vendas, 30).reduce((s, v) => s + Number(v.resultado_final || 0) + Number(v.juros_total || 0), 0);
-  const alerta = alertaExcesso({ custoFixoMensal: fixo, margemBrutaMes: brutoMes });
+  // excesso de custos: custos fixos do mes x resultado liquido realizado nos ultimos 30 dias
+  const alerta = alertaExcesso({ custoFixoMensal: fixo, resultadoLiquidoMes: vendas30.res });
 
   const adicionar = async (e) => {
     e.preventDefault();
@@ -136,7 +135,7 @@ export default function Custos() {
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                 <span className={`db-pill ${alerta.nivel === "alto" ? "db-pill-verm" : "db-pill-ambar"}`}><AlertTriangle size={13} /> Excesso de custos</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{alerta.texto}</span>
-                <span className="db-alerta-linha">Resultado bruto realizado no mês: <strong>{BRL(brutoMes)}</strong> · custos fixos: <strong>{BRL(fixo)}</strong>{brutoMes > 0 ? <> · custos = <strong>{PCT((fixo / brutoMes) * 100)}</strong> do bruto</> : null}. O bruto é a soma de (resultado final + juros) das vendas dos últimos 30 dias, antes dos juros do financiamento e dos custos fixos.</span>
+                <span className="db-alerta-linha">Resultado líquido realizado nos últimos 30 dias: <strong>{BRL(vendas30.res)}</strong> · custos fixos: <strong>{BRL(fixo)}</strong>{vendas30.res > 0 ? <> · custos = <strong>{PCT((fixo / vendas30.res) * 100)}</strong> do resultado líquido</> : null}. É a soma do resultado final de cada venda, já descontados despesas, descontos, compra, custos e juros.</span>
               </div>
             </section>
           )}
