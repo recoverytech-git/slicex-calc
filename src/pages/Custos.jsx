@@ -136,6 +136,7 @@ export default function Custos() {
               <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                 <span className={`db-pill ${alerta.nivel === "alto" ? "db-pill-verm" : "db-pill-ambar"}`}><AlertTriangle size={13} /> Excesso de custos</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{alerta.texto}</span>
+                <span className="db-alerta-linha">Resultado bruto realizado no mês: <strong>{BRL(brutoMes)}</strong> · custos fixos: <strong>{BRL(fixo)}</strong>{brutoMes > 0 ? <> · custos = <strong>{PCT((fixo / brutoMes) * 100)}</strong> do bruto</> : null}. O bruto é a soma de (resultado final + juros) das vendas dos últimos 30 dias, antes dos juros do financiamento e dos custos fixos.</span>
               </div>
             </section>
           )}
@@ -202,7 +203,7 @@ export default function Custos() {
               <button type="button" className="db-btn-prim" onClick={salvarMeta}><CheckCircle2 size={16} /> Salvar meta</button>
             </div>
 
-            <div className="db-kgrid">
+            <div className="db-scen">
               <div className="db-kpi" style={{ borderColor: cenario1 >= metaNumero ? "#a7f3d0" : "#fde68a" }}>
                 <div className="db-kpi-l">Cenário 1 · Realizado nos últimos 30 dias</div>
                 <div className="db-kpi-v" style={{ color: corLucro(cenario1) }}>{BRL(cenario1)}</div>
@@ -227,11 +228,7 @@ export default function Custos() {
                     : <>
                         <div className="db-kpi-v">{plano.escolhidos.length} veículo(s)</div>
                         <div className="db-kpi-s" style={{ fontSize: 13, color: "var(--text)" }}>Vender, nesta ordem:</div>
-                        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13 }}>
-                          {plano.escolhidos.map((v) => (
-                            <li key={v.id}><strong>{v.modelo}{v.placa ? ` · ${v.placa}` : ""}</strong> — resultado real {BRL(v.resultado)} (acumulado {BRL(v.acumulado)})</li>
-                          ))}
-                        </ul>
+                        <div className="db-kpi-s">Veja a ordem completa na tabela abaixo.</div>
                       </>
                 ) : (
                   <div className="db-kpi-s" style={{ fontSize: 13, color: "#b91c1c", fontWeight: 700 }}>
@@ -241,6 +238,23 @@ export default function Custos() {
                 {plano.atingivel && <span className="db-pill db-pill-verde"><CheckCircle2 size={13} /> Atinge a meta</span>}
               </div>
             </div>
+            {plano.atingivel && plano.escolhidos.length > 0 && (
+              <div className="db-tbl-wrap" style={{ marginTop: 16 }}>
+                <table className="db-tbl">
+                  <thead><tr><th>Ordem</th><th>Veículo</th><th className="db-r">Resultado real</th><th className="db-r">Acumulado no mês</th></tr></thead>
+                  <tbody>
+                    {plano.escolhidos.map((v, i) => (
+                      <tr key={v.id}>
+                        <td><span className="db-pill db-pill-azul">{i + 1}º</span></td>
+                        <td style={{ fontWeight: 700 }}>{v.modelo}{v.placa ? ` · ${v.placa}` : ""}</td>
+                        <td className="db-r">{BRL(v.resultado)}</td>
+                        <td className="db-r" style={{ fontWeight: 800, color: corLucro(v.acumulado) }}>{BRL(v.acumulado)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <p className="db-note" style={{ marginTop: 12 }}>
               Como calculamos (somente valores reais): lucro = resultado final das vendas do mês − custos fixos + resultado real de cada veículo vendido.
               Resultado real de cada veículo = preço pretendido − capital investido (igual à tela Estoque). Custos fixos: {BRL(fixo)} por mês.

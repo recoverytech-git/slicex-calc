@@ -77,4 +77,10 @@ export const DB_CSS = `
 .db-btn-prim:hover{background:#1d4ed8}
 .db-btn-prim:disabled{opacity:.55;cursor:not-allowed}
 .db-empty{text-align:center;color:#64748b;font-size:14px;padding:28px 12px}
+
+.db-scen{display:grid;gap:14px;grid-template-columns:1fr;width:100%}
+@media (min-width:640px){.db-scen{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1100px){.db-scen{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.db-scen .db-kpi{min-height:100%;justify-content:flex-start}
+.db-alerta-linha{flex-basis:100%;font-size:13px;color:var(--text-dim);margin-top:4px}
 `;
