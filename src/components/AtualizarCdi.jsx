@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { RefreshCw, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
+import DbCabeca from "./DbCabeca";
 
 // Botao do administrador master: forca a atualizacao do CDI agora, sem terminal
 export default function AtualizarCdi() {
@@ -26,14 +28,18 @@ export default function AtualizarCdi() {
   };
 
   return (
-    <section style={{ background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 20, marginBottom: 18 }}>
-      <h2 style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>CDI (taxa de oportunidade)</h2>
-      <p style={{ margin: "0 0 12px", fontSize: 12, color: "var(--text-dim)" }}>A atualização é automática em dias úteis. Use o botão para atualizar agora e ver o resultado.</p>
-      <button type="button" onClick={atualizar} disabled={carregando}
-        style={{ padding: "9px 16px", borderRadius: 12, border: "none", background: "var(--accent)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", opacity: carregando ? 0.6 : 1 }}>
-        {carregando ? "Atualizando..." : "Atualizar CDI agora"}
-      </button>
-      {estado && <p style={{ margin: "12px 0 0", fontSize: 13, color: estado.tipo === "ok" ? "#059669" : "#b91c1c" }}>{estado.texto}</p>}
+    <section className="db-card cfg-lift">
+      <DbCabeca Icone={RefreshCw} titulo="CDI (taxa de oportunidade)" sub="Atualização automática em dias úteis. Use o botão para atualizar agora e ver o resultado." />
+      <div className="cfg-acoes">
+        <button type="button" className="db-btn-prim" onClick={atualizar} disabled={carregando}>
+          {carregando ? <Loader2 size={15} className="spin" /> : <RefreshCw size={15} />} {carregando ? "Atualizando…" : "Atualizar CDI agora"}
+        </button>
+        {estado && (
+          <span className="cfg-status" style={{ color: estado.tipo === "ok" ? "#059669" : "#b91c1c" }}>
+            {estado.tipo === "ok" ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />} {estado.texto}
+          </span>
+        )}
+      </div>
     </section>
   );
 }
