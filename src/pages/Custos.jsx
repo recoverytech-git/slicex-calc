@@ -123,6 +123,37 @@ export default function Custos() {
           {erro && <section className="db-card"><p className="db-note" style={{ color: "#b91c1c" }}>{erro}</p></section>}
           {aviso && <p className="db-note" style={{ color: aviso.tipo === "ok" ? "#059669" : "#b91c1c", fontWeight: 700 }}>{aviso.texto}</p>}
 
+          <section className="db-card">
+            <DbCabeca Icone={Wallet} titulo="Custos recorrentes" sub="Seguro, pátio, lavagem e outros custos fixos da operação" />
+            <form onSubmit={adicionar} style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", alignItems: "end", marginBottom: 16 }}>
+              <div><label className="db-label">Descrição</label><input className="db-input" value={novo.descricao} onChange={(e) => setNovo({ ...novo, descricao: e.target.value })} placeholder="Ex.: Seguro da frota" /></div>
+              <div><label className="db-label">Categoria</label>
+                <select className="db-input" value={novo.categoria} onChange={(e) => setNovo({ ...novo, categoria: e.target.value })}>
+                  {CATEGORIAS_CUSTO.map((c) => <option key={c}>{c}</option>)}
+                </select></div>
+              <div><label className="db-label">Valor mensal (R$)</label><input className="db-input" inputMode="decimal" value={novo.valor} onChange={(e) => setNovo({ ...novo, valor: e.target.value })} placeholder="0,00" /></div>
+              <button type="submit" className="db-btn-prim" style={{ justifyContent: "center" }}><Plus size={16} /> Adicionar custo</button>
+            </form>
+            {custos.length === 0 ? <p className="db-note">Nenhum custo cadastrado.</p> : (
+              <div className="db-tbl-wrap">
+                <table className="db-tbl">
+                  <thead><tr><th>Descrição</th><th>Categoria</th><th className="db-r">Valor / mês</th><th>Ativo</th><th></th></tr></thead>
+                  <tbody>
+                    {custos.map((c) => (
+                      <tr key={c.id} style={{ opacity: c.ativo === false ? 0.5 : 1 }}>
+                        <td style={{ fontWeight: 700 }}>{c.descricao}</td>
+                        <td><span className="db-pill db-pill-azul">{c.categoria}</span></td>
+                        <td className="db-r" style={{ fontWeight: 800 }}>{BRL(c.valor_mensal)}</td>
+                        <td><input type="checkbox" checked={c.ativo !== false} onChange={() => alternarAtivo(c)} aria-label="Ativo" /></td>
+                        <td className="db-r"><button type="button" className="db-btn-sec" onClick={() => remover(c)} aria-label="Remover" style={{ height: 34, padding: "0 10px" }}><Trash2 size={14} /></button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
           <div className="db-kgrid">
             <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Custos fixos / mês</span><span className="db-kpi-ic"><Wallet size={16} /></span></div><div className="db-kpi-v">{BRL(fixo)}</div><div className="db-kpi-s">{custos.filter((c) => c.ativo !== false).length} custos ativos</div></div>
             <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Vendas (30 dias)</span><span className="db-kpi-ic"><Car size={16} /></span></div><div className="db-kpi-v">{vendas30.n}</div><div className="db-kpi-s">veículos vendidos</div></div>
@@ -260,36 +291,7 @@ export default function Custos() {
             </p>
           </section>
 
-          <section className="db-card">
-            <DbCabeca Icone={Wallet} titulo="Custos recorrentes" sub="Seguro, pátio, lavagem e outros custos fixos da operação" />
-            <form onSubmit={adicionar} style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", alignItems: "end", marginBottom: 16 }}>
-              <div><label className="db-label">Descrição</label><input className="db-input" value={novo.descricao} onChange={(e) => setNovo({ ...novo, descricao: e.target.value })} placeholder="Ex.: Seguro da frota" /></div>
-              <div><label className="db-label">Categoria</label>
-                <select className="db-input" value={novo.categoria} onChange={(e) => setNovo({ ...novo, categoria: e.target.value })}>
-                  {CATEGORIAS_CUSTO.map((c) => <option key={c}>{c}</option>)}
-                </select></div>
-              <div><label className="db-label">Valor mensal (R$)</label><input className="db-input" inputMode="decimal" value={novo.valor} onChange={(e) => setNovo({ ...novo, valor: e.target.value })} placeholder="0,00" /></div>
-              <button type="submit" className="db-btn-prim" style={{ justifyContent: "center" }}><Plus size={16} /> Adicionar custo</button>
-            </form>
-            {custos.length === 0 ? <p className="db-note">Nenhum custo cadastrado.</p> : (
-              <div className="db-tbl-wrap">
-                <table className="db-tbl">
-                  <thead><tr><th>Descrição</th><th>Categoria</th><th className="db-r">Valor / mês</th><th>Ativo</th><th></th></tr></thead>
-                  <tbody>
-                    {custos.map((c) => (
-                      <tr key={c.id} style={{ opacity: c.ativo === false ? 0.5 : 1 }}>
-                        <td style={{ fontWeight: 700 }}>{c.descricao}</td>
-                        <td><span className="db-pill db-pill-azul">{c.categoria}</span></td>
-                        <td className="db-r" style={{ fontWeight: 800 }}>{BRL(c.valor_mensal)}</td>
-                        <td><input type="checkbox" checked={c.ativo !== false} onChange={() => alternarAtivo(c)} aria-label="Ativo" /></td>
-                        <td className="db-r"><button type="button" className="db-btn-sec" onClick={() => remover(c)} aria-label="Remover" style={{ height: 34, padding: "0 10px" }}><Trash2 size={14} /></button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
+          
         </main>
       </div>
     </PageTransition>
