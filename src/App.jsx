@@ -1,3 +1,4 @@
+import CatalogoPublicoAdmin from "./pages/CatalogoPublicoAdmin";
 import Catalogo from "./pages/Catalogo";
 import VeiculoCatalogo from "./pages/VeiculoCatalogo";
 import SimuladorDecisao from "./pages/SimuladorDecisao";
@@ -70,6 +71,7 @@ function AnimatedRoutes() {
           <Route path="/simulador-decisao" element={<RotaPrivada><SimuladorDecisao /></RotaPrivada>} />
           <Route path="/loja/:slug" element={<Catalogo />} />
           <Route path="/loja/:slug/veiculo/:id" element={<VeiculoCatalogo />} />
+          <Route path="/catalogo-publico" element={<RotaPrivada><CatalogoPublicoAdmin /></RotaPrivada>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

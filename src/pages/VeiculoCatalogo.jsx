@@ -4,6 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Gauge, Fuel, Cog, MapPin, Hash, Users, DoorOpen, Send, CheckCircle2 } from "lucide-react";
 import { CATALOGO_CSS } from "./catalogo-estilos";
 import logo from "../assets/logo.png";
+import { formatarCPF, soDigitos } from "../lib/mascaras";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -12,7 +13,7 @@ export default function VeiculoCatalogo() {
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(null);
   const [foto, setFoto] = useState(0);
-  const [form, setForm] = useState({ nome: "", telefone: "", mensagem: "", site: "" });
+  const [form, setForm] = useState({ nome: "", telefone: "", cpf: "", mensagem: "", site: "" });
   const [enviando, setEnviando] = useState(false);
   const [ok, setOk] = useState(false);
   const [msgErro, setMsgErro] = useState(null);
@@ -24,6 +25,9 @@ export default function VeiculoCatalogo() {
       .then(setDados)
       .catch((e) => setErro(e.message));
   }, [slug, id]);
+
+  const waNumero = (dados?.loja?.whatsapp || "").replace(/\D/g, "");
+  const waLink = waNumero && dados?.veiculo ? `https://wa.me/${waNumero.length <= 11 ? "55" + waNumero : waNumero}?text=${encodeURIComponent(`Olá! Tenho interesse no ${dados.veiculo.modelo} (${dados.veiculo.ano_fabricacao}/${dados.veiculo.ano_modelo}) anunciado no catálogo.`)}` : null;
 
   const enviar = async (e) => {
     e.preventDefault();
@@ -115,17 +119,19 @@ export default function VeiculoCatalogo() {
 
               {v.descricao && <p style={{ margin: 0, fontSize: 14, color: "#334155", lineHeight: 1.6 }}>{v.descricao}</p>}
 
+              {waLink && <a href={waLink} target="_blank" rel="noreferrer" className="cat-btn" style={{ background: "#16a34a", boxShadow: "0 8px 16px -4px rgba(22,163,74,.35)", marginBottom: 4 }}>Chamar no WhatsApp</a>}
               {ok ? (
                 <div className="cat-ok"><CheckCircle2 size={18} style={{ verticalAlign: "-4px", marginRight: 6 }} />Recebemos seu interesse. A loja vai entrar em contato em breve.</div>
               ) : (
                 <form className="cat-form" onSubmit={enviar}>
-                  <div className="cat-eyebrow">Tenho interesse</div>
+                  <div className="cat-eyebrow">Quero receber retorno da loja</div>
+                  <input className="cat-in" placeholder="CPF" inputMode="numeric" required value={formatarCPF(form.cpf)} onChange={(e) => setForm({ ...form, cpf: soDigitos(e.target.value).slice(0, 11) })} aria-label="CPF" />
                   <input className="cat-in" placeholder="Seu nome" required minLength={2} value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} aria-label="Nome" />
                   <input className="cat-in" placeholder="Telefone com DDD (WhatsApp)" required inputMode="tel" value={form.telefone} onChange={(e) => setForm({ ...form, telefone: e.target.value })} aria-label="Telefone" />
                   <textarea className="cat-in" placeholder="Mensagem (opcional)" value={form.mensagem} onChange={(e) => setForm({ ...form, mensagem: e.target.value })} aria-label="Mensagem" />
                   <input type="text" value={form.site} onChange={(e) => setForm({ ...form, site: e.target.value })} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: -9999, opacity: 0, height: 0 }} />
                   {msgErro && <div className="cat-erro">{msgErro}</div>}
-                  <button type="submit" className="cat-btn" disabled={enviando}><Send size={16} /> {enviando ? "Enviando…" : "Enviar interesse"}</button>
+                  <button type="submit" className="cat-btn cat-btn-ghost" disabled={enviando}><Send size={16} /> {enviando ? "Enviando…" : "Enviar meus dados"}</button>
                 </form>
               )}
             </aside>

@@ -19,7 +19,7 @@ export default function Catalogo() {
   useEffect(() => {
     setDados(null); setErro(null);
     fetch(`/api/catalogo?slug=${encodeURIComponent(slug)}`)
-      .then(async (r) => { const b = await r.json(); if (!r.ok) throw new Error(b.erro || "Loja não encontrada"); return b; })
+      .then(async (r) => { const b = await r.json(); if (!r.ok) throw new Error([b.erro, b.detalhe].filter(Boolean).join(" — ") || "Loja não encontrada"); return b; })
       .then(setDados)
       .catch((e) => setErro(e.message));
   }, [slug]);

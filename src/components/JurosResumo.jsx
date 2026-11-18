@@ -1,7 +1,7 @@
 import { inicioPeriodo } from "./PainelPeriodo";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-const cartao = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 20, marginBottom: 18 };
+const cartao = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 20, marginBottom: 18 };
 
 // Juros em aberto (estoque, ate hoje) separado do juros ja realizado nas vendas do periodo
 export default function JurosResumo({ jurosEst, vendas, periodo }) {

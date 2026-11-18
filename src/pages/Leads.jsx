@@ -12,7 +12,7 @@ import { useRascunho } from "../lib/rascunho";
 import { gerarPdf, gerarPngBlob, linhaExcel, nomeArquivo, baixar } from "../lib/ficha";
 import { formatarCPF, formatarTelefone, soDigitos } from "../lib/mascaras";
 
-const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" };
+const card = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)" };
 const STATUS_LEAD = { preenchida: "Preenchida pelo cliente", completa: "Completa" };
 const botao = { display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 14px", borderRadius: "var(--r-sm)", border: "1px solid var(--border-strong)", background: "transparent", color: "var(--text)", fontSize: 13, fontWeight: 600, cursor: "pointer" };
 

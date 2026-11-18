@@ -26,7 +26,7 @@ export default function AtualizarCdi() {
   };
 
   return (
-    <section style={{ background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 20, marginBottom: 18 }}>
+    <section style={{ background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 20, marginBottom: 18 }}>
       <h2 style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 800, color: "var(--text)" }}>CDI (taxa de oportunidade)</h2>
       <p style={{ margin: "0 0 12px", fontSize: 12, color: "var(--text-dim)" }}>A atualização é automática em dias úteis. Use o botão para atualizar agora e ver o resultado.</p>
       <button type="button" onClick={atualizar} disabled={carregando}

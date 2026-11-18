@@ -104,7 +104,7 @@ export function exportarExcel(veiculos, vendas, metricas, custos, dias) {
   XLSX.writeFile(wb, `calcula-car_${dias}dias.xlsx`);
 }
 
-const cartao = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 20, marginBottom: 18 };
+const cartao = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 20, marginBottom: 18 };
 const subtitulo = { margin: "18px 0 8px", fontSize: 15, fontWeight: 800, color: "var(--text)" };
 const texto = { margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" };
 const tabela = { width: "100%", borderCollapse: "collapse", fontSize: 13 };

@@ -5,7 +5,7 @@ import { useAuth } from "../lib/auth";
 // Alerta apenas para a gestao: veiculos reservados, ou vendidos sem registro de venda, ha mais de X dias
 const GESTAO = ["admin_master", "proprietario", "gerente"];
 const DIA_MS = 86400000;
-const cartao = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 20, marginBottom: 18 };
+const cartao = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 20, marginBottom: 18 };
 const td = { padding: "8px 6px", borderBottom: "1px solid var(--border)", color: "var(--text)", fontSize: 13, whiteSpace: "nowrap" };
 
 export default function AlertaBaixaPendente() {

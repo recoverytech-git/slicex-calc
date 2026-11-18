@@ -32,12 +32,19 @@ const CSS = `
 .db-sec{display:flex;align-items:center;gap:10px;margin:6px 0 -6px}
 .db-sec-ic{width:36px;height:36px;border-radius:12px;background:#eff6ff;color:#2563eb;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .db-sec-t{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:15px;font-weight:800;color:var(--text);letter-spacing:.01em;text-transform:uppercase}
-.db-kgrid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.db-kgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
 @media (min-width:1024px){.db-kgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 .db-kpi{background:var(--surface);border:1px solid rgba(226,232,240,.8);border-radius:18px;box-shadow:0 1px 3px rgba(15,23,42,.03),0 10px 25px -5px rgba(15,23,42,.04);padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
 .db-kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .db-kpi-l{font-family:Inter,system-ui,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;line-height:1.3}
-.db-kpi-v{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:clamp(17px,3.6vw,24px);font-weight:800;color:var(--text);letter-spacing:-.01em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;line-height:1.15}
+.db-kpi-v{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:clamp(15px,1.7vw,22px);font-weight:800;color:var(--text);letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.db-hbars{display:flex;flex-direction:column;gap:8px}
+.db-hrow{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(92px,auto);gap:10px;align-items:center}
+.db-hlbl{font-size:12px;font-weight:700;color:var(--text-dim);text-transform:capitalize}
+.db-htrack{height:12px;border-radius:999px;background:#eef2ff;overflow:hidden}
+.db-hfill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#60a5fa);transition:width .6s cubic-bezier(.16,1,.3,1)}
+.db-hval{font-size:12px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+@media (max-width:639px){.db-hrow{grid-template-columns:40px minmax(0,1fr)}.db-hval{grid-column:2;text-align:left}}
 .db-kpi-ic{width:34px;height:34px;min-width:34px;border-radius:11px;background:#eff6ff;color:#2563eb;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center}
 .db-kpi-s{font-size:11.5px;color:var(--text-mute)}
 .db-charts{display:grid;gap:16px;grid-template-columns:1fr}
@@ -53,9 +60,6 @@ const CSS = `
 .db-stat-l{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b;overflow-wrap:anywhere}
 .db-note{font-size:11.5px;color:var(--text-mute);margin:0}
 @media (max-width:639px){
-  .db-bar-v{display:none}
-  .db-bars{height:150px;padding-top:6px}
-  .db-bar-l{font-size:9px}
   .db-status{grid-template-columns:repeat(2,minmax(0,1fr))}
   .db-btn{height:40px;padding:0 14px}
 }
@@ -85,18 +89,21 @@ function Secao({ icone: Icone, titulo }) {
 
 function GraficoBarras({ titulo, dados, formatar = (v) => v }) {
   const max = Math.max(...dados.map((d) => d.valor), 1);
+  const comValor = dados.filter((d) => d.valor > 0).length;
   return (
     <div className="db-card">
-      <p className="db-kpi-l" style={{ margin: "0 0 4px" }}>{titulo}</p>
-      <div className="db-bars">
-        {dados.map((d, i) => (
-          <div key={d.rotulo + i} className="db-bar" title={`${d.rotulo}: ${formatar(d.valor)}`}>
-            <span className="db-bar-v">{d.valor ? formatar(d.valor) : ""}</span>
-            <div className="db-bar-fill" style={{ height: `${(d.valor / max) * 100}%`, minHeight: d.valor ? 4 : 0 }} />
-            <span className="db-bar-l">{d.rotulo}</span>
-          </div>
-        ))}
-      </div>
+      <p className="db-kpi-l" style={{ margin: "0 0 10px" }}>{titulo}</p>
+      {comValor === 0 ? <p className="db-note">Sem movimento no período.</p> : (
+        <div className="db-hbars">
+          {dados.map((d, i) => (
+            <div key={d.rotulo + i} className="db-hrow">
+              <span className="db-hlbl">{d.rotulo}</span>
+              <div className="db-htrack"><div className="db-hfill" style={{ width: `${(d.valor / max) * 100}%` }} /></div>
+              <span className="db-hval">{formatar(d.valor)}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

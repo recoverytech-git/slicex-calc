@@ -10,7 +10,7 @@ import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 import { useRascunho } from "../lib/rascunho";
 
-const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" };
+const card = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)" };
 const PAGINA = 50;
 const TABELAS = ["veiculos", "veiculo_custos", "veiculo_dados_financeiros", "veiculo_financiamentos", "veiculo_financiamento_parcelas", "veiculo_fotos", "veiculo_checklists", "veiculo_vendas", "organizacoes", "perfis", "configuracoes"];
 const ROTULO_OP = { INSERT: "Criou", UPDATE: "Alterou", DELETE: "Excluiu" };

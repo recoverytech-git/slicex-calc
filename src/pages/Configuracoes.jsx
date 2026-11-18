@@ -1,4 +1,3 @@
-import CatalogoConfig from "../components/CatalogoConfig";
 import AtualizarCdi from "../components/AtualizarCdi";
 // sem-rascunho: página de configuração, sem formulário de texto
 import { useEffect, useState } from "react";
@@ -11,7 +10,7 @@ import { useAuth } from "../lib/auth";
 import { atualizarMarca } from "../lib/marca";
 import logoPadrao from "../assets/logo.png";
 
-const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 18 };
+const card = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 18 };
 const TIPOS = ["image/png", "image/jpeg", "image/webp", "image/svg+xml", "image/x-icon", "image/vnd.microsoft.icon"];
 const MAX_BYTES = 2 * 1024 * 1024;
 
@@ -125,7 +124,6 @@ export default function Configuracoes() {
             <Settings size={22} /> Configurações
           </h1>
           <AtualizarCdi />
-          <CatalogoConfig />
           <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>
             Cada lugar da plataforma tem uma logomarca para o modo escuro e outra para o modo claro. Use o campo do lugar e do modo que você quer trocar.
           </p>

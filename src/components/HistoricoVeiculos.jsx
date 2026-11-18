@@ -4,7 +4,7 @@ import { supabase, supabaseConfigurado } from "../lib/supabase";
 const CAMPOS = { status: "Status", preco_venda_pretendido: "Preço pretendido", preco_compra: "Preço de compra" };
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const formatar = (campo, valor) => (valor == null || valor === "" ? "—" : ["preco_venda_pretendido", "preco_compra"].includes(campo) ? BRL(valor) : valor);
-const cartao = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)", padding: 20, marginBottom: 18 };
+const cartao = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 20, marginBottom: 18 };
 const cabec = { padding: "8px 6px", textAlign: "left", color: "var(--text-dim)", borderBottom: "1px solid var(--border)", fontSize: 12, whiteSpace: "nowrap" };
 const td = { padding: "8px 6px", borderBottom: "1px solid var(--border)", color: "var(--text)", fontSize: 13, whiteSpace: "nowrap" };
 
