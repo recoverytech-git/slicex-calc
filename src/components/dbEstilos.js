@@ -52,7 +52,7 @@ export const DB_CSS = `
 .db-kpi-ic{width:34px;height:34px;min-width:34px;border-radius:11px;background:#eff6ff;color:#2563eb;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center}
 .db-kpi-s{font-size:11.5px;color:var(--text-mute)}
 .db-charts{display:grid;gap:16px;grid-template-columns:1fr}
-@media (min-width:1024px){.db-charts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:880px){.db-charts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .db-bars{display:flex;align-items:flex-end;gap:clamp(3px,1.2vw,10px);height:180px;padding-top:22px}
 .db-bar{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;position:relative}
 .db-bar-v{font-size:10px;font-weight:700;color:var(--text-dim);white-space:nowrap;font-variant-numeric:tabular-nums}
