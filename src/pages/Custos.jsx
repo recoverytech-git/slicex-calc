@@ -8,7 +8,7 @@ import { DB_CSS } from "../components/dbEstilos";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
 import { CATEGORIAS_CUSTO, custoFixoMensal, analisarMeta, alertaExcesso } from "../lib/custos";
-import { taxaMensalDeAnual } from "../lib/cdi";
+import { useRascunho } from "../lib/rascunho";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const PCT = (n) => `${(Number(n || 0) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
@@ -25,7 +25,7 @@ export default function Custos() {
   const [fin, setFin] = useState([]);
   const [metricas, setMetricas] = useState([]);
   const [vendas30, setVendas30] = useState(0);
-  const [novo, setNovo] = useState(VAZIO_CUSTO);
+  const [novo, setNovo] = useRascunho("custos.novo", VAZIO_CUSTO);
   const [aviso, setAviso] = useState(null);
   const [erro, setErro] = useState(null);
   const gestao = GESTAO.includes(perfil?.papel);
