@@ -162,15 +162,12 @@ export default function Configuracoes() {
 
           <AtualizarCdi />
 
-          {GRUPOS.map((g) => (
-            <div key={g.titulo}>
-              <div className="cfg-titulo-grupo">{g.titulo}</div>
-              <p className="db-note" style={{ margin: "-4px 0 12px" }}>{g.onde}</p>
-              <div className="cfg-grid">
-                {g.slots.map((s) => cartaoLogo(s, g))}
-              </div>
-            </div>
-          ))}
+          <div className="cfg-titulo-grupo">Logomarcas da plataforma</div>
+          <p className="db-note" style={{ margin: "-4px 0 12px" }}>Cada cartão mostra onde a imagem aparece. Troque a imagem do lugar que você quer.</p>
+          <div style={{ display: "grid", gap: 16, width: "100%", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))" }}>
+            {GRUPOS.flatMap((g) => g.slots.map((s) => cartaoLogo(s, g)))}
+          </div>
+
         </main>
       </div>
     </PageTransition>
