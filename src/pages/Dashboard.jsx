@@ -146,7 +146,7 @@ export default function Dashboard() {
             <>
               {erro && <p className="db-note" style={{ color: "#b91c1c" }}>Não foi possível carregar: {erro}</p>}
               <Secao icone={Warehouse} titulo="Estoque" />
-              <div className="db-kgrid">
+              <div className="db-kgrid-5">
                 <KpiCard rotulo="Veículos cadastrados" valor={veiculos.length} icone={Car} />
                 <KpiCard rotulo="Em estoque" valor={emEstoque.length} icone={Boxes} />
                 <KpiCard rotulo="Capital investido" valor={formatarBRL(capital)} icone={Coins} sub="compra + custos" />
