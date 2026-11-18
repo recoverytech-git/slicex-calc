@@ -1,3 +1,4 @@
+// sem-rascunho: pagina publica do visitante; dados pessoais nao ficam guardados no navegador
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Gauge, Fuel, Cog, MapPin, Hash, Users, DoorOpen, Send, CheckCircle2 } from "lucide-react";

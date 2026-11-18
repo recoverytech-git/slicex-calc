@@ -1,3 +1,4 @@
+// sem-rascunho: pagina publica do visitante; dados pessoais nao ficam guardados no navegador
 import { useEffect, useMemo, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Search, Car } from "lucide-react";
