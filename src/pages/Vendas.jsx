@@ -1,16 +1,33 @@
-import ResumoVendas from "../components/ResumoVendas";
 // sem-rascunho: página somente de consulta, sem formulário
 import { useEffect, useState } from "react";
-import { BadgeDollarSign } from "lucide-react";
+import { BadgeDollarSign, Car, Coins, TrendingUp, Trash2, ListChecks } from "lucide-react";
+import ResumoVendas from "../components/ResumoVendas";
 import Header from "../components/Header";
 import BackLink from "../components/BackLink";
 import PageTransition from "../components/PageTransition";
+import DbCabeca from "../components/DbCabeca";
+import { DB_CSS } from "../components/dbEstilos";
 import { BUCKET_FOTOS } from "../lib/fotos";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { formatarBRL } from "../lib/moeda";
 import { useAuth } from "../lib/auth";
 
-const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border: "1px solid var(--border)", padding: 16 };
+const VD_CSS = `
+.vd-lift{transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s}
+.vd-lift:hover{transform:translateY(-2px);box-shadow:0 1px 3px rgba(15,23,42,.04),0 18px 32px -12px rgba(15,23,42,.14)}
+.vd-row{transition:background .2s}
+.vd-row td{transition:background .2s}
+.vd-row:hover td{background:#f8fafc}
+.vd-enter{animation:vdIn .5s cubic-bezier(.16,1,.3,1) both}
+@keyframes vdIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.vd-del{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:10px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.vd-del:hover{background:#fee2e2;box-shadow:0 6px 14px -6px rgba(185,28,28,.35)}
+.vd-tabela table{min-width:760px}
+.vd-cell-veic{font-weight:700;color:var(--text)}
+.vd-data{color:var(--text-mute);font-variant-numeric:tabular-nums}
+@media (max-width:639px){.vd-hide-sm{display:none}.vd-tabela table{min-width:0}}
+`;
+
 const dataBR = (d) => (d ? new Date(d).toLocaleDateString("pt-BR") : "—");
 const pct = (r, base) => (base > 0 ? `${((r / base) * 100).toFixed(2)}%` : "—");
 
@@ -30,7 +47,6 @@ export default function Vendas() {
   const faturamento = linhas.reduce((s, l) => s + Number(l.valor_venda ?? 0), 0);
   const resultado = linhas.reduce((s, l) => s + Number(l.resultado_final ?? 0), 0);
 
-
   const excluirDefinitivo = async (l) => {
     const ok = window.confirm(`Excluir definitivamente ${l.modelo}${l.placa ? ` (${l.placa})` : ""}, sua venda e todos os dados ligados a ele? Esta ação não pode ser desfeita.`);
     if (!ok) return;
@@ -48,57 +64,75 @@ export default function Vendas() {
     setLinhas((prev) => prev.filter((x) => x.veiculo_id !== l.veiculo_id));
   };
 
+  const indicador = (rot, valor, Icone, cor, sub) => (
+    <div className="db-kpi vd-lift">
+      <div className="db-kpi-top"><span className="db-kpi-l">{rot}</span><span className="db-kpi-ic"><Icone size={16} /></span></div>
+      <div className="db-kpi-v" style={cor ? { color: cor } : undefined}>{valor}</div>
+      {sub && <div className="db-kpi-s">{sub}</div>}
+    </div>
+  );
+
   return (
     <PageTransition>
       <div className="page-bg">
+        <style>{DB_CSS + VD_CSS}</style>
         <Header subtitle="Veículos vendidos" />
-        <div className="container" style={{ paddingTop: 8 }}>
+        <main className="db-wrap">
           <BackLink />
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: "22px 0 14px", color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
-            <BadgeDollarSign size={22} /> Veículos vendidos
-          </h1>
-          <ResumoVendas />
+          <header className="db-head">
+            <div>
+              <div className="db-eyebrow">Vendas concretizadas</div>
+              <h1 className="db-title"><BadgeDollarSign size={24} /> Veículos vendidos</h1>
+              <p className="db-sub">Faturamento, ágio e resultado final de cada venda.</p>
+            </div>
+          </header>
 
-          <div className="grid-3" style={{ marginBottom: 14 }}>
-            <div style={card}><p style={{ margin: 0, fontSize: 12, color: "var(--text-mute)" }}>Veículos vendidos</p><p style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text)" }}>{linhas.length}</p></div>
-            <div style={card}><p style={{ margin: 0, fontSize: 12, color: "var(--text-mute)" }}>Faturamento</p><p style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text)" }}>{formatarBRL(faturamento)}</p></div>
-            {gestao && <div style={card}><p style={{ margin: 0, fontSize: 12, color: "var(--text-mute)" }}>Resultado final total</p><p style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800, color: "var(--text)" }}>{formatarBRL(resultado)}</p></div>}
+          <div className="db-kgrid">
+            {indicador("Veículos vendidos", linhas.length, Car, null, "total registrado")}
+            {indicador("Faturamento", formatarBRL(faturamento), Coins, null, "soma dos valores vendidos")}
+            {gestao && indicador("Resultado final total", formatarBRL(resultado), TrendingUp, resultado < 0 ? "#b91c1c" : "#059669", "após custos de cada venda")}
           </div>
 
-          {erro && <p style={{ color: "var(--text-dim)", fontSize: 13 }}>Não foi possível carregar: {erro}</p>}
-          {!erro && linhas.length === 0 && <p style={{ color: "var(--text-mute)", fontSize: 13 }}>Nenhuma venda registrada ainda.</p>}
+          <ResumoVendas />
+
+          {erro && <section className="db-card"><p className="db-note" style={{ color: "#b91c1c", fontWeight: 700 }}>Não foi possível carregar: {erro}</p></section>}
+          {!erro && linhas.length === 0 && <section className="db-card"><p className="db-empty">Nenhuma venda registrada ainda.</p></section>}
 
           {linhas.length > 0 && (
-            <div style={{ ...card, padding: 0, overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 720 }}>
-                <thead>
-                  <tr style={{ background: "var(--bg-elevated)", color: "var(--text-dim)", textAlign: "left" }}>
-                    <th style={{ padding: "10px 12px" }}>Veículo</th>
-                    <th style={{ padding: "10px 12px" }}>Data</th>
-                    <th style={{ padding: "10px 12px", textAlign: "right" }}>Venda</th>
-                    {gestao && <th style={{ padding: "10px 12px", textAlign: "right" }}>Investimento</th>}
-                    {gestao && <th style={{ padding: "10px 12px", textAlign: "right" }}>Resultado final</th>}
-                    {gestao && <th style={{ padding: "10px 12px", textAlign: "right" }}>%</th>}
-                    {admin && <th style={{ padding: "10px 12px", textAlign: "right" }}>Ações</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {linhas.map((l) => (
-                    <tr key={l.venda_id} style={{ borderTop: "1px solid var(--border)" }}>
-                      <td style={{ padding: "10px 12px", color: "var(--text)" }}>{l.modelo}{gestao && l.placa ? ` · ${l.placa}` : ""}</td>
-                      <td style={{ padding: "10px 12px", color: "var(--text-dim)" }}>{dataBR(l.data_venda)}</td>
-                      <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--text)" }}>{formatarBRL(l.valor_venda)}</td>
-                      {gestao && <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--text-dim)" }}>{formatarBRL(l.investimento_total)}</td>}
-                      {gestao && <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--text)", fontWeight: 700 }}>{formatarBRL(l.resultado_final)}</td>}
-                      {gestao && <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--text-dim)" }}>{pct(l.resultado_final, l.investimento_total)}</td>}
-                      {admin && <td style={{ padding: "10px 12px", textAlign: "right" }}><button onClick={() => excluirDefinitivo(l)} style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #fca5a5", background: "#fee2e2", color: "#b91c1c", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Excluir definitivamente</button></td>}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <section className="db-card">
+              <DbCabeca Icone={ListChecks} titulo="Vendas registradas" sub={`${linhas.length} venda(s), da mais recente para a mais antiga`} />
+              <div className="vd-tabela db-tbl-wrap">
+                <table className="db-tbl">
+                  <thead><tr>
+                    <th>Veículo</th>
+                    <th>Data</th>
+                    <th className="db-r">Venda</th>
+                    {gestao && <th className="db-r vd-hide-sm">Investimento</th>}
+                    {gestao && <th className="db-r">Resultado final</th>}
+                    {gestao && <th className="db-r">%</th>}
+                    {admin && <th className="db-r">Ações</th>}
+                  </tr></thead>
+                  <tbody>
+                    {linhas.map((l, i) => {
+                      const positivo = Number(l.resultado_final) >= 0;
+                      return (
+                        <tr key={l.venda_id} className="vd-row vd-enter" style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}>
+                          <td className="vd-cell-veic">{l.modelo}{gestao && l.placa ? ` · ${l.placa}` : ""}</td>
+                          <td className="vd-data">{dataBR(l.data_venda)}</td>
+                          <td className="db-r">{formatarBRL(l.valor_venda)}</td>
+                          {gestao && <td className="db-r vd-hide-sm" style={{ color: "var(--text-mute)" }}>{formatarBRL(l.investimento_total)}</td>}
+                          {gestao && <td className="db-r" style={{ fontWeight: 800, color: positivo ? "#059669" : "#b91c1c" }}>{formatarBRL(l.resultado_final)}</td>}
+                          {gestao && <td className="db-r"><span className={`db-pill ${positivo ? "db-pill-verde" : "db-pill-verm"}`}>{pct(l.resultado_final, l.investimento_total)}</span></td>}
+                          {admin && <td className="db-r"><button type="button" className="vd-del" onClick={() => excluirDefinitivo(l)}><Trash2 size={13} /> Excluir definitivamente</button></td>}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </section>
           )}
-        </div>
+        </main>
       </div>
     </PageTransition>
   );
