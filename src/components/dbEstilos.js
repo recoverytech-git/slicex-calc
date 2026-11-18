@@ -13,9 +13,9 @@ export const DB_CSS = `
 .db-sec{display:flex;align-items:center;gap:10px;margin:6px 0 -6px}
 .db-sec-ic{width:36px;height:36px;border-radius:12px;background:#eff6ff;color:#2563eb;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .db-sec-t{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:15px;font-weight:800;color:var(--text);letter-spacing:.01em;text-transform:uppercase}
-.db-kgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
-@media (min-width:1024px){.db-kgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
-.db-kpi{container-type:inline-size;background:var(--surface);border:1px solid rgba(226,232,240,.8);border-radius:18px;box-shadow:0 1px 3px rgba(15,23,42,.03),0 10px 25px -5px rgba(15,23,42,.04);padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.db-kgrid{display:grid;gap:14px;width:100%;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+@media (min-width:1024px){.db-kgrid{display:grid;gap:14px;width:100%;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}}
+.db-kpi{container-type:inline-size;min-width:0;background:var(--surface);border:1px solid rgba(226,232,240,.8);border-radius:18px;box-shadow:0 1px 3px rgba(15,23,42,.03),0 10px 25px -5px rgba(15,23,42,.04);padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
 .db-kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .db-kpi-l{font-family:Inter,system-ui,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;line-height:1.3}
 .db-kpi-v{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:clamp(13px,11cqi,24px);font-weight:800;color:var(--text);letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.15}
