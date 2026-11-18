@@ -1,3 +1,4 @@
+import { Calculator as CalculatorIcon } from "lucide-react";
 import GestaoInteligente from "../components/GestaoInteligente";
 import KpisVendidos from "../components/KpisVendidos";
 import JurosResumo from "../components/JurosResumo";
@@ -20,14 +21,7 @@ const card = { background: "var(--surface)", borderRadius: "var(--r-lg)", border
 const GESTAO = ["admin_master", "proprietario", "gerente"];
 const ROTULO = { em_preparacao: "Em preparação", disponivel: "Disponível", reservado: "Reservado", vendido: "Vendido", retirado: "Retirado" };
 
-const ACESSOS = [
-  { to: "/financiamento", titulo: "Financiamento", texto: "Price ou SAC, com tabela completa", icon: Landmark },
-  { to: "/percentual", titulo: "Diferença %", texto: "Variação entre dois valores", icon: Percent },
-  { to: "/amortizacao", titulo: "Amortização extra", texto: "Reduzir o prazo ou a parcela", icon: Scissors },
-  { to: "/calcula-car-novo", titulo: "Calcula-Car", texto: "Análise de compra e venda", icon: Car },
-  { to: "/estoque", titulo: "Estoque", texto: "Veículos, fotos e checklist", icon: Warehouse },
-  { to: "/vendas", titulo: "Vendidos", texto: "Vendas e resultado final", icon: BadgeDollarSign, gestao: true },
-];
+
 
 function Kpi({ rotulo, valor, i = 0 }) {
   return (
@@ -125,10 +119,10 @@ export default function Dashboard() {
       <div className="page-bg">
         <Header subtitle="Dashboard" />
         <div className="container" style={{ paddingTop: 8 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, margin: "22px 0 4px", color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "22px 0 6px" }}><h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, color: "var(--text)", display: "flex", alignItems: "center", gap: 10 }}>
             <LayoutDashboard size={22} /> Dashboard
-          </h1>
-          <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acesse as ferramentas e acompanhe a operação.</p>
+          </h1><Link to="/simulador-decisao" style={{ display: "inline-flex", alignItems: "center", gap: 8, height: 40, padding: "0 16px", borderRadius: 12, background: "#2563eb", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none", boxShadow: "0 8px 16px -4px rgba(37,99,235,.35)" }}><CalculatorIcon size={16} /> Simulador</Link></div>
+          <p style={{ margin: "0 0 18px", fontSize: 13, color: "var(--text-dim)" }}>Acompanhe a operação e acesse o simulador.</p>
           <KpisVendidos />
           <PainelPeriodo periodo={periodo} setPeriodo={setPeriodo} veiculos={veiculos} vendas={vendas} metricas={jurosEst} custos={[...custos, ...finEst.map((f) => ({ veiculo_id: f.veiculo_id, valor: f.total_juros }))]} />
           <VeiculosParados veiculos={veiculos} metricas={jurosEst} />
@@ -136,23 +130,7 @@ export default function Dashboard() {
           <AlertaBaixaPendente />
           <GestaoInteligente />
 
-          <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Acessos</p>
-          <div className="grid-3" style={{ marginBottom: 22 }}>
-            {ACESSOS.filter((a) => !a.gestao || gestao).map(({ to, titulo, texto, icon: Icon }, i) => (
-              <motion.div key={to} {...ENTRADA} whileHover={{ y: -4 }}>
-                <Link to={to} style={{ ...card, padding: 18, display: "flex", flexDirection: "column", gap: 12, textDecoration: "none", height: "100%" }}>
-                  <span style={{ width: 40, height: 40, borderRadius: "var(--r-sm)", background: "rgba(68,147,248,0.12)", border: "1px solid rgba(68,147,248,0.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Icon size={18} color="var(--accent)" />
-                  </span>
-                  <span>
-                    <span style={{ display: "block", fontSize: 15, fontWeight: 700, color: "var(--text)" }}>{titulo}</span>
-                    <span style={{ display: "block", fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>{texto}</span>
-                  </span>
-                  <span style={{ marginTop: "auto", fontSize: 12, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 6 }}>Abrir <ArrowRight size={13} /></span>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+          
 
           {gestao && (
             <>
