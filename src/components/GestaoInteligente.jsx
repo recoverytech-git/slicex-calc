@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { Target, BellRing, Percent } from "lucide-react";
+import DbCabeca from "./DbCabeca";
 import { Link } from "react-router-dom";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
@@ -75,28 +77,34 @@ export default function GestaoInteligente() {
   })), { taxaOportunidadeMensal: taxaMensal || 0 }).slice(0, 8), [linhas, taxaMensal]);
 
   if (!gestao) return null;
-  if (erro) return <section style={cartao}><p style={{ color: "#b91c1c", fontSize: 13 }}>{erro}</p></section>;
+  if (erro) return <section className="db-card"><p className="db-note" style={{ color: "#b91c1c" }}>{erro}</p></section>;
   if (!dados) return null;
 
   const comRisco = linhas.filter((l) => l.riscos.length > 0);
   const comReducao = linhas.filter((l) => l.reducao);
+  const nivel = { alto: "db-pill-verm", medio: "db-pill-ambar", baixo: "db-pill-azul" };
   return (
     <>
-      <section style={cartao}>
-        <h3 style={titulo}>Prioridade de venda</h3>
-        <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>Ordenado pelo total do carregamento. Juros acumulado é custo real (sai do caixa). Custo CDI é o rendimento que o capital deixou de ter: capital × taxa mensal × dias ÷ 30. Ele não é uma saída de caixa.</p>
-        {situacao.ok ? <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>CDI {String(cdi.valor).replace(".", ",")}% a.a. ({(taxaMensal * 100).toFixed(2).replace(".", ",")}% a.m.) · referência {new Date(cdi.referencia + "T00:00:00").toLocaleDateString("pt-BR")} · fonte: Banco Central (SGS 4389)</p> : <p style={{ margin: "0 0 10px", fontSize: 12, color: "#b45309" }}>{erroCdi ? `Erro ao consultar o CDI: ${erroCdi}` : situacao.aviso}</p>}
-        {prioridade.length === 0 ? <p style={{ fontSize: 13, color: "var(--text-dim)" }}>Nenhum veículo em estoque.</p> : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr><th style={th}>#</th><th style={th}>Modelo</th><th style={th}>Placa</th><th style={{ ...th, textAlign: "right" }}>Dias</th><th style={{ ...th, textAlign: "right" }}>Capital</th><th style={{ ...th, textAlign: "right" }}>Juros acumulado (caixa)</th><th style={{ ...th, textAlign: "right" }}>Custo CDI (oportunidade)</th><th style={{ ...th, textAlign: "right" }}>Total do carregamento</th><th style={{ ...th, textAlign: "right" }}>Margem</th></tr></thead>
+      <section className="db-card">
+        <DbCabeca Icone={Target} titulo="Prioridade de venda" sub={situacao.ok
+          ? `Custo CDI ${String(cdi.valor).replace(".", ",")}% a.a. (${(taxaMensal * 100).toFixed(2).replace(".", ",")}% a.m.) · ${new Date(cdi.referencia + "T00:00:00").toLocaleDateString("pt-BR")} · Banco Central`
+          : situacao.aviso} />
+        {prioridade.length === 0 ? <p className="db-note">Nenhum veículo em estoque.</p> : (
+          <div className="db-tbl-wrap">
+            <table className="db-tbl">
+              <thead><tr><th>#</th><th>Modelo</th><th>Placa</th><th className="db-r">Dias</th><th className="db-r">Capital</th><th className="db-r">Juros (caixa)</th><th className="db-r">Custo CDI</th><th className="db-r">Total</th><th className="db-r">Margem</th></tr></thead>
               <tbody>
                 {prioridade.map((p, i) => (
                   <tr key={p.id}>
-                    <td style={td}>{i + 1}</td><td style={td}>{p.modelo}</td><td style={td}>{p.placa || "—"}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{p.dias}</td>
-                    <td style={{ ...td, textAlign: "right" }}>{BRL(p.capital)}</td><td style={{ ...td, textAlign: "right", color: "#b45309" }}>{BRL(p.jurosAcumulado)}</td><td style={{ ...td, textAlign: "right", color: "var(--accent)" }}>{BRL(p.custoOportunidade)}</td><td style={{ ...td, textAlign: "right", fontWeight: 700 }}>{BRL(p.custoCarregamento)}</td>
-                    <td style={{ ...td, textAlign: "right", color: p.margem < 0 ? "#b91c1c" : "#059669" }}>{BRL(p.margem)}</td>
+                    <td><span className="db-pill db-pill-azul">{i + 1}</span></td>
+                    <td style={{ fontWeight: 700 }}>{p.modelo}</td>
+                    <td style={{ fontFamily: "ui-monospace, monospace" }}>{p.placa || "—"}</td>
+                    <td className="db-r">{p.dias}</td>
+                    <td className="db-r">{BRL(p.capital)}</td>
+                    <td className="db-r" style={{ color: "#b45309" }}>{BRL(p.jurosAcumulado)}</td>
+                    <td className="db-r" style={{ color: "#2563eb" }}>{BRL(p.custoOportunidade)}</td>
+                    <td className="db-r" style={{ fontWeight: 800 }}>{BRL(p.custoCarregamento)}</td>
+                    <td className="db-r"><span className={`db-pill ${p.margem < 0 ? "db-pill-verm" : "db-pill-verde"}`}>{BRL(p.margem)}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -105,44 +113,42 @@ export default function GestaoInteligente() {
         )}
       </section>
 
-      <section style={cartao}>
-        <h3 style={titulo}>Alertas de risco</h3>
-        {comRisco.length === 0 ? <p style={{ fontSize: 13, color: "var(--text-dim)" }}>Nenhum alerta de risco.</p> : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <section className="db-card">
+        <DbCabeca Icone={BellRing} titulo="Alertas de risco" sub="Margem, juros acumulado e data da FIPE de cada veículo" />
+        {comRisco.length === 0 ? <p className="db-note">Nenhum alerta de risco.</p> : (
+          <div className="db-grid-2">
             {comRisco.map((l) => (
-              <div key={l.id} style={{ border: "1px solid var(--border)", borderRadius: 12, padding: "10px 12px" }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{l.modelo} {l.placa ? `· ${l.placa}` : ""}</div>
-                <ul style={{ margin: "6px 0 0", paddingLeft: 18, fontSize: 12 }}>
-                  {l.riscos.map((r, i) => (
-                    <li key={i} style={{ color: r.nivel === "alto" ? "#b91c1c" : r.nivel === "medio" ? "#b45309" : "var(--text-dim)" }}>{r.texto}</li>
-                  ))}
-                </ul>
+              <div key={l.id} className="db-kpi" style={{ gap: 8 }}>
+                <div style={{ fontWeight: 800, color: "var(--text)" }}>{l.modelo} {l.placa ? `· ${l.placa}` : ""}</div>
+                {l.riscos.map((r, i) => (
+                  <span key={i} className={`db-pill ${nivel[r.nivel] || "db-pill-azul"}`} style={{ alignSelf: "flex-start" }}>{r.texto}</span>
+                ))}
               </div>
             ))}
           </div>
         )}
       </section>
 
-      <section style={cartao}>
-        <h3 style={titulo}>Reprecificação e faixa de mercado</h3>
-        <p style={{ margin: "0 0 10px", fontSize: 12, color: "var(--text-dim)" }}>Sugestão de redução a partir de 60 dias parado, com piso de 5% de margem sobre o capital. A faixa de mercado usa vendas da mesma família e ano próximo.</p>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead><tr><th style={th}>Modelo</th><th style={th}>Placa</th><th style={{ ...th, textAlign: "right" }}>Pretendido</th><th style={{ ...th, textAlign: "right" }}>Sugestão</th><th style={{ ...th, textAlign: "right" }}>Faixa de mercado</th></tr></thead>
+      <section className="db-card">
+        <DbCabeca Icone={Percent} titulo="Reprecificação e faixa de mercado" sub="Sugestão a partir de 60 dias parado, com piso de 5% de margem sobre o capital" />
+        <div className="db-tbl-wrap">
+          <table className="db-tbl">
+            <thead><tr><th>Modelo</th><th>Placa</th><th className="db-r">Pretendido</th><th className="db-r">Sugestão</th><th>Faixa de mercado</th></tr></thead>
             <tbody>
               {linhas.map((l) => (
                 <tr key={l.id}>
-                  <td style={td}>{l.modelo}</td><td style={td}>{l.placa || "—"}</td>
-                  <td style={{ ...td, textAlign: "right" }}>{BRL(l.pret)}</td>
-                  <td style={{ ...td, textAlign: "right", color: l.reducao ? "#b45309" : "var(--text-dim)", fontWeight: l.reducao ? 700 : 400 }}>{l.reducao ? BRL(l.reducao.precoSugerido) : "—"}</td>
-                  <td style={{ ...td, textAlign: "right" }}>{l.faixa.n ? `${BRL(l.faixa.minimo)} a ${BRL(l.faixa.maximo)} (${l.faixa.n} vendas)` : l.faixa.aviso}</td>
+                  <td style={{ fontWeight: 700 }}>{l.modelo}</td>
+                  <td style={{ fontFamily: "ui-monospace, monospace" }}>{l.placa || "—"}</td>
+                  <td className="db-r">{BRL(l.pret)}</td>
+                  <td className="db-r">{l.reducao ? <span className="db-pill db-pill-ambar">{BRL(l.reducao.precoSugerido)}</span> : <span style={{ color: "#94a3b8" }}>—</span>}</td>
+                  <td>{l.faixa.n ? `${BRL(l.faixa.minimo)} a ${BRL(l.faixa.maximo)} · ${l.faixa.n} vendas` : <span style={{ color: "#94a3b8" }}>{l.faixa.aviso}</span>}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        {comReducao.length === 0 && <p style={{ fontSize: 12, color: "var(--text-dim)", margin: "10px 0 0" }}>Nenhum veículo passou de 60 dias parado.</p>}
-        <p style={{ margin: "14px 0 0", fontSize: 13 }}><Link to="/simulador-decisao" style={{ color: "var(--accent)", fontWeight: 700 }}>Abrir simulador: comprar à vista x financiar</Link></p>
+        {comReducao.length === 0 && <p className="db-note" style={{ marginTop: 10 }}>Nenhum veículo passou de 60 dias parado.</p>}
+        <p style={{ margin: "14px 0 0", fontSize: 13 }}><Link to="/simulador-decisao" style={{ color: "#2563eb", fontWeight: 700 }}>Abrir simulador: comprar à vista x financiar</Link></p>
       </section>
     </>
   );

@@ -34,16 +34,39 @@ const CSS = `
 .db-sec-t{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:15px;font-weight:800;color:var(--text);letter-spacing:.01em;text-transform:uppercase}
 .db-kgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
 @media (min-width:1024px){.db-kgrid{grid-template-columns:repeat(5,minmax(0,1fr))}}
-.db-kpi{background:var(--surface);border:1px solid rgba(226,232,240,.8);border-radius:18px;box-shadow:0 1px 3px rgba(15,23,42,.03),0 10px 25px -5px rgba(15,23,42,.04);padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.db-kpi{container-type:inline-size;background:var(--surface);border:1px solid rgba(226,232,240,.8);border-radius:18px;box-shadow:0 1px 3px rgba(15,23,42,.03),0 10px 25px -5px rgba(15,23,42,.04);padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
 .db-kpi-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .db-kpi-l{font-family:Inter,system-ui,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;line-height:1.3}
-.db-kpi-v{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:clamp(15px,1.7vw,22px);font-weight:800;color:var(--text);letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.db-kpi-v{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;font-size:clamp(13px,11cqi,24px);font-weight:800;color:var(--text);letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.15}
 .db-hbars{display:flex;flex-direction:column;gap:8px}
 .db-hrow{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(92px,auto);gap:10px;align-items:center}
 .db-hlbl{font-size:12px;font-weight:700;color:var(--text-dim);text-transform:capitalize}
 .db-htrack{height:12px;border-radius:999px;background:#eef2ff;overflow:hidden}
 .db-hfill{height:100%;border-radius:999px;background:linear-gradient(90deg,#2563eb,#60a5fa);transition:width .6s cubic-bezier(.16,1,.3,1)}
 .db-hval{font-size:12px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+
+.db-grid-2{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.db-tbl-wrap{overflow-x:auto}
+.db-tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.db-tbl th{font-family:Inter,system-ui,sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b;text-align:left;padding:10px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+.db-tbl td{padding:12px 10px;border-bottom:1px solid #f1f5f9;color:var(--text);white-space:nowrap;font-variant-numeric:tabular-nums}
+.db-tbl tr:last-child td{border-bottom:none}
+.db-tbl tbody tr:hover td{background:#f8fafc}
+.db-r{text-align:right !important}
+.db-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.db-pill-azul{background:#eff6ff;color:#2563eb;border:1px solid #dbeafe}
+.db-pill-verde{background:#ecfdf5;color:#059669;border:1px solid #a7f3d0}
+.db-pill-ambar{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.db-pill-verm{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.db-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.db-chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid #e2e8f0;background:#fff;font-size:12px;font-weight:700;color:var(--text-dim);cursor:pointer;transition:all .2s}
+.db-chip:hover{border-color:#bfdbfe;color:#2563eb}
+.db-chip.on{background:#2563eb;color:#fff;border-color:#2563eb;box-shadow:0 6px 14px -4px rgba(37,99,235,.35)}
+.db-h3{font-family:"Plus Jakarta Sans",Inter,sans-serif;font-size:16px;font-weight:800;color:var(--text);margin:0}
+.db-sub2{font-size:12px;color:var(--text-dim);margin:4px 0 0}
+.db-head2{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.db-bar-linha{display:flex;align-items:center;gap:10px;min-width:0}
+.db-bar-linha .db-htrack{flex:1;min-width:60px;max-width:220px}
 @media (max-width:639px){.db-hrow{grid-template-columns:40px minmax(0,1fr)}.db-hval{grid-column:2;text-align:left}}
 .db-kpi-ic{width:34px;height:34px;min-width:34px;border-radius:11px;background:#eff6ff;color:#2563eb;border:1px solid #dbeafe;display:flex;align-items:center;justify-content:center}
 .db-kpi-s{font-size:11.5px;color:var(--text-mute)}

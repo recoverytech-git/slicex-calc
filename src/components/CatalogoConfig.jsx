@@ -15,7 +15,7 @@ export default function CatalogoConfig() {
     if (!supabaseConfigurado || !gestao) return;
     supabase.from("organizacoes").select("nome, slug").eq("id", perfil?.organizacao_id).maybeSingle()
       .then(({ data }) => setLoja(data ?? null));
-    supabase.from("veiculos").select("id, modelo, placa, status, publicado_catalogo, mostrar_placa, preco_venda_pretendido")
+    supabase.from("veiculos").select("id, modelo, placa, status, publicado_catalogo, mostrar_placa, preco_venda_pretendido, cidade, uf")
       .neq("status", "vendido").order("criado_em", { ascending: false })
       .then(({ data }) => setVeiculos(data ?? []));
   }, [gestao, perfil?.organizacao_id]);
@@ -59,7 +59,9 @@ export default function CatalogoConfig() {
               <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)" }}>{v.modelo}</div>
               <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{v.status} · {Number(v.preco_venda_pretendido || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</div>
             </div>
-            <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <input defaultValue={v.cidade || ""} placeholder="Cidade" onBlur={(e) => e.target.value !== (v.cidade || "") && atualizar(v.id, { cidade: e.target.value || null })} style={{ height: 34, width: 140, padding: "0 10px", borderRadius: 9, border: "1px solid #cbd5e1", fontSize: 12 }} aria-label="Cidade" />
+              <input defaultValue={v.uf || ""} placeholder="UF" maxLength={2} onBlur={(e) => e.target.value.toUpperCase() !== (v.uf || "") && atualizar(v.id, { uf: e.target.value.toUpperCase() || null })} style={{ height: 34, width: 56, padding: "0 10px", borderRadius: 9, border: "1px solid #cbd5e1", fontSize: 12, textTransform: "uppercase" }} aria-label="UF" />
               <label style={{ display: "inline-flex", gap: 6, alignItems: "center", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
                 <input type="checkbox" checked={!!v.publicado_catalogo} onChange={(e) => atualizar(v.id, { publicado_catalogo: e.target.checked })} /> Publicar
               </label>

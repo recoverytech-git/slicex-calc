@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { BarChart3, FileSpreadsheet } from "lucide-react";
+import DbCabeca from "./DbCabeca";
 import * as XLSX from "xlsx";
 import { resumoAgio, faturamento, contarParados, FAIXAS_PARADOS } from "../lib/calculos";
 
@@ -121,38 +123,26 @@ export default function PainelPeriodo({ periodo, setPeriodo, veiculos, vendas, m
   const mapaMetricas = useMemo(() => Object.fromEntries((metricas || []).map((m) => [m.veiculo_id, m])), [metricas]);
   const totEnt = meses.reduce((s, m) => s + m.entradas, 0);
   const totSai = meses.reduce((s, m) => s + m.saidas, 0);
-  const ini = inicioPeriodo(periodo);
-  const vendasPeriodo = vendas.filter((s) => new Date(s.data_venda) >= ini);
-  const fat = faturamento(vendasPeriodo);
-  const agio = resumoAgio(vendasPeriodo);
-  const parados = contarParados(metricas || [], FAIXAS_PARADOS);
+  const maxMov = Math.max(1, ...meses.map((m) => Math.max(m.entradas, m.saidas)));
   return (
-    <section style={cartao}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {PERIODOS.map(([dias, rotulo]) => (
-            <button key={dias} type="button" onClick={() => setPeriodo(dias)} style={botaoPeriodo(periodo === dias)}>{rotulo}</button>
-          ))}
-        </div>
-        <button type="button" onClick={() => exportarExcel(veiculos, vendas, mapaMetricas, custos || [], periodo)}
-          style={{ padding: "9px 16px", borderRadius: 12, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-          Exportar Excel (vendas e estoque)
-        </button>
+    <section className="db-card">
+      <DbCabeca Icone={BarChart3} titulo={`Giro mensal · últimos ${periodo} dias`}
+        sub={`Entradas pela aquisição e saídas pela venda · ${totEnt} entradas e ${totSai} saídas`}
+        acao={<button type="button" className="db-chip" onClick={() => exportarExcel(veiculos, vendas, mapaMetricas, custos || [], periodo)}><FileSpreadsheet size={14} style={{ verticalAlign: "-2px", marginRight: 6 }} />Excel</button>} />
+      <div className="db-chips" style={{ marginBottom: 14 }}>
+        {PERIODOS.map(([dias, rotulo]) => (
+          <button key={dias} type="button" className={`db-chip ${periodo === dias ? "on" : ""}`} onClick={() => setPeriodo(dias)}>{rotulo}</button>
+        ))}
       </div>
-
-      <h3 style={subtitulo}>Giro mensal (últimos {periodo} dias)</h3>
-      <p style={texto}>Entradas pela data de aquisição e saídas pela data da venda. Total no período: {totEnt} entradas e {totSai} saídas.</p>
-      <div style={{ overflowX: "auto" }}>
-        <table style={tabela}>
-          <thead><tr>
-            <th style={cabecTd}>Mês</th><th style={{ ...cabecTd, textAlign: "right" }}>Entradas</th><th style={{ ...cabecTd, textAlign: "right" }}>Saídas (vendas)</th>
-          </tr></thead>
+      <div className="db-tbl-wrap">
+        <table className="db-tbl">
+          <thead><tr><th>Mês</th><th>Entradas</th><th className="db-r">Saídas</th></tr></thead>
           <tbody>
             {meses.map((m) => (
               <tr key={m.chave}>
-                <td style={td}>{m.rotulo}</td>
-                <td style={{ ...td, textAlign: "right", fontWeight: 700, color: "var(--accent)" }}>{m.entradas}</td>
-                <td style={{ ...td, textAlign: "right", fontWeight: 700, color: "#059669" }}>{m.saidas}</td>
+                <td style={{ fontWeight: 700, textTransform: "capitalize" }}>{m.rotulo}</td>
+                <td><div className="db-bar-linha"><div className="db-htrack"><div className="db-hfill" style={{ width: `${(m.entradas / maxMov) * 100}%` }} /></div><span className="db-pill db-pill-azul">{m.entradas}</span></div></td>
+                <td className="db-r"><div className="db-bar-linha" style={{ justifyContent: "flex-end" }}><div className="db-htrack" style={{ maxWidth: 160 }}><div className="db-hfill" style={{ width: `${(m.saidas / maxMov) * 100}%`, background: "linear-gradient(90deg,#059669,#34d399)" }} /></div><span className="db-pill db-pill-verde">{m.saidas}</span></div></td>
               </tr>
             ))}
           </tbody>

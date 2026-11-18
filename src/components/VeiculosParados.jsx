@@ -1,17 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Hourglass } from "lucide-react";
 import { FAIXAS_PARADOS } from "../lib/calculos";
+import DbCabeca from "./DbCabeca";
 
-const cartao = { background: "var(--surface)", borderRadius: 20, border: "1px solid rgba(226,232,240,.8)", boxShadow: "0 1px 3px rgba(15,23,42,.03), 0 10px 25px -5px rgba(15,23,42,.04)", padding: 20, marginBottom: 18 };
-const titulo = { margin: "0 0 4px", fontSize: 15, fontWeight: 800, color: "var(--text)" };
-const texto = { margin: "0 0 12px", fontSize: 12, color: "var(--text-dim)" };
-const cabec = { padding: "8px 6px", textAlign: "left", color: "var(--text-dim)", borderBottom: "1px solid var(--border)", fontSize: 12, whiteSpace: "nowrap" };
-const td = { padding: "9px 6px", borderBottom: "1px solid var(--border)", color: "var(--text)", fontSize: 13, whiteSpace: "nowrap" };
-const COR = { 30: "#b45309", 60: "#c2410c", 90: "#b91c1c", 180: "#991b1b", 360: "#450a0a" };
 const CRITICO = 180;
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-// Data AAAA-MM-DD -> DD/MM/AAAA
 const dataBR = (s) => {
   const [a, m, d] = String(s || "").slice(0, 10).split("-");
   return a && m && d ? `${d}/${m}/${a}` : "—";
@@ -20,63 +14,38 @@ const dataBR = (s) => {
 export default function VeiculosParados({ veiculos, metricas }) {
   const [faixa, setFaixa] = useState(30);
   const mapa = useMemo(() => Object.fromEntries((metricas || []).map((m) => [m.veiculo_id, m])), [metricas]);
-  const lista = useMemo(
-    () => veiculos
-      .filter((v) => v.status !== "vendido")
-      .map((v) => ({
-        ...v,
-        dias: Number(mapa[v.id]?.dias_em_estoque ?? 0),
-        juros: Number(mapa[v.id]?.juros_diario_acumulado ?? 0),
-      }))
-      .filter((v) => v.dias >= faixa)
-      .sort((a, b) => b.dias - a.dias),
-    [veiculos, mapa, faixa]
-  );
+  const lista = useMemo(() => veiculos
+    .filter((v) => v.status !== "vendido")
+    .map((v) => ({ ...v, dias: Number(mapa[v.id]?.dias_em_estoque ?? 0), juros: Number(mapa[v.id]?.juros_diario_acumulado ?? 0) }))
+    .filter((v) => v.dias >= faixa)
+    .sort((a, b) => b.dias - a.dias), [veiculos, mapa, faixa]);
+
   return (
-    <section style={cartao}>
-      <h3 style={titulo}>Veículos parados em estoque</h3>
-      <p style={texto}>Veículos em estoque com tempo parado a partir da faixa selecionada. Ordenados do mais antigo para o mais recente. Em vermelho, os veículos parados há {CRITICO} dias ou mais.</p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-        {FAIXAS_PARADOS.map((dias) => (
-          <button key={dias} type="button" onClick={() => setFaixa(dias)}
-            style={{ padding: "6px 14px", borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: "pointer", border: `1px solid ${faixa === dias ? COR[dias] : "var(--border)"}`,
-              background: faixa === dias ? COR[dias] : "var(--surface)", color: faixa === dias ? "#fff" : "var(--text-dim)" }}>
-            {dias}+ dias
-          </button>
+    <section className="db-card">
+      <DbCabeca Icone={Hourglass} titulo="Veículos parados em estoque" sub={`Ordenados do mais antigo. Em vermelho, ${CRITICO} dias ou mais.`} />
+      <div className="db-chips" style={{ marginBottom: 14 }}>
+        {FAIXAS_PARADOS.map((d) => (
+          <button key={d} type="button" className={`db-chip ${faixa === d ? "on" : ""}`} onClick={() => setFaixa(d)}>{d}+ dias</button>
         ))}
       </div>
-      {lista.length === 0 ? (
-        <p style={texto}>Nenhum veículo parado a partir de {faixa} dias.</p>
-      ) : (
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={cabec}>Data de aquisição</th><th style={cabec}>Modelo</th><th style={cabec}>Placa</th>
-                <th style={cabec}>Ano</th><th style={cabec}>Ano modelo</th>
-                <th style={{ ...cabec, textAlign: "right" }}>Dias parados</th>
-                <th style={{ ...cabec, textAlign: "right" }}>Juros acumulado</th>
-                <th style={cabec}></th>
-              </tr>
-            </thead>
+      {lista.length === 0 ? <p className="db-note">Nenhum veículo parado a partir de {faixa} dias.</p> : (
+        <div className="db-tbl-wrap">
+          <table className="db-tbl">
+            <thead><tr>
+              <th>Aquisição</th><th>Modelo</th><th>Placa</th><th>Ano</th><th className="db-r">Dias</th><th className="db-r">Juros acum.</th><th></th>
+            </tr></thead>
             <tbody>
               {lista.map((v) => {
                 const critico = v.dias >= CRITICO;
-                const fundo = critico ? "rgba(185,28,28,0.07)" : "transparent";
                 return (
-                  <tr key={v.id} style={{ background: fundo }}>
-                    <td style={td}>{dataBR(v.data_aquisicao)}</td>
-                    <td style={{ ...td, color: critico ? "#991b1b" : td.color, fontWeight: critico ? 700 : 400 }}>{v.modelo || "—"}</td>
-                    <td style={{ ...td, fontFamily: "ui-monospace, monospace", fontWeight: 700 }}>{v.placa || "—"}</td>
-                    <td style={td}>{v.ano_fabricacao ?? "—"}</td>
-                    <td style={td}>{v.ano_modelo ?? "—"}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 800, color: critico ? "#991b1b" : COR[faixa] }}>{v.dias}</td>
-                    <td style={{ ...td, textAlign: "right", fontWeight: 700, color: critico ? "#991b1b" : "#b45309" }}>{BRL(v.juros)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>
-                      <Link to={`/estoque/${v.id}`} style={{ display: "inline-block", padding: "5px 12px", borderRadius: 999, border: "1px solid var(--border)", background: "var(--surface)", color: "var(--accent)", fontSize: 12, fontWeight: 700, textDecoration: "none" }}>
-                        Ver detalhe
-                      </Link>
-                    </td>
+                  <tr key={v.id}>
+                    <td>{dataBR(v.data_aquisicao)}</td>
+                    <td style={{ fontWeight: 700 }}>{v.modelo || "—"}</td>
+                    <td style={{ fontFamily: "ui-monospace, monospace", fontWeight: 700 }}>{v.placa || "—"}</td>
+                    <td>{v.ano_fabricacao ?? "—"}/{v.ano_modelo ?? "—"}</td>
+                    <td className="db-r"><span className={`db-pill ${critico ? "db-pill-verm" : "db-pill-ambar"}`}>{v.dias} dias</span></td>
+                    <td className="db-r" style={{ color: critico ? "#b91c1c" : "#b45309", fontWeight: 700 }}>{BRL(v.juros)}</td>
+                    <td className="db-r"><Link to={`/estoque/${v.id}`} className="db-chip" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center" }}>Abrir</Link></td>
                   </tr>
                 );
               })}
