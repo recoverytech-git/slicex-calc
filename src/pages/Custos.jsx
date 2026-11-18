@@ -7,7 +7,7 @@ import DbCabeca from "../components/DbCabeca";
 import { DB_CSS } from "../components/dbEstilos";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
-import { CATEGORIAS_CUSTO, custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal } from "../lib/custos";
+import { CATEGORIAS_CUSTO, custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal, cenariosMeta } from "../lib/custos";
 import { useRascunho } from "../lib/rascunho";
 
 const BRL = (n) => Number(n || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -24,7 +24,6 @@ export default function Custos() {
   const [custosVeic, setCustosVeic] = useState([]);
   const [fin, setFin] = useState([]);
   const [metricas, setMetricas] = useState([]);
-  const [vendas30, setVendas30] = useState(0);
   const [vendasMes, setVendasMes] = useState([]);
   const [novo, setNovo] = useRascunho("custos.novo", VAZIO_CUSTO);
   const [aviso, setAviso] = useState(null);
@@ -33,7 +32,7 @@ export default function Custos() {
 
   const carregar = async () => {
     if (!supabaseConfigurado || !gestao) return;
-    const desde = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+    const desde90 = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
     const [c, cf, v, vc, f, m, vd] = await Promise.all([
       supabase.from("custos_recorrentes").select("id, descricao, categoria, valor_mensal, ativo").order("criado_em", { ascending: true }),
       supabase.from("custos_config").select("meta_lucro_mensal").maybeSingle(),
@@ -41,7 +40,7 @@ export default function Custos() {
       supabase.from("veiculo_custos").select("veiculo_id, valor"),
       supabase.from("veiculo_financiamentos").select("veiculo_id, total_juros"),
       supabase.from("v_estoque_metricas").select("veiculo_id, juros_diario_acumulado"),
-      supabase.from("v_vendas_resultado").select("data_venda, valor_venda, resultado_final").gte("data_venda", desde),
+      supabase.from("v_vendas_resultado").select("data_venda, valor_venda, resultado_final").gte("data_venda", desde90),
     ]);
     const falha = [c, cf, v, vc, f, m, vd].find((r) => r.error);
     if (falha) { setErro(falha.error.message); return; }
@@ -52,13 +51,16 @@ export default function Custos() {
     setCustosVeic(vc.data ?? []);
     setFin(f.data ?? []);
     setMetricas(m.data ?? []);
-    setVendas30((vd.data ?? []).length);
     setVendasMes(vd.data ?? []);
   };
   useEffect(() => { carregar(); }, [gestao]);
 
+  const desde30 = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+  const vendas30Arr = vendasMes.filter((v) => v.data_venda >= desde30);
+  const vendas30 = vendas30Arr.length;
+  const mediaMensal90 = vendasMes.length / 3;
   const resumo = useMemo(() => resumoEstoque({ veiculos, custosVeic, fin, metricas }), [veiculos, custosVeic, fin, metricas]);
-  const real = useMemo(() => resumoReal(vendasMes), [vendasMes]);
+  const real = useMemo(() => resumoReal(vendas30Arr), [vendasMes]);
   const pctTxt = (n) => (n == null || Number.isNaN(n) ? "—" : `${Number(n).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`);
   const corLucro = (n) => (Number(n) < 0 ? "#b91c1c" : "#059669");
 
@@ -66,6 +68,7 @@ export default function Custos() {
   const margemMedia = resumo.margemMedia;
   const precoMedio = resumo.precoMedio;
   const analise = analisarMeta({ custoFixoMensal: fixo, vendas30, margemMedia, precoMedio, meta: Number(String(meta).replace(",", ".")) || 0 });
+  const cenarios = cenariosMeta({ meta: Number(String(meta).replace(",", ".")) || 0, custoFixoMensal: fixo, margemMedia, jurosPorCarro: resumo.jurosPorCarro, precoMedio, vendas30, mediaMensal90 });
   const alerta = alertaExcesso({ custoFixoMensal: fixo, margemBrutaMes: analise.margemBrutaMes ?? 0 });
 
   const adicionar = async (e) => {
@@ -117,7 +120,7 @@ export default function Custos() {
           </header>
 
           <section className="db-card">
-            <DbCabeca Icone={Car} titulo="Estoque (valores atuais)" sub="Mesma base da meta de lucro: capital = compra + custos + juros do financiamento + juros acumulado" />
+            <DbCabeca Icone={Car} titulo="Estoque (valores atuais)" sub="Base da tela Estoque: capital = compra + custos. Juros aparecem à parte nos cenários da meta" />
             <div className="db-kgrid">
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Total no pátio</span></div><div className="db-kpi-v">{resumo.total}</div><div className="db-kpi-s">unidades não vendidas</div></div>
               <div className="db-kpi"><div className="db-kpi-top"><span className="db-kpi-l">Venda pela FIPE</span></div><div className="db-kpi-v">{BRL(resumo.potFipe)}</div><div className="db-kpi-s">potencial somando os valores FIPE</div></div>
@@ -170,41 +173,22 @@ export default function Custos() {
               <button type="button" className="db-btn-prim" onClick={salvarMeta}><CheckCircle2 size={16} /> Salvar meta</button>
             </div>
 
-            {analise.status === "sem_dados" && <p className="db-note">Cadastre veículos no estoque com preço de venda pretendido para calcular a meta.</p>}
-            {analise.status === "ok" && (
-              <div className="db-grid-2">
-                <div className="db-kpi" style={{ borderColor: "#a7f3d0" }}>
-                  <span className="db-pill db-pill-verde"><CheckCircle2 size={13} /> Dentro do esperado</span>
-                  <div className="db-kpi-v" style={{ color: "#059669" }}>+{BRL(analise.excedente)}</div>
-                  <div className="db-kpi-s">acima da meta, neste mês, com o volume atual de vendas</div>
+            {cenarios.c.impossivel && <p className="db-note" style={{ color: "#b91c1c", fontWeight: 700 }}>Com a margem líquida atual por carro, a meta não é atingível. Revise preços ou custos.</p>}
+            <div className="db-kgrid" style={{ marginTop: 6 }}>
+              {[cenarios.a, cenarios.b, cenarios.c].filter((x) => !x.impossivel || x === cenarios.c).map((x, idx) => (
+                <div key={idx} className="db-kpi" style={{ borderColor: x.atinge ? "#a7f3d0" : "#fde68a" }}>
+                  <div className="db-kpi-l">Cenário {idx + 1} · {x.rotulo}</div>
+                  <div className="db-kpi-v">{x.carros != null ? `${Number(x.carros).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} carros/mês` : "—"}</div>
+                  {!x.impossivel && <div style={{ fontWeight: 800, color: x.lucro < 0 ? "#b91c1c" : "#059669" }}>Lucro líquido: {BRL(x.lucro)}</div>}
+                  {!x.impossivel && (x.atinge
+                    ? <span className="db-pill db-pill-verde"><CheckCircle2 size={13} /> Atinge a meta</span>
+                    : <span className="db-pill db-pill-ambar"><AlertTriangle size={13} /> Faltam {BRL(x.faltam)}</span>)}
+                  {idx === 2 && !x.impossivel && <div className="db-kpi-s">{x.necessario} carros por mês garantem a meta com a margem atual.</div>}
+                  {idx === 1 && cenarios.aumentoPorCarro > 0 && <div className="db-kpi-s">Ou manter este ritmo e ganhar {BRL(cenarios.aumentoPorCarro)} a mais por carro{cenarios.aumentoPct != null ? ` (≈ ${PCT(cenarios.aumentoPct)} do preço médio)` : ""}.</div>}
                 </div>
-                <div className="db-kpi">
-                  <div className="db-kpi-l">Para manter a meta você precisa vender</div>
-                  <div className="db-kpi-v">{analise.veiculosNecessarios} carros / mês</div>
-                  <div className="db-kpi-s">ao ritmo atual são {vendas30}</div>
-                </div>
-              </div>
-            )}
-            {analise.status === "abaixo" && (
-              <div className="db-grid-2">
-                <div className="db-kpi" style={{ borderColor: "#fde68a" }}>
-                  <span className="db-pill db-pill-ambar"><AlertTriangle size={13} /> Abaixo da meta</span>
-                  <div className="db-kpi-v" style={{ color: cor }}>faltam {BRL(analise.faltaTotal)}</div>
-                  <div className="db-kpi-s">de margem no mês para cobrir custos e atingir a meta</div>
-                </div>
-                <div className="db-kpi">
-                  <div className="db-kpi-l">Caminhos para atingir</div>
-                  <div className="db-kpi-s" style={{ fontSize: 13, color: "var(--text)" }}>
-                    • Vender {analise.faltamVeiculos} carro(s) a mais no mês<br />
-                    • Ou ganhar {BRL(analise.acrescimoPorVeiculo)} a mais de margem por carro
-                    {analise.acrescimoPrecoPct != null && ` (≈ ${PCT(analise.acrescimoPrecoPct)} do preço médio)`}
-                  </div>
-                </div>
-              </div>
-            )}
-            {analise.custoPorVeiculo != null && (
-              <p className="db-note" style={{ marginTop: 12 }}>Custo fixo por carro vendido: {BRL(analise.custoPorVeiculo)} (custo mensal ÷ vendas dos últimos 30 dias).</p>
-            )}
+              ))}
+            </div>
+            <p className="db-note" style={{ marginTop: 12 }}>Como calculamos: lucro líquido = carros × (margem média por carro − juros por carro) − custos fixos. Margem média {BRL(margemMedia)}; juros por carro {BRL(resumo.jurosPorCarro)}; custos fixos {BRL(fixo)} por mês.</p>
           </section>
 
           <section className="db-card">

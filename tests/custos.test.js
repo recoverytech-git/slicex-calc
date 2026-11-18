@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal } from "../src/lib/custos";
+import { custoFixoMensal, analisarMeta, alertaExcesso, resumoEstoque, resumoReal, cenariosMeta } from "../src/lib/custos";
 
 describe("custos recorrentes", () => {
   it("soma somente os custos ativos", () => {
@@ -49,7 +49,7 @@ describe("alerta de excesso de custos", () => {
   });
 });
 
-describe("base unica do estoque (indicadores = meta)", () => {
+describe("base do estoque (igual a tela Estoque)", () => {
   const veiculos = [
     { id: "a", status: "disponivel", preco_compra: 40000, preco_venda_pretendido: 50000, valor_fipe: 48000 },
     { id: "b", status: "disponivel", preco_compra: 30000, preco_venda_pretendido: 36000, valor_fipe: 35000 },
@@ -59,17 +59,44 @@ describe("base unica do estoque (indicadores = meta)", () => {
   const fin = [{ veiculo_id: "b", total_juros: 2000 }];
   const metricas = [{ veiculo_id: "a", juros_diario_acumulado: 500 }];
   const r = resumoEstoque({ veiculos, custosVeic, fin, metricas });
-  it("capital inclui compra, custos, juros do financiamento e juros acumulado; vendidos ficam de fora", () => {
+  it("capital = compra + custos (vendidos fora); juros ficam separados", () => {
     expect(r.total).toBe(2);
-    expect(r.capital).toBe(40000 + 1000 + 500 + 30000 + 2000);
+    expect(r.capital).toBe(71000);
+    expect(r.jurosEstoque).toBe(2500);
   });
-  it("margem media do indicador e a mesma usada na meta (pretendido - capital, por veiculo)", () => {
-    const margemIndividual = (50000 - 41500 + 36000 - 32000) / 2;
-    expect(r.margemMedia).toBeCloseTo(margemIndividual, 6);
-    expect(r.margemMedia).toBeCloseTo(r.lucroPret / r.total, 6);
+  it("margem media e juros por carro", () => {
+    expect(r.margemMedia).toBeCloseTo((50000 - 41000 + 36000 - 30000) / 2, 6);
+    expect(r.jurosPorCarro).toBeCloseTo(1250, 6);
   });
   it("realizado soma faturamento e resultado do periodo", () => {
     const x = resumoReal([{ valor_venda: 100, resultado_final: 30 }, { valor_venda: 300, resultado_final: 70 }]);
     expect(x.fat).toBe(400); expect(x.res).toBe(100); expect(x.margem).toBeCloseTo(25, 6); expect(x.ticket).toBe(200);
+  });
+});
+
+describe("cenarios da meta de lucro liquido", () => {
+  const base = { meta: 3000, custoFixoMensal: 2000, margemMedia: 1500, jurosPorCarro: 500, precoMedio: 50000 };
+  it("liquido por carro desconta juros; lucro = carros x liquido - custos fixos", () => {
+    const r = cenariosMeta({ ...base, vendas30: 4, mediaMensal90: 2 });
+    expect(r.liqPorCarro).toBe(1000);
+    expect(r.a.lucro).toBe(2000);
+    expect(r.a.atinge).toBe(false);
+    expect(r.a.faltam).toBe(1000);
+  });
+  it("cenario para atingir: carros necessarios arredondados para cima", () => {
+    const r = cenariosMeta({ ...base, vendas30: 0, mediaMensal90: 0 });
+    expect(r.c.necessario).toBe(5);
+    expect(r.c.lucro).toBe(3000);
+    expect(r.c.atinge).toBe(true);
+  });
+  it("alternativa de preco: sem atingir no ritmo medio, calcula aumento por carro", () => {
+    const r = cenariosMeta({ ...base, vendas30: 1, mediaMensal90: 2 });
+    expect(r.b.atinge).toBe(false);
+    expect(r.aumentoPorCarro).toBeCloseTo(1500, 6);
+    expect(r.aumentoPct).toBeCloseTo(0.03, 6);
+  });
+  it("sem margem liquida positiva, informa que nao atinge", () => {
+    const r = cenariosMeta({ ...base, margemMedia: 400, jurosPorCarro: 500 });
+    expect(r.c.impossivel).toBe(true);
   });
 });

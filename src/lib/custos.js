@@ -41,31 +41,57 @@ export function alertaExcesso({ custoFixoMensal = 0, margemBrutaMes = 0, limite 
   return { nivel: pct > 0.5 ? 'alto' : 'medio', pct, texto: `Os custos fixos consomem ${Math.round(pct * 100)}% da margem bruta do mês` };
 }
 
-// Base unica do estoque: capital = compra + custos adicionais + juros do financiamento + juros acumulado.
-// Usada pelos indicadores da pagina e pela meta de lucro (mesma margem media e mesmo preco medio).
+// Base do estoque (igual a tela Estoque): capital = compra + custos adicionais.
+// Os juros (financiamento e acumulado) sao custos financeiros separados, deduzidos nos cenarios de meta.
 export function resumoEstoque({ veiculos = [], custosVeic = [], fin = [], metricas = [] }) {
   const cv = {}; custosVeic.forEach((c) => { cv[c.veiculo_id] = (cv[c.veiculo_id] || 0) + Number(c.valor || 0); });
   const ft = {}; fin.forEach((f) => { ft[f.veiculo_id] = (ft[f.veiculo_id] || 0) + Number(f.total_juros || 0); });
   const jd = {}; metricas.forEach((m) => { jd[m.veiculo_id] = Number(m.juros_diario_acumulado || 0); });
   const patio = veiculos.filter((v) => v.status !== "vendido");
-  const capitalDe = (v) => Number(v.preco_compra || 0) + (cv[v.id] || 0) + (ft[v.id] || 0) + (jd[v.id] || 0);
+  const capital = patio.reduce((s, v) => s + Number(v.preco_compra || 0) + (cv[v.id] || 0), 0);
+  const jurosEstoque = patio.reduce((s, v) => s + (ft[v.id] || 0) + (jd[v.id] || 0), 0);
   const fipes = patio.map((v) => Number(v.valor_fipe || 0)).filter((x) => x > 0);
   const potFipe = patio.reduce((s, v) => s + Number(v.valor_fipe || 0), 0);
   const potPret = patio.reduce((s, v) => s + Number(v.preco_venda_pretendido || 0), 0);
-  const capital = patio.reduce((s, v) => s + capitalDe(v), 0);
   const n = patio.length;
   const lucroFipe = potFipe - capital;
   const lucroPret = potPret - capital;
   const minFipe = fipes.length ? Math.min(...fipes) : 0;
   const maxFipe = fipes.length ? Math.max(...fipes) : 0;
   return {
-    total: n, capital, potFipe, potPret, lucroFipe, lucroPret,
+    total: n, capital, potFipe, potPret, lucroFipe, lucroPret, jurosEstoque,
     margemFipe: potFipe > 0 ? (lucroFipe / potFipe) * 100 : null,
     margemPret: potPret > 0 ? (lucroPret / potPret) * 100 : null,
     margemMedia: n ? lucroPret / n : 0,
+    jurosPorCarro: n ? jurosEstoque / n : 0,
     precoMedio: n ? potPret / n : 0,
     ticketFipe: (minFipe + maxFipe) / 2, minFipe, maxFipe,
   };
+}
+
+// Tres cenarios da meta de lucro liquido
+export function cenariosMeta({ meta = 0, custoFixoMensal = 0, margemMedia = 0, jurosPorCarro = 0, precoMedio = 0, vendas30 = 0, mediaMensal90 = 0 }) {
+  const liq = (Number(margemMedia) || 0) - (Number(jurosPorCarro) || 0);
+  const custo = Number(custoFixoMensal) || 0;
+  const alvo = Number(meta) || 0;
+  const pm = Number(precoMedio) || 0;
+  const lucro = (n) => n * liq - custo;
+  const cenario = (rotulo, n) => {
+    const l = lucro(n);
+    return { rotulo, carros: n, lucro: l, atinge: l >= alvo, faltam: Math.max(0, alvo - l) };
+  };
+  const a = cenario("Ritmo dos últimos 30 dias", Number(vendas30) || 0);
+  const nb = Number(mediaMensal90) || 0;
+  const b = cenario("Ritmo médio dos últimos 90 dias", nb);
+  let c;
+  if (liq <= 0) c = { rotulo: "Para atingir a meta", impossivel: true };
+  else {
+    const necessario = Math.max(1, Math.ceil((alvo + custo) / liq));
+    c = { ...cenario("Para atingir a meta", necessario), necessario };
+  }
+  const falta = alvo - lucro(nb);
+  const aumentoPorCarro = nb > 0 && falta > 0 ? falta / nb : 0;
+  return { a, b, c, liqPorCarro: liq, aumentoPorCarro, aumentoPct: pm > 0 ? aumentoPorCarro / pm : null };
 }
 
 // Vendas reais no periodo
