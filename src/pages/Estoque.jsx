@@ -8,7 +8,9 @@ import Sino from "../components/Sino";
 import { listarVeiculos } from "../lib/estoque";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { BUCKET_FOTOS } from "../lib/fotos";
-import { buildEstoquePDF } from "../lib/estoqueRelatorio";
+import { buildEstoquePDF, linhaRelatorio } from "../lib/estoqueRelatorio";
+import { carregarLogo } from "../lib/relatorioPdf";
+import logoPadrao from "../assets/logo.png";
 import { useAuth } from "../lib/auth";
 import { useMarca } from "../lib/marca";
 
@@ -33,6 +35,7 @@ export default function Estoque() {
   const [stats, setStats] = useState(null);
   const [slot, setSlot] = useState(null);
   const itensRef = useRef(itens);
+  const relatorioRef = useRef({});
   itensRef.current = itens;
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -78,15 +81,17 @@ export default function Estoque() {
       // Dados financeiros e tecnicos (fora do perfil vendedor)
       const extras = {};
       const custos = {};
+      const custosAd = {};
+      const finMap = {};
       const metricas = {};
       let checklists = null;
       if (!vendedor && ids.length) {
         const { data: ex } = await supabase.from("veiculos").select("id, preco_compra, combustivel, cambio, cor").in("id", ids);
         for (const r of ex ?? []) extras[r.id] = r;
         const { data: cs } = await supabase.from("veiculo_custos").select("veiculo_id, valor").in("veiculo_id", ids);
-        for (const c of cs ?? []) custos[c.veiculo_id] = (custos[c.veiculo_id] || 0) + Number(c.valor || 0);
+        for (const c of cs ?? []) { custos[c.veiculo_id] = (custos[c.veiculo_id] || 0) + Number(c.valor || 0); custosAd[c.veiculo_id] = (custosAd[c.veiculo_id] || 0) + Number(c.valor || 0); }
         const { data: fi } = await supabase.from("veiculo_financiamentos").select("veiculo_id, total_juros").in("veiculo_id", ids);
-        for (const f of fi ?? []) custos[f.veiculo_id] = (custos[f.veiculo_id] || 0) + Number(f.total_juros || 0);
+        for (const f of fi ?? []) { custos[f.veiculo_id] = (custos[f.veiculo_id] || 0) + Number(f.total_juros || 0); finMap[f.veiculo_id] = (finMap[f.veiculo_id] || 0) + Number(f.total_juros || 0); }
         const { data: mt } = await supabase.from("v_estoque_metricas").select("veiculo_id, dias_em_estoque, juros_diario_acumulado").in("veiculo_id", ids);
         for (const m of mt ?? []) { metricas[m.veiculo_id] = m; custos[m.veiculo_id] = (custos[m.veiculo_id] || 0) + Number(m.juros_diario_acumulado || 0); }
       }
@@ -112,6 +117,7 @@ export default function Estoque() {
         juros_diario: Number(metricas[v.id]?.juros_diario_acumulado ?? 0),
       }));
       setItens(mapeados);
+      relatorioRef.current = { custosAd, finMap, metricas, extras };
       setStats(calcularResumo(lista.map((v) => ({ ...v, preco: v.preco_venda_pretendido ?? 0 })), extras, custos, checklists, vendedor));
     })();
     return () => { vivo = false; };
@@ -133,7 +139,8 @@ export default function Estoque() {
         const filtrados = brutos.current.filter((v) => ids.includes(v.id));
         if (!filtrados.length) return;
         const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
-        buildEstoquePDF({ jsPDF, autoTable, itens: filtrados, rotulos: ROTULO }).save("estoque.pdf");
+        const logo = await carregarLogo(marcaRef.current?.logo_claro || logoPadrao);
+        buildEstoquePDF({ jsPDF, autoTable, itens: filtrados.map((v) => linhaRelatorio(v, relatorioRef.current)), rotulos: ROTULO, logo }).save("estoque.pdf");
       }
     };
     window.addEventListener("message", ouvir);
