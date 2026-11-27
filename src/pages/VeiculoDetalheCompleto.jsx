@@ -1,3 +1,5 @@
+import logoPadrao from "../assets/logo.png";
+import { carregarLogo } from "../lib/relatorioPdf";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Pencil, Trash2, Plus, Download, Share2, X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -92,7 +94,7 @@ export default function VeiculoDetalhe() {
         supabase.from("veiculo_checklists").select("*").eq("veiculo_id", id).maybeSingle(),
       ]);
       const imgs = (await Promise.all(fotos.filter((f) => f.url).map((f) => urlParaDataUrl(f.url)))).filter(Boolean);
-      const doc = gerarPdfVeiculo({ veiculo, financiamento, custos, vendas, checklist: chk.data, fotos: imgs,
+      const doc = gerarPdfVeiculo({ logo: await carregarLogo(logoPadrao), veiculo, financiamento, custos, vendas, checklist: chk.data, fotos: imgs,
         jsPDF, autoTable, ITENS: ck.ITENS, DOCUMENTACAO: ck.DOCUMENTACAO });
       doc.save(`veiculo-${(veiculo.modelo || "veiculo").toLowerCase().replace(/\s+/g, "-")}.pdf`);
     } catch (e) {

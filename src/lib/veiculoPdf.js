@@ -1,14 +1,12 @@
-/** PDF completo do veículo: identificação, análise, origem, custos, resultados, checklist e fotos. */
-const brl = (v) => (v == null || v === "" ? "—" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }));
-const data = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR") : "—");
-const sim = (v) => (v === true ? "Sim" : v === false ? "Não" : "Não informado");
+import { COR, brl, cabecalho, cartoes, secao, tabela, rodape, novoDocumento } from "./relatorioPdf";
 
-export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], vendas = [], checklist, fotos = [], jsPDF, autoTable, ITENS, DOCUMENTACAO }) {
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
-  const W = 210, M = 14;
-  let y = 34;
+/** PDF completo do veículo (mesma base visual dos demais relatórios). Cálculos iguais aos da tela. */
+export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], vendas = [], checklist, fotos = [], jsPDF, autoTable, ITENS, DOCUMENTACAO, logo = null }) {
+  const doc = novoDocumento(jsPDF, "portrait");
+  const data = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR") : "—");
+  const sim = (x) => (x === true ? "Sim" : x === false ? "Não" : "Não informado");
+  const pct = (r) => (r == null || !investimento ? "—" : `${((r / investimento) * 100).toFixed(2)}%`);
 
-  // Cálculos iguais aos da tela
   const compra = Number(v.preco_compra ?? 0);
   const totalCustos = custos.reduce((s, c) => s + Number(c.valor ?? 0), 0);
   const juros = f ? Number(f.total_juros ?? 0) : 0;
@@ -16,57 +14,49 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   const venda = vendas[0];
   const parcial = v.preco_venda_pretendido != null ? Number(v.preco_venda_pretendido) - investimento : null;
   const final = venda ? Number(venda.valor_venda) - Number(venda.despesas_venda ?? 0) - Number(venda.descontos ?? 0) - investimento : null;
-  const pct = (r) => (r == null || !investimento ? "—" : `${((r / investimento) * 100).toFixed(2)}%`);
 
-  doc.setFillColor(14, 26, 46);
-  doc.rect(0, 0, W, 26, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text(`${v.modelo || "Veículo"}`, M, 12);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`CALCULA.CAR · Ficha do veículo · Gerado em ${new Date().toLocaleString("pt-BR")}`, M, 20);
+  const cab = () => cabecalho(doc, {
+    titulo: v.modelo || "Veículo",
+    subtitulo: `Ficha do veículo · ${v.marca ? v.marca + " · " : ""}${v.placa || "sem placa"}`,
+    logo,
+  });
+  let y = cab();
 
-  const titulo = (t) => {
-    if (y > 262) { doc.addPage(); y = 16; }
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(68, 147, 248);
-    doc.text(t, M, y);
-    y += 2;
-  };
-  const tabela = (linhas) => {
-    autoTable(doc, {
-      startY: y, margin: { left: M, right: M }, theme: "plain",
-      styles: { fontSize: 9, cellPadding: 1.6 },
-      body: linhas,
-      columnStyles: { 0: { textColor: [90, 90, 90], cellWidth: 70 }, 1: { fontStyle: "bold" } },
-    });
-    y = doc.lastAutoTable.finalY + 7;
+  const indicadores = [
+    { rotulo: "Investimento total", valor: brl(investimento), sub: "compra + custos + juros" },
+    { rotulo: "Resultado parcial", valor: `${brl(parcial)}`, sub: `${pct(parcial)} sobre o investimento`, cor: parcial != null && parcial < 0 ? [185, 28, 28] : [5, 150, 105] },
+    { rotulo: "Juros do financiamento", valor: brl(juros), sub: f ? "total do contrato" : "sem financiamento", cor: [180, 83, 9] },
+    venda
+      ? { rotulo: "Resultado final", valor: brl(final), sub: `${pct(final)} · venda registrada`, cor: final < 0 ? [185, 28, 28] : [5, 150, 105] }
+      : { rotulo: "Valor pretendido", valor: brl(v.preco_venda_pretendido), sub: "venda ainda não registrada" },
+  ];
+  y = cartoes(doc, y, indicadores);
+
+  const bloco = (titulo, linhas) => {
+    if (y > 250) { doc.addPage(); y = cab(); }
+    y = secao(doc, y + 2, titulo);
+    y = tabela(doc, autoTable, { y, head: ["Campo", "Informação"], body: linhas, colunas: { 0: { cellWidth: 75, textColor: COR.cinza }, 1: { fontStyle: "bold" } } });
   };
 
-  titulo("1. Identificação e características");
-  tabela([
+  bloco("1. Identificação e características", [
     ["Modelo", v.modelo || "—"], ["Marca", v.marca || "—"], ["Placa", v.placa || "—"], ["RENAVAM", v.renavam || "—"],
     ["Chassi", v.chassi || "—"], ["Data de aquisição", data(v.data_aquisicao)], ["Ano de fabricação", v.ano_fabricacao ?? "—"],
     ["Ano do modelo", v.ano_modelo ?? "—"], ["Quilometragem", v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString("pt-BR")} km` : "—"],
-    ["Nº do motor", v.numero_motor || "—"], ["Potência do motor", v.potencia_motor || "—"], ["Portas", v.portas ?? "—"], ["Lugares", v.lugares ?? "—"], ["Categoria / Carroceria", v.categoria || "—"], ["Cor", v.cor || "—"], ["Combustível", v.combustivel || "—"], ["Câmbio", v.cambio || "—"],
+    ["Nº do motor", v.numero_motor || "—"], ["Potência do motor", v.potencia_motor || "—"], ["Portas", v.portas ?? "—"],
+    ["Lugares", v.lugares ?? "—"], ["Categoria / carroceria", v.categoria || "—"], ["Cor", v.cor || "—"],
     ["Valor de venda pretendido", brl(v.preco_venda_pretendido)],
   ]);
 
-  titulo("2. Análise FIPE x Compra");
-  tabela([
+  bloco("2. Análise FIPE x compra", [
     ["Valor FIPE", brl(v.valor_fipe)], ["Valor de compra", brl(v.preco_compra)],
     ["Diferença em reais", v.valor_fipe && v.preco_compra ? brl(Number(v.valor_fipe) - compra) : "—"],
     ["Diferença percentual", v.valor_fipe && v.preco_compra ? `${(((Number(v.valor_fipe) - compra) / Number(v.valor_fipe)) * 100).toFixed(2)}%` : "—"],
   ]);
 
-  titulo("3. Origem do capital");
-  tabela([
+  bloco("3. Origem do capital", [
     ["Origem do capital", v.tipo_aquisicao === "financiamento" ? "Financiamento" : v.tipo_aquisicao === "capital_proprio" ? "Capital próprio" : "—"],
     ...(f ? [
-      ["Modo de financiamento", String(f.sistema_amortizacao || "").toLowerCase() === "sac" ? "SAC" : "PRICE"],
+      ["Modo de financiamento", String(f.sistema_amortizacao || "").toLowerCase() === "sac" ? "SAC" : "Price"],
       ["Valor financiado", brl(f.valor_financiado)],
       ["Taxa de juros", `${f.taxa_juros_percentual}% ${f.periodicidade_taxa ?? "mensal"}`],
       ["Prazo", `${f.quantidade_parcelas} parcelas`],
@@ -75,56 +65,39 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
     ] : []),
   ]);
 
-  titulo("4. Custos adicionais");
-  tabela([
+  bloco("4. Custos adicionais", [
     ...(custos.length ? custos.map((c) => [c.descricao, brl(c.valor)]) : [["Nenhum custo adicional", brl(0)]]),
     ["Total de custos adicionais", brl(totalCustos)],
   ]);
 
-  titulo("5. Resultado da operação");
-  tabela([
+  bloco("5. Resultado da operação", [
     ["Investimento total", brl(investimento)],
     ["Resultado parcial (venda pretendida)", `${brl(parcial)} · ${pct(parcial)}`],
-  ]);
-
-  if (venda) {
-    titulo("6. Resultado final");
-    tabela([
+    ...(venda ? [
       ["Valor de venda", brl(venda.valor_venda)],
       ["Despesas e descontos", brl(Number(venda.despesas_venda ?? 0) + Number(venda.descontos ?? 0))],
       ["Resultado final do veículo", `${brl(final)} · ${pct(final)}`],
-    ]);
-  }
+    ] : []),
+  ]);
 
-  titulo("7. Checklist do veículo");
-  const linhasCk = checklist
+  bloco("6. Checklist do veículo", checklist
     ? [...ITENS.map(([k, rotulo]) => [rotulo, sim(checklist[k])]),
        ["Documentação", (DOCUMENTACAO.find(([k]) => k === checklist.documentacao_status) || [, "Não informado"])[1]],
        ["Observações", checklist.observacoes || "—"]]
-    : [["Checklist", "Não preenchido"]];
-  tabela(linhasCk);
+    : [["Checklist", "Não preenchido"]]);
 
   if (fotos.length) {
-    titulo("8. Fotos");
+    if (y > 240) { doc.addPage(); y = cab(); }
+    y = secao(doc, y + 2, "7. Fotos");
     fotos.forEach((src, i) => {
-      if (i % 2 === 0) {
-        if (y + 66 > 280) { doc.addPage(); y = 16; }
-      }
-      const x = M + (i % 2) * 92;
+      if (i % 2 === 0 && y + 66 > 275) { doc.addPage(); y = cab(); }
+      const x = 12 + (i % 2) * 99;
       const fmt = (src.match(/data:image\/(\w+)/) || [])[1];
-      try {
-        doc.addImage(src, fmt === "png" ? "PNG" : "JPEG", x, y, 85, 64);
-      } catch { /* formato não suportado: pula a foto */ }
+      try { doc.addImage(src, fmt === "png" ? "PNG" : "JPEG", x, y, 93, 66); } catch { /* formato não suportado */ }
       if (i % 2 === 1 || i === fotos.length - 1) y += 70;
     });
   }
 
-  const paginas = doc.getNumberOfPages();
-  for (let p = 1; p <= paginas; p++) {
-    doc.setPage(p);
-    doc.setFontSize(7);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`CALCULA.CAR · Página ${p}/${paginas}`, M, 292);
-  }
+  rodape(doc, "Calcula.car · Ficha do veículo · uso interno");
   return doc;
 }

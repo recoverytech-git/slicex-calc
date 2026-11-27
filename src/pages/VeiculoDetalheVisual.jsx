@@ -1,3 +1,5 @@
+import logoPadrao from "../assets/logo.png";
+import { carregarLogo } from "../lib/relatorioPdf";
 // sem-rascunho: a tela e o design do HTML (iframe); dados e acoes passam pelo sistema
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -132,7 +134,7 @@ export default function VeiculoDetalheVisual() {
               supabase.from("veiculo_checklists").select("*").eq("veiculo_id", id).maybeSingle(),
             ]);
             const imgs = (await Promise.all(c.fotos.filter((f) => f.url).map((f) => urlParaDataUrl(f.url)))).filter(Boolean);
-            const doc = gerarPdfVeiculo({ veiculo: c.veiculo, financiamento: c.financiamento, custos: c.custos, vendas: c.vendas, checklist: ck, fotos: imgs, jsPDF, autoTable, ITENS, DOCUMENTACAO });
+            const doc = gerarPdfVeiculo({ logo: await carregarLogo(logoPadrao), veiculo: c.veiculo, financiamento: c.financiamento, custos: c.custos, vendas: c.vendas, checklist: ck, fotos: imgs, jsPDF, autoTable, ITENS, DOCUMENTACAO });
             doc.save(`veiculo-${(c.veiculo.modelo || "veiculo").toLowerCase().replace(/\s+/g, "-")}.pdf`);
             break;
           }
