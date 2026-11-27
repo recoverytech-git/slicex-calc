@@ -1,7 +1,15 @@
+import { supabase, supabaseConfigurado } from "./supabase";
 import { COR, brl, cabecalho, cartoes, secao, tabela, rodape, novoDocumento } from "./relatorioPdf";
 
 /** PDF completo do veículo (mesma base visual dos demais relatórios). Cálculos iguais aos da tela. */
-export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], vendas = [], checklist, fotos = [], jsPDF, autoTable, ITENS, DOCUMENTACAO, logo = null, financeiro = true, emitido }) {
+/** Juros após o 30º dia ainda não pagos (mesma regra da tela Estoque). Retorna 0 sem dados. */
+export async function buscarJurosAcumulado(veiculoId) {
+  if (!supabaseConfigurado || !veiculoId) return 0;
+  const { data } = await supabase.from("v_estoque_metricas").select("juros_diario_acumulado").eq("veiculo_id", veiculoId).maybeSingle();
+  return Number(data?.juros_diario_acumulado ?? 0);
+}
+
+export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], vendas = [], checklist, fotos = [], jsPDF, autoTable, ITENS, DOCUMENTACAO, logo = null, financeiro = true, emitido, jurosAcumulado = 0 }) {
   const doc = novoDocumento(jsPDF, "portrait");
   const data = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR") : "—");
   const sim = (x) => (x === true ? "Sim" : x === false ? "Não" : "Não informado");
@@ -10,8 +18,10 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   const compra = Number(v.preco_compra ?? 0);
   const totalCustos = custos.reduce((s, c) => s + Number(c.valor ?? 0), 0);
   const juros = f ? Number(f.total_juros ?? 0) : 0;
-  const investimento = compra + totalCustos + juros;
   const venda = vendas[0];
+  // Juros após o 30º dia: acumulado até hoje (veículo em estoque) ou até a data da venda (veículo vendido)
+  const jurosApos30 = venda ? Math.max(0, Number(venda.juros_total ?? 0) - juros) : Number(jurosAcumulado || 0);
+  const investimento = compra + totalCustos + juros + jurosApos30;
   const parcial = v.preco_venda_pretendido != null ? Number(v.preco_venda_pretendido) - investimento : null;
   const final = venda ? Number(venda.valor_venda) - Number(venda.despesas_venda ?? 0) - Number(venda.descontos ?? 0) - investimento : null;
 
@@ -25,7 +35,7 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   const indicadores = [
     { rotulo: "Investimento total", valor: brl(investimento), sub: "compra + custos + juros" },
     { rotulo: "Resultado parcial", valor: `${brl(parcial)}`, sub: `${pct(parcial)} sobre o investimento`, cor: parcial != null && parcial < 0 ? [185, 28, 28] : [5, 150, 105] },
-    { rotulo: "Juros do financiamento", valor: brl(juros), sub: f ? "total do contrato" : "sem financiamento", cor: [180, 83, 9] },
+    { rotulo: "Juros após o 30º dia", valor: brl(jurosApos30), sub: venda ? "até a data da venda" : "acumulado até hoje", cor: [180, 83, 9] },
     venda
       ? { rotulo: "Resultado final", valor: brl(final), sub: `${pct(final)} · venda registrada`, cor: final < 0 ? [185, 28, 28] : [5, 150, 105] }
       : { rotulo: "Valor pretendido", valor: brl(v.preco_venda_pretendido), sub: "venda ainda não registrada" },
@@ -75,6 +85,8 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   ]);
 
   if (financeiro) bloco("5. Resultado da operação", [
+    ["Juros do financiamento (total)", brl(juros)],
+    ["Juros após o 30º dia", brl(jurosApos30)],
     ["Investimento total", brl(investimento)],
     ["Resultado parcial (venda pretendida)", `${brl(parcial)} · ${pct(parcial)}`],
     ...(venda ? [

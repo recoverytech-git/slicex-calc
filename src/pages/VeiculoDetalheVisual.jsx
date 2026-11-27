@@ -14,7 +14,7 @@ import { BUCKET_FOTOS, enviarFotos } from "../lib/fotos";
 import { criarZip } from "../lib/zip";
 import { baixarBlob, slug } from "../lib/galeriaFotos";
 import { URL_PUBLICA } from "../lib/urls";
-import { gerarPdfVeiculo } from "../lib/veiculoPdf";
+import { gerarPdfVeiculo, buscarJurosAcumulado } from "../lib/veiculoPdf";
 import { excluirVeiculo, buscarDuplicado } from "../lib/estoque";
 
 const ITENS_CK = ITENS.map(([k, rot]) => [k, rot]);
@@ -134,7 +134,7 @@ export default function VeiculoDetalheVisual() {
               supabase.from("veiculo_checklists").select("*").eq("veiculo_id", id).maybeSingle(),
             ]);
             const imgs = (await Promise.all(c.fotos.filter((f) => f.url).map((f) => urlParaDataUrl(f.url)))).filter(Boolean);
-            const doc = gerarPdfVeiculo({ logo: await carregarLogo(logoPadrao), financeiro: podeFinanceiro(papel), emitido: emitidoPor(perfil), veiculo: c.veiculo, financiamento: c.financiamento, custos: c.custos, vendas: c.vendas, checklist: ck, fotos: imgs, jsPDF, autoTable, ITENS, DOCUMENTACAO });
+            const doc = gerarPdfVeiculo({ logo: await carregarLogo(logoPadrao), financeiro: podeFinanceiro(papel), emitido: emitidoPor(perfil), jurosAcumulado: await buscarJurosAcumulado(c.veiculo.id), veiculo: c.veiculo, financiamento: c.financiamento, custos: c.custos, vendas: c.vendas, checklist: ck, fotos: imgs, jsPDF, autoTable, ITENS, DOCUMENTACAO });
             doc.save(`veiculo-${(c.veiculo.modelo || "veiculo").toLowerCase().replace(/\s+/g, "-")}.pdf`);
             break;
           }
