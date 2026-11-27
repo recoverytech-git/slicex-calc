@@ -1,3 +1,4 @@
+import { novoDocumento, cabecalho, secao, tabela, rodape, COR } from "./relatorioPdf";
 import { formatarCPF, formatarTelefone, soDigitos } from "./mascaras";
 
 /** Estrutura da ficha financeira (fonte única para formulário, PDF, PNG e Excel). */
@@ -60,37 +61,27 @@ export function baixar(url, nome) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-/** PDF com uma ficha por página. Recebe jsPDF e autoTable já carregados. */
-export function gerarPdf(registros, jsPDF, autoTable) {
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
+/** PDF padrão de fichas: uma ficha por página, com cabeçalho e logomarca do sistema. */
+export function gerarPdf(registros, jsPDF, autoTable, logo = null) {
+  const doc = novoDocumento(jsPDF, "portrait");
+  const cab = (r) => cabecalho(doc, {
+    titulo: "Ficha financeira",
+    subtitulo: `${r.nome || "Sem nome"} · CPF ${r.cpf ? formatarCPF(r.cpf) : "—"}`,
+    logo,
+  });
   registros.forEach((r, idx) => {
     if (idx > 0) doc.addPage();
-    doc.setFillColor(14, 26, 46);
-    doc.rect(0, 0, 210, 26, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(15);
-    doc.text("CALCULA.CAR · Ficha financeira", 14, 12);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`${r.nome || ""}  ·  CPF ${r.cpf ? formatarCPF(r.cpf) : "—"}  ·  ${new Date().toLocaleDateString("pt-BR")}`, 14, 20);
-    let y = 32;
+    let y = cab(r);
     linhasFicha(r.dados ?? {}).forEach((sec) => {
-      doc.setTextColor(68, 147, 248);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text(sec.titulo, 14, y);
-      autoTable(doc, {
-        startY: y + 2,
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 9, cellPadding: 1.8 },
-        body: sec.linhas,
-        columnStyles: { 0: { textColor: [90, 90, 90], cellWidth: 70 }, 1: { fontStyle: "bold" } },
-        theme: "plain",
+      if (y > 255) { doc.addPage(); y = cab(r); }
+      y = secao(doc, y + 2, sec.titulo);
+      y = tabela(doc, autoTable, {
+        y, head: ["Campo", "Informação"], body: sec.linhas,
+        colunas: { 0: { cellWidth: 75, textColor: COR.cinza }, 1: { fontStyle: "bold" } },
       });
-      y = doc.lastAutoTable.finalY + 8;
     });
   });
+  rodape(doc, "Calcula.car · Ficha financeira · dados confidenciais");
   return doc;
 }
 

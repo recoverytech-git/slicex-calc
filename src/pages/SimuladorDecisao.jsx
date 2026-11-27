@@ -1,3 +1,5 @@
+import logoPadrao from "../assets/logo.png";
+import { carregarLogo } from "../lib/relatorioPdf";
 import { parseMoeda, mascararReais } from "../lib/moeda";
 import { useMemo } from "react";
 import { Calculator, Car, Target, Banknote, Percent, CalendarDays, Landmark, Scale, FileDown } from "lucide-react";
@@ -80,7 +82,7 @@ export default function SimuladorDecisao() {
     taxa: num("taxa"), meses: num("meses"), sistema: v.sistema,
   }), [v]);
   const temValores = num("compra") > 0 && (num("fipe") > 0 || num("pretendido") > 0);
-  const gerarPdf = () => gerarPdfSimulacao({
+  const gerarPdf = async () => gerarPdfSimulacao({ logo: await carregarLogo(logoPadrao),
     entradas: [
       ["Valor FIPE", BRL(num("fipe"))],
       ["Valor de compra", BRL(num("compra"))],
