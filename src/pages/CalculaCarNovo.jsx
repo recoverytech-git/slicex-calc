@@ -1,3 +1,5 @@
+import logoPadrao from "../assets/logo.png";
+import { carregarLogo } from "../lib/relatorioPdf";
 import { useCampoMoeda } from "../lib/moeda";
 import { Component as ComponentCn } from "react";
 import { Gauge as GaugeCn, Percent as PercentCn, Lightbulb as LightbulbCn, SlidersHorizontal as SlidersCn, ArrowUpDown as ArrowUpDownCn, TrendingDown as TrendingDownCn } from "lucide-react";
@@ -204,7 +206,7 @@ export default function CalculaCarNovo() {
         import("jspdf"),
         import("jspdf-autotable"),
       ]);
-      const doc = buildCalculaCarPDF({ jsPDF, autoTable, data: exportData });
+      const doc = buildCalculaCarPDF({ jsPDF, autoTable, data: exportData, logo: await carregarLogo(logoPadrao) });
       doc.save(`calcula-car_${(modelo || "veiculo").toLowerCase().replace(/\s+/g, "-")}.pdf`);
       setDlState({ ok: true, tipo: "pdf" });
       setTimeout(() => setDlState(null), 4000);

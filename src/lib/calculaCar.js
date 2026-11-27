@@ -1,3 +1,4 @@
+import { COR, cabecalho, cartoes, secao, tabela, rodape, novoDocumento } from "./relatorioPdf";
 /**
  * Calcula-Car — lógica de negócio da análise de compra e venda de veículos.
  *
@@ -142,15 +143,10 @@ export function buildCalculaCarXLSX(XLSX, data) {
 }
 
 /**
- * Monta o relatório em PDF da análise. jsPDF e jspdf-autotable são
- * carregados dinamicamente apenas na página do Calcula-Car (import()
- * dentro do handler), então nenhuma outra rota paga o custo dessa
- * dependência — mesmo princípio de code-splitting já usado no App.jsx.
- *
- * Identidade visual em texto (não raster) por robustez: evita qualquer
- * dependência de carregamento assíncrono de imagem dentro do PDF.
+ * Relatório em PDF da análise Calcula-Car (mesma base visual dos demais relatórios).
+ * jsPDF e jspdf-autotable chegam já carregados pelo chamador (code-splitting).
  */
-export function buildCalculaCarPDF({ jsPDF, autoTable, data }) {
+export function buildCalculaCarPDF({ jsPDF, autoTable, data, logo = null }) {
   const { numeroMotor, categoria, potenciaMotor, portas, lugares } = data;
   const {
     modelo, placa, fipe, compra, valorVenda,
@@ -160,149 +156,85 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data }) {
     custosTotais, investimentoTotal, margemPotencial, resultadoLiquido,
   } = data;
 
-  const fmt = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const PAGE_W = 210;
+  const fmt = (v) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const doc = novoDocumento(jsPDF, "portrait");
+  const cab = () => cabecalho(doc, { titulo: modelo || "Calcula-Car", subtitulo: `Análise de compra e venda veicular${placa ? " · " + placa : ""}`, logo });
+  let y = cab();
 
-  // Header
-  doc.setFillColor(14, 26, 46);
-  doc.rect(0, 0, PAGE_W, 26, "F");
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, 26, PAGE_W, 0.6, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text("CALCULA.CAR  ·  Calcula-Car", 14, 12);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Análise de Compra e Venda Veicular · Gerado em ${new Date().toLocaleString("pt-BR")}`, 14, 20);
+  y = cartoes(doc, y, [
+    { rotulo: "Investimento total", valor: fmt(investimentoTotal), sub: "compra + custos" },
+    { rotulo: "Margem potencial", valor: fmt(margemPotencial), sub: "FIPE − compra" },
+    { rotulo: "Custos totais", valor: fmt(custosTotais), sub: "adicionais + financeiro", cor: [180, 83, 9] },
+    { rotulo: "Resultado líquido", valor: fmt(resultadoLiquido), sub: "estimado", cor: Number(resultadoLiquido) < 0 ? [185, 28, 28] : [5, 150, 105] },
+  ]);
 
-  let y = 34;
-  const sectionTitle = (text) => {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(20, 20, 20);
-    doc.text(text, 14, y);
-    doc.setDrawColor(210, 210, 210);
-    doc.line(14, y + 2, PAGE_W - 14, y + 2);
-    y += 8;
+  const bloco = (titulo, fn) => {
+    if (y > 235) { doc.addPage(); y = cab(); }
+    y = secao(doc, y + 2, titulo);
+    fn();
   };
+  const colRotulo = { 0: { fontStyle: "bold", textColor: COR.cinza }, 2: { fontStyle: "bold", textColor: COR.cinza } };
 
-  sectionTitle("1. Dados do Veículo");
-  autoTable(doc, {
-    startY: y, theme: "plain", margin: { left: 14, right: 14 },
-    styles: { fontSize: 9, cellPadding: 1.5 },
-    body: [
+  bloco("1. Dados do veículo", () => {
+    y = tabela(doc, autoTable, { y, head: ["Campo", "Informação", "Campo", "Informação"], colunas: colRotulo, body: [
       ["Modelo", modelo || "—", "Placa", placa || "—"],
       ["Motor", numeroMotor || "—", "Potência", potenciaMotor || "—"],
       ["Portas", portas || "—", "Lugares", lugares || "—"],
-      ["Categoria", categoria || "—", "", ""],
+      ["Categoria", categoria || "—", "Data de aquisição", data.dataAquisicao || "—"],
       ["Valor FIPE", fmt(fipe), "Valor de compra", fmt(compra)],
-      ["Data de aquisição", data.dataAquisicao || "—", "", ""],
-    ],
-    columnStyles: { 0: { fontStyle: "bold", textColor: [90, 90, 90] }, 2: { fontStyle: "bold", textColor: [90, 90, 90] } },
+    ] });
   });
-  y = doc.lastAutoTable.finalY + 8;
 
-  sectionTitle("2. Análise FIPE x Compra");
-  autoTable(doc, {
-    startY: y, theme: "plain", margin: { left: 14, right: 14 },
-    styles: { fontSize: 9, cellPadding: 1.5 },
-    body: [
+  bloco("2. Análise FIPE x compra", () => {
+    y = tabela(doc, autoTable, { y, head: ["Indicador", "Valor", "Indicador", "Valor"], colunas: colRotulo, body: [
       ["Diferença (R$)", fmt(diferencaReais), "Diferença (%)", diferencaPercentual !== null ? `${diferencaPercentual.toFixed(2)}%` : "—"],
-      ["Margem de referência", "15%", "Situação", abaixoDaMargem ? "Abaixo da margem de referência" : "Dentro/acima da margem de referência"],
-    ],
-    columnStyles: { 0: { fontStyle: "bold", textColor: [90, 90, 90] }, 2: { fontStyle: "bold", textColor: [90, 90, 90] } },
+      ["Margem de referência", `${MARGEM_REFERENCIA_PCT}%`, "Situação", abaixoDaMargem ? "Abaixo da referência" : "Dentro ou acima da referência"],
+    ] });
+    if (abaixoDaMargem) {
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...COR.cinza);
+      doc.text(`Atenção: margem abaixo da referência de ${MARGEM_REFERENCIA_PCT}%. Isso não impede a análise; indica apenas que a margem da compra é menor que o valor sugerido.`, 12, y, { maxWidth: 186 });
+      y += 9;
+    }
   });
-  y = doc.lastAutoTable.finalY + 4;
-  if (abaixoDaMargem) {
-    doc.setFillColor(245, 245, 245);
-    doc.rect(14, y, PAGE_W - 28, 9, "F");
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(8.5);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Atenção: este veículo está abaixo da margem de referência de 15%. Isso não impede a análise —", 17, y + 4);
-    doc.text("apenas indica que a margem obtida na compra é menor que o valor de referência sugerido.", 17, y + 7.5);
-    y += 13;
-  } else {
-    y += 4;
-  }
 
-  sectionTitle("3. Origem do Capital");
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9.5);
-  doc.setTextColor(40, 40, 40);
-  doc.text(`Capital: ${tipoCapital}`, 14, y);
-  y += 8;
+  bloco("3. Origem do capital", () => {
+    y = tabela(doc, autoTable, { y, head: ["Campo", "Informação"], colunas: { 0: { cellWidth: 75, textColor: COR.cinza }, 1: { fontStyle: "bold" } }, body: [["Capital", tipoCapital]] });
+  });
 
   if (financiamento) {
-    sectionTitle("Financiamento");
-    autoTable(doc, {
-      startY: y, theme: "plain", margin: { left: 14, right: 14 },
-      styles: { fontSize: 9, cellPadding: 1.5 },
-      body: [
+    bloco("Financiamento", () => {
+      y = tabela(doc, autoTable, { y, head: ["Campo", "Informação", "Campo", "Informação"], colunas: colRotulo, body: [
         ["Valor financiado", fmt(financiamento.pv), "Taxa mensal", `${financiamento.taxa}%`],
         ["Prazo", `${financiamento.n} meses`, "Sistema", financiamento.sistema],
         ["Total de juros", fmt(financiamento.totalJuros), "Total pago", fmt(financiamento.totalPago)],
-      ],
-      columnStyles: { 0: { fontStyle: "bold", textColor: [90, 90, 90] }, 2: { fontStyle: "bold", textColor: [90, 90, 90] } },
+      ] });
     });
-    y = doc.lastAutoTable.finalY + 8;
   }
 
-  sectionTitle("Custos Adicionais");
-  autoTable(doc, {
-    startY: y, margin: { left: 14, right: 14 }, styles: { fontSize: 9 },
-    headStyles: { fillColor: [20, 20, 20], textColor: 255, fontStyle: "bold" },
-    head: [["Descrição", "Valor"]],
-    body: custos.length ? custos.map((c) => [c.descricao || "(sem descrição)", fmt(c.valor || 0)]) : [["Nenhum custo adicional informado", fmt(0)]],
-    foot: [["TOTAL", fmt(totalCustosAdicionais)]],
-    footStyles: { fillColor: [235, 235, 235], textColor: [20, 20, 20], fontStyle: "bold" },
+  bloco("Custos adicionais", () => {
+    y = tabela(doc, autoTable, { y, head: ["Descrição", "Valor"], body: custos.length ? custos.map((c) => [c.descricao || "(sem descrição)", fmt(c.valor || 0)]) : [["Nenhum custo adicional informado", fmt(0)]],
+      foot: ["Total", fmt(totalCustosAdicionais)], colunas: { 1: { halign: "right", fontStyle: "bold" } } });
   });
-  y = doc.lastAutoTable.finalY + 8;
 
   if (financiamento) {
-    if (y > 250) { doc.addPage(); y = 16; }
-    sectionTitle("Evolução Completa do Financiamento");
-    autoTable(doc, {
-      startY: y, margin: { left: 14, right: 14 }, styles: { fontSize: 8, cellPadding: 1.6 },
-      headStyles: { fillColor: [20, 20, 20], textColor: 255, fontStyle: "bold", halign: "right" },
-      head: [["Mês", "Parcela", "Juros", "Amortização", "Saldo Devedor"]],
-      body: financiamento.rows.map((r) => [r.mes, fmt(r.parcela), fmt(r.juros), fmt(r.amortizacao), fmt(r.saldo)]),
-      foot: [["TOTAL", fmt(financiamento.totalPago), fmt(financiamento.totalJuros), fmt(financiamento.pv), "—"]],
-      footStyles: { fillColor: [20, 20, 20], textColor: 255, fontStyle: "bold" },
-      columnStyles: { 0: { halign: "center" }, 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
+    bloco("Evolução completa do financiamento", () => {
+      y = tabela(doc, autoTable, { y, head: ["Mês", "Parcela", "Juros", "Amortização", "Saldo devedor"], fonte: 7,
+        body: financiamento.rows.map((r) => [r.mes, fmt(r.parcela), fmt(r.juros), fmt(r.amortizacao), fmt(r.saldo)]),
+        foot: ["Total", fmt(financiamento.totalPago), fmt(financiamento.totalJuros), fmt(financiamento.pv), "—"],
+        colunas: { 0: { halign: "center" }, 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } } });
     });
-    y = doc.lastAutoTable.finalY + 8;
   }
 
-  if (y > 240) { doc.addPage(); y = 16; }
-  sectionTitle("Resultado da Operação");
-  autoTable(doc, {
-    startY: y, theme: "plain", margin: { left: 14, right: 14 },
-    styles: { fontSize: 10, cellPadding: 2 },
-    body: [
+  bloco("Resultado da operação", () => {
+    y = tabela(doc, autoTable, { y, head: ["Indicador", "Valor"], colunas: { 0: { cellWidth: 110, fontStyle: "bold", textColor: COR.cinza }, 1: { halign: "right", fontStyle: "bold" } }, body: [
       ["Investimento total", fmt(investimentoTotal)],
-      ["Margem potencial (FIPE - Compra)", fmt(margemPotencial)],
+      ["Margem potencial (FIPE − compra)", fmt(margemPotencial)],
       ["Custos totais (adicionais + financeiro)", fmt(custosTotais)],
       ["Valor de venda considerado", fmt(valorVenda)],
       ["Resultado líquido estimado", fmt(resultadoLiquido)],
-    ],
-    columnStyles: { 0: { fontStyle: "bold", textColor: [90, 90, 90] }, 1: { halign: "right", fontStyle: "bold" } },
-    didParseCell: (d) => {
-      if (d.row.index === 4) { d.cell.styles.fontSize = 12; d.cell.styles.textColor = [0, 0, 0]; }
-    },
+    ] });
   });
 
-  const pageCount = doc.internal.getNumberOfPages();
-  for (let p = 1; p <= pageCount; p++) {
-    doc.setPage(p);
-    doc.setDrawColor(220, 220, 220);
-    doc.line(14, 288, PAGE_W - 14, 288);
-    doc.setFontSize(7);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`Calcula-Car · Simulação estimada, não substitui avaliação profissional · Página ${p}/${pageCount}`, 14, 292);
-  }
-
+  rodape(doc, "Calcula-Car · Simulação estimada, não substitui avaliação profissional");
   return doc;
 }
