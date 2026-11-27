@@ -1,5 +1,5 @@
 import logoPadrao from "../assets/logo.png";
-import { carregarLogo } from "../lib/relatorioPdf";
+import { carregarLogo, podeFinanceiro, emitidoPor } from "../lib/relatorioPdf";
 import { useCampoMoeda } from "../lib/moeda";
 import { URL_PUBLICA } from "../lib/urls";
 import { useEffect, useState } from "react";
@@ -198,7 +198,7 @@ export default function Ficha() {
 
   const exportarPdf = async () => {
     const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
-    gerarPdf([registro()], jsPDF, autoTable, await carregarLogo(logoPadrao)).save(nomeArquivo(registro(), "pdf"));
+    gerarPdf([registro()], jsPDF, autoTable, await carregarLogo(logoPadrao), { financeiro: podeFinanceiro(papel), emitido: emitidoPor(perfil) }).save(nomeArquivo(registro(), "pdf"));
   };
 
   const exportarPng = async () => {

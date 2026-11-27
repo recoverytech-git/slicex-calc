@@ -4,7 +4,7 @@ import { LogOut, Lock, ChevronDown } from "lucide-react";
 import { itensNav } from "./navItems";
 import { useAuth } from "../lib/auth";
 import { useMarca } from "../lib/marca";
-import logo from "../assets/logo.png";
+import logo from "../assets/logo-branca.png";
 
 const ROTAS_CALCULADORAS = ["/financiamento", "/percentual", "/amortizacao"];
 
@@ -28,7 +28,7 @@ export default function Sidebar({ aberta = true }) {
   return (
     <aside className={`sidebar${aberta ? "" : " fechada"}`} aria-label="Navegação principal">
       <div className="sidebar-brand">
-        <img src={logoSidebar} alt="SliceX.calc" style={{ height: 26, width: "auto" }} />
+        <img src={logoSidebar} alt="Calcula.car" style={{ height: 26, width: "auto" }} />
       </div>
       <nav className="sidebar-nav">
         {itens.map((item) => {

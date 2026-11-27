@@ -122,7 +122,7 @@ export function buildCalculaCarXLSX(XLSX, data) {
   wsC["!cols"] = [{ wch: 34 }, { wch: 18 }];
   XLSX.utils.book_append_sheet(wb, wsC, "Custos Adicionais");
 
-  if (financiamento) {
+  if (financiamento && financeiro) {
     const wsF = XLSX.utils.aoa_to_sheet([
       ["Mês", "Parcela (R$)", "Juros (R$)", "Amortização (R$)", "Saldo Devedor (R$)"],
       ...financiamento.rows.map((r) => [
@@ -146,7 +146,7 @@ export function buildCalculaCarXLSX(XLSX, data) {
  * Relatório em PDF da análise Calcula-Car (mesma base visual dos demais relatórios).
  * jsPDF e jspdf-autotable chegam já carregados pelo chamador (code-splitting).
  */
-export function buildCalculaCarPDF({ jsPDF, autoTable, data, logo = null }) {
+export function buildCalculaCarPDF({ jsPDF, autoTable, data, logo = null, financeiro = true, emitido }) {
   const { numeroMotor, categoria, potenciaMotor, portas, lugares } = data;
   const {
     modelo, placa, fipe, compra, valorVenda,
@@ -158,10 +158,13 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data, logo = null }) {
 
   const fmt = (v) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const doc = novoDocumento(jsPDF, "portrait");
-  const cab = () => cabecalho(doc, { titulo: modelo || "Calcula-Car", subtitulo: `Análise de compra e venda veicular${placa ? " · " + placa : ""}`, logo });
+  const cab = () => cabecalho(doc, { titulo: modelo || "Calcula-Car", subtitulo: `Análise de compra e venda veicular${placa ? " · " + placa : ""}`, logo, meta: emitido });
   let y = cab();
 
-  y = cartoes(doc, y, [
+  y = cartoes(doc, y, !financeiro ? [
+    { rotulo: "Valor FIPE", valor: fmt(fipe), sub: "referência de mercado" },
+    { rotulo: "Valor de venda", valor: fmt(valorVenda), sub: "pretendido" },
+  ] : [
     { rotulo: "Investimento total", valor: fmt(investimentoTotal), sub: "compra + custos" },
     { rotulo: "Margem potencial", valor: fmt(margemPotencial), sub: "FIPE − compra" },
     { rotulo: "Custos totais", valor: fmt(custosTotais), sub: "adicionais + financeiro", cor: [180, 83, 9] },
@@ -181,11 +184,11 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data, logo = null }) {
       ["Motor", numeroMotor || "—", "Potência", potenciaMotor || "—"],
       ["Portas", portas || "—", "Lugares", lugares || "—"],
       ["Categoria", categoria || "—", "Data de aquisição", data.dataAquisicao || "—"],
-      ["Valor FIPE", fmt(fipe), "Valor de compra", fmt(compra)],
+      ["Valor FIPE", fmt(fipe), financeiro ? "Valor de compra" : "Valor pretendido", financeiro ? fmt(compra) : fmt(valorVenda)],
     ] });
   });
 
-  bloco("2. Análise FIPE x compra", () => {
+  if (financeiro) bloco("2. Análise FIPE x compra", () => {
     y = tabela(doc, autoTable, { y, head: ["Indicador", "Valor", "Indicador", "Valor"], colunas: colRotulo, body: [
       ["Diferença (R$)", fmt(diferencaReais), "Diferença (%)", diferencaPercentual !== null ? `${diferencaPercentual.toFixed(2)}%` : "—"],
       ["Margem de referência", `${MARGEM_REFERENCIA_PCT}%`, "Situação", abaixoDaMargem ? "Abaixo da referência" : "Dentro ou acima da referência"],
@@ -197,11 +200,11 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data, logo = null }) {
     }
   });
 
-  bloco("3. Origem do capital", () => {
+  if (financeiro) bloco("3. Origem do capital", () => {
     y = tabela(doc, autoTable, { y, head: ["Campo", "Informação"], colunas: { 0: { cellWidth: 75, textColor: COR.cinza }, 1: { fontStyle: "bold" } }, body: [["Capital", tipoCapital]] });
   });
 
-  if (financiamento) {
+  if (financiamento && financeiro) {
     bloco("Financiamento", () => {
       y = tabela(doc, autoTable, { y, head: ["Campo", "Informação", "Campo", "Informação"], colunas: colRotulo, body: [
         ["Valor financiado", fmt(financiamento.pv), "Taxa mensal", `${financiamento.taxa}%`],
@@ -211,12 +214,12 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data, logo = null }) {
     });
   }
 
-  bloco("Custos adicionais", () => {
+  if (financeiro) bloco("Custos adicionais", () => {
     y = tabela(doc, autoTable, { y, head: ["Descrição", "Valor"], body: custos.length ? custos.map((c) => [c.descricao || "(sem descrição)", fmt(c.valor || 0)]) : [["Nenhum custo adicional informado", fmt(0)]],
       foot: ["Total", fmt(totalCustosAdicionais)], colunas: { 1: { halign: "right", fontStyle: "bold" } } });
   });
 
-  if (financiamento) {
+  if (financiamento && financeiro) {
     bloco("Evolução completa do financiamento", () => {
       y = tabela(doc, autoTable, { y, head: ["Mês", "Parcela", "Juros", "Amortização", "Saldo devedor"], fonte: 7,
         body: financiamento.rows.map((r) => [r.mes, fmt(r.parcela), fmt(r.juros), fmt(r.amortizacao), fmt(r.saldo)]),
@@ -225,7 +228,7 @@ export function buildCalculaCarPDF({ jsPDF, autoTable, data, logo = null }) {
     });
   }
 
-  bloco("Resultado da operação", () => {
+  if (financeiro) bloco("Resultado da operação", () => {
     y = tabela(doc, autoTable, { y, head: ["Indicador", "Valor"], colunas: { 0: { cellWidth: 110, fontStyle: "bold", textColor: COR.cinza }, 1: { halign: "right", fontStyle: "bold" } }, body: [
       ["Investimento total", fmt(investimentoTotal)],
       ["Margem potencial (FIPE − compra)", fmt(margemPotencial)],

@@ -1,5 +1,6 @@
+import { useAuth } from "../lib/auth";
 import logoPadrao from "../assets/logo.png";
-import { carregarLogo } from "../lib/relatorioPdf";
+import { carregarLogo, podeFinanceiro, emitidoPor } from "../lib/relatorioPdf";
 import { ENTRADA, FADE } from "../lib/motion";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,6 +41,7 @@ function SectionTitle({ icon: Icon, n, children }) {
 }
 
 export default function CalculaCar() {
+  const { perfil } = useAuth();
   // Bloco 1 — veículo
   const [modelo, setModelo] = useRascunho("cc.modelo", "");
   const [placa, setPlaca] = useRascunho("cc.placa", "");
@@ -199,7 +201,7 @@ export default function CalculaCar() {
         import("jspdf"),
         import("jspdf-autotable"),
       ]);
-      const doc = buildCalculaCarPDF({ jsPDF, autoTable, data: exportData, logo: await carregarLogo(logoPadrao) });
+      const doc = buildCalculaCarPDF({ jsPDF, autoTable, data: exportData, logo: await carregarLogo(logoPadrao), financeiro: podeFinanceiro(perfil?.papel), emitido: emitidoPor(perfil) });
       doc.save(`calcula-car_${(modelo || "veiculo").toLowerCase().replace(/\s+/g, "-")}.pdf`);
       setDlState({ ok: true, tipo: "pdf" });
       setTimeout(() => setDlState(null), 4000);

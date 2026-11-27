@@ -24,7 +24,7 @@ export default function Header({ subtitle }) {
         <motion.img
           src={logoSrc}
           data-logo
-          alt="SliceX.calc"
+          alt="Calcula.car"
           style={{ height: 38, width: "auto", display: "block", filter: claro && logoPadrao ? "invert(1)" : "none" }}
           whileHover={{ scale: 1.04 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}

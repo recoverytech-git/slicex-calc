@@ -55,7 +55,7 @@ function CabecalhoPublico({ nome }) {
   const logoPadrao = logoSrc === logo;
   return (
     <div style={{ background: "var(--bg-header)", padding: "18px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 16 }}>
-      <img src={logoSrc} alt="SliceX.calc" style={{ height: 38, width: "auto", display: "block", filter: logoPadrao ? "invert(1)" : "none" }} />
+      <img src={logoSrc} alt="Calcula.car" style={{ height: 38, width: "auto", display: "block", filter: logoPadrao ? "invert(1)" : "none" }} />
       <div style={{ borderLeft: "1px solid var(--border-strong)", paddingLeft: 16 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{nome || "Ficha cadastral"}</div>
         <div style={{ fontSize: 10, color: "var(--text-mute)", marginTop: 2 }}>Preenchimento de ficha financeira</div>

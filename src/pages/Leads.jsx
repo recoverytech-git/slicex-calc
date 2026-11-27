@@ -1,5 +1,5 @@
 import logoPadrao from "../assets/logo.png";
-import { carregarLogo } from "../lib/relatorioPdf";
+import { carregarLogo, podeFinanceiro, emitidoPor } from "../lib/relatorioPdf";
 // sem-rascunho: a busca e a selecao usam useRascunho; a pagina nao tem formulario de dados pessoais
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -87,7 +87,7 @@ export default function Leads() {
     setOcupado(true);
     try {
       const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
-      gerarPdf(lista, jsPDF, autoTable, await carregarLogo(logoPadrao)).save(lista.length === 1 ? nomeArquivo(lista[0], "pdf") : "fichas-leads.pdf");
+      gerarPdf(lista, jsPDF, autoTable, await carregarLogo(logoPadrao), { financeiro: podeFinanceiro(perfil?.papel), emitido: emitidoPor(perfil) }).save(lista.length === 1 ? nomeArquivo(lista[0], "pdf") : "fichas-leads.pdf");
     } finally { setOcupado(false); }
   };
 

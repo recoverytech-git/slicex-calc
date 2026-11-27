@@ -1,7 +1,7 @@
 import { COR, brl, cabecalho, cartoes, secao, tabela, rodape, novoDocumento } from "./relatorioPdf";
 
 /** PDF completo do veículo (mesma base visual dos demais relatórios). Cálculos iguais aos da tela. */
-export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], vendas = [], checklist, fotos = [], jsPDF, autoTable, ITENS, DOCUMENTACAO, logo = null }) {
+export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], vendas = [], checklist, fotos = [], jsPDF, autoTable, ITENS, DOCUMENTACAO, logo = null, financeiro = true, emitido }) {
   const doc = novoDocumento(jsPDF, "portrait");
   const data = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR") : "—");
   const sim = (x) => (x === true ? "Sim" : x === false ? "Não" : "Não informado");
@@ -18,7 +18,7 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   const cab = () => cabecalho(doc, {
     titulo: v.modelo || "Veículo",
     subtitulo: `Ficha do veículo · ${v.marca ? v.marca + " · " : ""}${v.placa || "sem placa"}`,
-    logo,
+    logo, meta: emitido,
   });
   let y = cab();
 
@@ -30,7 +30,11 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
       ? { rotulo: "Resultado final", valor: brl(final), sub: `${pct(final)} · venda registrada`, cor: final < 0 ? [185, 28, 28] : [5, 150, 105] }
       : { rotulo: "Valor pretendido", valor: brl(v.preco_venda_pretendido), sub: "venda ainda não registrada" },
   ];
-  y = cartoes(doc, y, indicadores);
+  y = cartoes(doc, y, financeiro ? indicadores : [
+    { rotulo: "Valor FIPE", valor: brl(v.valor_fipe), sub: "referência de mercado" },
+    { rotulo: "Valor pretendido", valor: brl(v.preco_venda_pretendido), sub: "preço de venda" },
+    { rotulo: "Status", valor: String(v.status || "—").replace(/_/g, " "), sub: "situação no estoque" },
+  ]);
 
   const bloco = (titulo, linhas) => {
     if (y > 250) { doc.addPage(); y = cab(); }
@@ -47,13 +51,13 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
     ["Valor de venda pretendido", brl(v.preco_venda_pretendido)],
   ]);
 
-  bloco("2. Análise FIPE x compra", [
+  if (financeiro) bloco("2. Análise FIPE x compra", [
     ["Valor FIPE", brl(v.valor_fipe)], ["Valor de compra", brl(v.preco_compra)],
     ["Diferença em reais", v.valor_fipe && v.preco_compra ? brl(Number(v.valor_fipe) - compra) : "—"],
     ["Diferença percentual", v.valor_fipe && v.preco_compra ? `${(((Number(v.valor_fipe) - compra) / Number(v.valor_fipe)) * 100).toFixed(2)}%` : "—"],
   ]);
 
-  bloco("3. Origem do capital", [
+  if (financeiro) bloco("3. Origem do capital", [
     ["Origem do capital", v.tipo_aquisicao === "financiamento" ? "Financiamento" : v.tipo_aquisicao === "capital_proprio" ? "Capital próprio" : "—"],
     ...(f ? [
       ["Modo de financiamento", String(f.sistema_amortizacao || "").toLowerCase() === "sac" ? "SAC" : "Price"],
@@ -65,12 +69,12 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
     ] : []),
   ]);
 
-  bloco("4. Custos adicionais", [
+  if (financeiro) bloco("4. Custos adicionais", [
     ...(custos.length ? custos.map((c) => [c.descricao, brl(c.valor)]) : [["Nenhum custo adicional", brl(0)]]),
     ["Total de custos adicionais", brl(totalCustos)],
   ]);
 
-  bloco("5. Resultado da operação", [
+  if (financeiro) bloco("5. Resultado da operação", [
     ["Investimento total", brl(investimento)],
     ["Resultado parcial (venda pretendida)", `${brl(parcial)} · ${pct(parcial)}`],
     ...(venda ? [

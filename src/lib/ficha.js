@@ -1,4 +1,4 @@
-import { novoDocumento, cabecalho, secao, tabela, rodape, COR } from "./relatorioPdf";
+import { novoDocumento, cabecalho, secao, tabela, rodape, COR, mascararCpf } from "./relatorioPdf";
 import { formatarCPF, formatarTelefone, soDigitos } from "./mascaras";
 
 /** Estrutura da ficha financeira (fonte única para formulário, PDF, PNG e Excel). */
@@ -61,22 +61,26 @@ export function baixar(url, nome) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-/** PDF padrão de fichas: uma ficha por página, com cabeçalho e logomarca do sistema. */
-export function gerarPdf(registros, jsPDF, autoTable, logo = null) {
+/** PDF padrão de fichas. `opts.financeiro` = false (vendedor): CPF mascarado e sem a seção financeira. */
+export function gerarPdf(registros, jsPDF, autoTable, logo = null, opts = {}) {
+  const financeiro = opts.financeiro !== false;
   const doc = novoDocumento(jsPDF, "portrait");
+  const cpfTxt = (r) => (financeiro ? (r.cpf ? formatarCPF(r.cpf) : "—") : mascararCpf(r.cpf));
   const cab = (r) => cabecalho(doc, {
     titulo: "Ficha financeira",
-    subtitulo: `${r.nome || "Sem nome"} · CPF ${r.cpf ? formatarCPF(r.cpf) : "—"}`,
-    logo,
+    subtitulo: `${r.nome || "Sem nome"} · CPF ${cpfTxt(r)}`,
+    logo, meta: opts.emitido,
   });
   registros.forEach((r, idx) => {
     if (idx > 0) doc.addPage();
     let y = cab(r);
     linhasFicha(r.dados ?? {}).forEach((sec) => {
+      if (!financeiro && sec.titulo.startsWith("2.")) return;
       if (y > 255) { doc.addPage(); y = cab(r); }
+      const linhas = financeiro ? sec.linhas : sec.linhas.map(([k, v]) => [k, /cpf/i.test(k) ? mascararCpf(v) : v]);
       y = secao(doc, y + 2, sec.titulo);
       y = tabela(doc, autoTable, {
-        y, head: ["Campo", "Informação"], body: sec.linhas,
+        y, head: ["Campo", "Informação"], body: linhas,
         colunas: { 0: { cellWidth: 75, textColor: COR.cinza }, 1: { fontStyle: "bold" } },
       });
     });

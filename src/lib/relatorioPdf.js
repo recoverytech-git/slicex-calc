@@ -13,12 +13,20 @@ export async function carregarLogo(url) {
     if (!r.ok) return null;
     const blob = await r.blob();
     if (!/png|jpe?g/.test(blob.type)) return null;
-    return await new Promise((resolve) => {
+    const data = await new Promise((resolve) => {
       const fr = new FileReader();
-      fr.onload = () => resolve({ data: fr.result, tipo: blob.type.includes("png") ? "PNG" : "JPEG", ratio: 0 });
+      fr.onload = () => resolve(fr.result);
       fr.onerror = () => resolve(null);
       fr.readAsDataURL(blob);
     });
+    if (!data) return null;
+    const ratio = await new Promise((resolve) => {
+      const im = new Image();
+      im.onload = () => resolve(im.naturalWidth / im.naturalHeight || 1);
+      im.onerror = () => resolve(1);
+      im.src = data;
+    });
+    return { data, tipo: blob.type.includes("png") ? "PNG" : "JPEG", ratio };
   } catch { return null; }
 }
 
@@ -31,18 +39,24 @@ export function cabecalho(doc, { titulo, subtitulo, logo, meta }) {
   const W = doc.internal.pageSize.getWidth();
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, W, 24, "F");
+  // logomarca na proporção real (sem distorcer), altura fixa de 13 mm
+  const h = 13;
+  let w = 13;
   if (logo) {
-    try { doc.addImage(logo.data, logo.tipo, 12, 6, 30, 12); } catch { /* segue sem logo */ }
+    w = Math.min(40, h * (logo.ratio || 1));
+    try { doc.addImage(logo.data, logo.tipo, 12, 5.5, w, h); } catch { /* segue sem logo */ }
   } else {
     doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(...COR.navy);
     doc.text("CALCULA.CAR", 12, 13);
+    w = 34;
   }
+  const tx = 12 + w + 6;
   doc.setDrawColor(...COR.borda); doc.setLineWidth(0.3);
-  doc.line(48, 6, 48, 18);
+  doc.line(tx - 3, 6, tx - 3, 18);
   doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(...COR.navy);
-  doc.text(titulo, 53, 12);
+  doc.text(titulo, tx, 12);
   doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...COR.cinza);
-  doc.text(subtitulo, 53, 17.5);
+  doc.text(subtitulo, tx, 17.5);
   doc.setFontSize(7.5);
   doc.text(meta || `Emitido em ${new Date().toLocaleString("pt-BR")}`, W - 12, 12, { align: "right" });
   doc.setFillColor(...COR.azul);
@@ -109,3 +123,12 @@ export function rodape(doc, texto) {
     doc.text(`Página ${i} de ${total}`, W - 12, H - 6, { align: "right" });
   }
 }
+
+/** Perfis com acesso aos dados financeiros (compra, custos, juros, capital, margem e resultado). */
+export const PAPEIS_FINANCEIROS = ["admin_master", "proprietario", "gerente"];
+export const podeFinanceiro = (papel) => PAPEIS_FINANCEIROS.includes(papel);
+/** Linha de emissão: quem gerou o relatório e quando. */
+export const emitidoPor = (perfil) => `Emitido por ${perfil?.nome || perfil?.papel || "usuário"} em ${new Date().toLocaleString("pt-BR")}`;
+/** CPF mascarado para quem não tem acesso completo aos dados pessoais. */
+export const mascararCpf = (c) => { const d = String(c || "").replace(/\D/g, ""); return d.length === 11 ? `***.***.***-${d.slice(9)}` : "—"; };
+

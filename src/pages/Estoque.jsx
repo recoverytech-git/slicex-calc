@@ -9,7 +9,7 @@ import { listarVeiculos } from "../lib/estoque";
 import { supabase, supabaseConfigurado } from "../lib/supabase";
 import { BUCKET_FOTOS } from "../lib/fotos";
 import { buildEstoquePDF, linhaRelatorio } from "../lib/estoqueRelatorio";
-import { carregarLogo } from "../lib/relatorioPdf";
+import { carregarLogo, podeFinanceiro, emitidoPor } from "../lib/relatorioPdf";
 import logoPadrao from "../assets/logo.png";
 import { useAuth } from "../lib/auth";
 import { useMarca } from "../lib/marca";
@@ -140,7 +140,7 @@ export default function Estoque() {
         if (!filtrados.length) return;
         const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
         const logo = await carregarLogo(marcaRef.current?.logo_claro || logoPadrao);
-        buildEstoquePDF({ jsPDF, autoTable, itens: filtrados.map((v) => linhaRelatorio(v, relatorioRef.current)), rotulos: ROTULO, logo }).save("estoque.pdf");
+        buildEstoquePDF({ jsPDF, autoTable, itens: filtrados.map((v) => linhaRelatorio(v, relatorioRef.current)), rotulos: ROTULO, logo, financeiro: podeFinanceiro(perfil?.papel), emitido: emitidoPor(perfil) }).save("estoque.pdf");
       }
     };
     window.addEventListener("message", ouvir);
