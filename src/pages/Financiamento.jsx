@@ -1,3 +1,5 @@
+import logoPadrao from "../assets/logo.png";
+import { novoDocumento, cabecalho, cartoes, secao, tabela, rodape, carregarLogo } from "../lib/relatorioPdf";
 // sem-rascunho: formulario e resultados ficam no documento do design (iframe); o calculo usa calcPrice e calcSAC
 import { useCallback, useEffect, useRef, useState } from "react";
 import PageTransition from "../components/PageTransition";
@@ -46,22 +48,27 @@ async function exportar(d) {
   }
   if (d.formato === "pdf") {
     const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
-    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    const logo = await carregarLogo(logoPadrao);
+    const doc = novoDocumento(jsPDF, "portrait");
     const fmt = (v) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text(`Simulação de financiamento – Sistema ${sistemaNome}`, 14, 16);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`Valor financiado: ${fmt(pv)} · Taxa: ${d.taxa}% a.m. (${taxaAnual.toFixed(2)}% a.a.) · Prazo: ${d.meses} meses`, 14, 23);
-    doc.text(`Total pago: ${fmt(totalPago)} · Total de juros: ${fmt(totalJuros)}`, 14, 28);
-    autoTable(doc, {
-      startY: 34,
-      head: [["Mês", "Parcela", "Juros", "Amortização", "Saldo devedor"]],
+    const cab = () => cabecalho(doc, { titulo: "Simulação de financiamento", subtitulo: `Sistema ${sistemaNome} · ${d.meses} meses`, logo });
+    let y = cab();
+    y = cartoes(doc, y, [
+      { rotulo: "Valor financiado", valor: fmt(pv), sub: "após a entrada" },
+      { rotulo: "Taxa mensal", valor: `${d.taxa}%`, sub: `${taxaAnual.toFixed(2)}% ao ano` },
+      { rotulo: "Total pago", valor: fmt(totalPago), sub: `${d.meses} parcelas` },
+      { rotulo: "Total de juros", valor: fmt(totalJuros), sub: "custo do financiamento", cor: [180, 83, 9] },
+    ]);
+    y = secao(doc, y + 2, "Evolução mensal");
+    tabela(doc, autoTable, {
+      y,
+      head: ["Mês", "Parcela", "Juros", "Amortização", "Saldo devedor"],
       body: rows.map((r) => [r.mes, fmt(r.parcela), fmt(r.juros), fmt(r.amortizacao), fmt(r.saldo)]),
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [37, 99, 235] },
+      foot: ["Total", fmt(totalPago), fmt(totalJuros), fmt(pv), "—"],
+      fonte: 7.5,
+      colunas: { 0: { halign: "center" }, 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } },
     });
+    rodape(doc, "Calcula.car · Simulação estimada, não constitui oferta de crédito");
     doc.save(`${base}.pdf`);
   }
 }
