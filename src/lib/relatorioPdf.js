@@ -1,9 +1,9 @@
 // Base visual comum de todos os relatórios PDF do Calcula.car (mesma linguagem do sistema)
 export const COR = { azul: [37, 99, 235], navy: [14, 26, 46], texto: [30, 41, 59], cinza: [100, 116, 139], borda: [226, 232, 240], fundo: [248, 250, 252], azulClaro: [239, 246, 255] };
 
-export const brl = (v) => (v == null || v === "" || Number.isNaN(Number(v)) ? "—" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }));
-export const numero = (v) => (v == null || v === "" ? "—" : Number(v).toLocaleString("pt-BR"));
-export const pct = (v) => (v == null || Number.isNaN(Number(v)) ? "—" : `${Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`);
+export const brl = (v) => (v == null || v === "" || Number.isNaN(Number(v)) ? "-" : Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }));
+export const numero = (v) => (v == null || v === "" ? "-" : Number(v).toLocaleString("pt-BR"));
+export const pct = (v) => (v == null || Number.isNaN(Number(v)) ? "-" : `${Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`);
 
 // Logomarca em PNG/JPEG (formatos aceitos pelo PDF). Sem logo válida, o cabeçalho usa o nome da marca.
 export async function carregarLogo(url) {
@@ -130,5 +130,5 @@ export const podeFinanceiro = (papel) => PAPEIS_FINANCEIROS.includes(papel);
 /** Linha de emissão: quem gerou o relatório e quando. */
 export const emitidoPor = (perfil) => `Emitido por ${perfil?.nome || perfil?.papel || "usuário"} em ${new Date().toLocaleString("pt-BR")}`;
 /** CPF mascarado para quem não tem acesso completo aos dados pessoais. */
-export const mascararCpf = (c) => { const d = String(c || "").replace(/\D/g, ""); return d.length === 11 ? `***.***.***-${d.slice(9)}` : "—"; };
+export const mascararCpf = (c) => { const d = String(c || "").replace(/\D/g, ""); return d.length === 11 ? `***.***.***-${d.slice(9)}` : "-"; };
 

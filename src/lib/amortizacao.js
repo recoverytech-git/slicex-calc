@@ -4,11 +4,11 @@
  * Dado um saldo devedor atual, compara as duas estratégias clássicas de
  * usar um aporte extra para abater o financiamento:
  *
- *   Estratégia 1 — Reduzir Prazo:
+ *   Estratégia 1 - Reduzir Prazo:
  *     mantém o valor da parcela (Price) ou o ritmo de amortização mensal
  *     (SAC) e quita o saldo mais rápido, encurtando o número de meses.
  *
- *   Estratégia 2 — Reduzir Parcela:
+ *   Estratégia 2 - Reduzir Parcela:
  *     mantém o número de meses restante e recalcula uma parcela menor
  *     sobre o novo saldo (após o aporte).
  *

@@ -30,7 +30,7 @@ export function buildXLSX(rows, pv, taxaNum, n, entNum, totalPago, totalJuros, s
   const wb = XLSX.utils.book_new();
 
   const resumo = [
-    [`SIMULAÇÃO DE FINANCIAMENTO – SISTEMA ${sistema}`],
+    [`SIMULAÇÃO DE FINANCIAMENTO - SISTEMA ${sistema}`],
     ["Gerado em:", new Date().toLocaleString("pt-BR")],
     [],
     ["PARÂMETROS"],
@@ -65,7 +65,7 @@ export function buildXLSX(rows, pv, taxaNum, n, entNum, totalPago, totalJuros, s
       parseFloat(r.saldo.toFixed(2)),
     ]),
     [],
-    ["TOTAL", parseFloat(totalPago.toFixed(2)), parseFloat(totalJuros.toFixed(2)), parseFloat(pv.toFixed(2)), "—"],
+    ["TOTAL", parseFloat(totalPago.toFixed(2)), parseFloat(totalJuros.toFixed(2)), parseFloat(pv.toFixed(2)), "-"],
   ]);
   wsT["!cols"] = [{ wch: 8 }, { wch: 18 }, { wch: 18 }, { wch: 20 }, { wch: 22 }];
   XLSX.utils.book_append_sheet(wb, wsT, "Evolução da Dívida");

@@ -9,14 +9,14 @@ export const SECOES = [
     ["email", "E-mail"], ["cep", "CEP"], ["endereco", "Endereço residencial"], ["numero", "Nº"],
     ["complemento", "Complemento"], ["bairro", "Bairro"], ["cidade", "Cidade"], ["uf", "UF"],
     ["tempo_residencia", "Tempo de residência"],
-    ["ref_pessoal_nome", "Referência pessoal — Nome"], ["ref_pessoal_tel", "Referência pessoal — Telefone / WhatsApp", "tel"],
+    ["ref_pessoal_nome", "Referência pessoal - Nome"], ["ref_pessoal_tel", "Referência pessoal - Telefone / WhatsApp", "tel"],
     ["cnh", "Possui CNH", "bool"],
   ]},
   { titulo: "2. Dados financeiros e ocupacionais", campos: [
     ["empresa", "Nome da empresa"], ["admissao", "Data de admissão"], ["profissao", "Profissão"], ["regime", "Regime contratual"],
     ["cargo", "Cargo"], ["renda", "Renda", "money"], ["renda_adicional", "Renda adicional", "money"],
     ["contato_empresa", "Contato da empresa"], ["consulta_scr", "Autoriza consulta bancária (SCR / Bacen)", "bool"],
-    ["ref_emp_nome", "Referência comercial — Nome"], ["ref_emp_tel", "Referência comercial — Telefone / WhatsApp", "tel"],
+    ["ref_emp_nome", "Referência comercial - Nome"], ["ref_emp_tel", "Referência comercial - Telefone / WhatsApp", "tel"],
   ]},
   { titulo: "3. Dados do veículo", campos: [
     ["placa", "Placa"], ["renavam", "RENAVAM"], ["modelo", "Modelo"], ["ano_modelo", "Ano/modelo"],
@@ -31,11 +31,11 @@ export const FICHA_VAZIA = Object.fromEntries(SECOES.flatMap((s) =>
 const dinheiro = (v) => Number(v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 function textoValor(v, tipo) {
-  if (tipo === "bool") return v === true ? "Sim" : v === false ? "Não" : "—";
-  if (tipo === "money") return v ? dinheiro(v) : "—";
-  if (tipo === "cpf") return v ? formatarCPF(v) : "—";
-  if (tipo === "tel") return v ? formatarTelefone(v) : "—";
-  return v ? String(v) : "—";
+  if (tipo === "bool") return v === true ? "Sim" : v === false ? "Não" : "-";
+  if (tipo === "money") return v ? dinheiro(v) : "-";
+  if (tipo === "cpf") return v ? formatarCPF(v) : "-";
+  if (tipo === "tel") return v ? formatarTelefone(v) : "-";
+  return v ? String(v) : "-";
 }
 
 /** Seções com linhas [rótulo, valor] já formatadas, para exportar. */
@@ -65,7 +65,7 @@ export function baixar(url, nome) {
 export function gerarPdf(registros, jsPDF, autoTable, logo = null, opts = {}) {
   const financeiro = opts.financeiro !== false;
   const doc = novoDocumento(jsPDF, "portrait");
-  const cpfTxt = (r) => (financeiro ? (r.cpf ? formatarCPF(r.cpf) : "—") : mascararCpf(r.cpf));
+  const cpfTxt = (r) => (financeiro ? (r.cpf ? formatarCPF(r.cpf) : "-") : mascararCpf(r.cpf));
   const cab = (r) => cabecalho(doc, {
     titulo: "Ficha financeira",
     subtitulo: `${r.nome || "Sem nome"} · CPF ${cpfTxt(r)}`,
@@ -105,7 +105,7 @@ export function gerarPngBlob(registro) {
   g.fillText("CALCULA.CAR · Ficha financeira", pad, 64);
   g.fillStyle = "#9198A1";
   g.font = "18px sans-serif";
-  g.fillText(`${registro.nome || ""}  ·  CPF ${registro.cpf ? formatarCPF(registro.cpf) : "—"}`, pad, 100);
+  g.fillText(`${registro.nome || ""}  ·  CPF ${registro.cpf ? formatarCPF(registro.cpf) : "-"}`, pad, 100);
   let y = 140;
   secoes.forEach((sec) => {
     g.fillStyle = "#4493F8";

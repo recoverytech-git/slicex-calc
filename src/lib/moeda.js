@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 /**
- * Formatação e parsing monetário — fonte única de verdade para todo o sistema.
+ * Formatação e parsing monetário - fonte única de verdade para todo o sistema.
  *
  * Regra: a MÁSCARA é apenas apresentação. Cálculos usam sempre o número
  * (parseMoeda), nunca a string formatada.

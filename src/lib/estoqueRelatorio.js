@@ -35,7 +35,7 @@ export function buildEstoquePDF({ jsPDF, autoTable, itens, rotulos, logo, financ
         { rotulo: "Potencial FIPE", valor: brl(soma(itens, "fipe")), sub: "soma dos valores FIPE" },
         { rotulo: "Potencial pretendido", valor: brl(soma(itens, "pret")), sub: "soma dos valores pretendidos" },
         { rotulo: "Juros em aberto", valor: brl(soma(itens, "jd")), sub: "juros acumulado após o 30º dia", cor: [180, 83, 9] },
-        { rotulo: "Margem projetada", valor: brl(soma(itens, "margem")), sub: "pretendido − C.E.T atual", cor: soma(itens, "margem") < 0 ? [185, 28, 28] : [5, 150, 105] },
+        { rotulo: "Margem projetada", valor: brl(soma(itens, "margem")), sub: "pretendido - C.E.T atual", cor: soma(itens, "margem") < 0 ? [185, 28, 28] : [5, 150, 105] },
       ])
     : cartoes(doc, y, [
         { rotulo: "Veículos", valor: numero(itens.length), sub: "unidades listadas" },
@@ -53,7 +53,7 @@ export function buildEstoquePDF({ jsPDF, autoTable, itens, rotulos, logo, financ
       y = tabela(doc, autoTable, {
         y,
         head: ["Veículo", "Placa", "Ano", "KM", "Dias", "Compra", "Custos", "Juros fin.", "Juros acum.", "C.E.T atual", "FIPE", "Pretendido", "Margem"],
-        body: lista.map((v) => [`${v.marca ? v.marca + " " : ""}${v.modelo}`, v.placa || "—", v.ano ?? "—", numero(v.km), v.dias ?? "—",
+        body: lista.map((v) => [`${v.marca ? v.marca + " " : ""}${v.modelo}`, v.placa || "-", v.ano ?? "-", numero(v.km), v.dias ?? "-",
           brl(v.compra), brl(v.custos), brl(v.fin), brl(v.jd), brl(v.capital), brl(v.fipe), brl(v.pret), brl(v.margem)]),
         foot: ["Total", "", "", "", "", brl(soma(lista, "compra")), brl(soma(lista, "custos")), brl(soma(lista, "fin")), brl(soma(lista, "jd")), brl(soma(lista, "capital")), brl(soma(lista, "fipe")), brl(soma(lista, "pret")), brl(soma(lista, "margem"))],
         fonte: 7,
@@ -65,7 +65,7 @@ export function buildEstoquePDF({ jsPDF, autoTable, itens, rotulos, logo, financ
       y = tabela(doc, autoTable, {
         y,
         head: ["Veículo", "Placa", "Ano", "KM", "Dias", "FIPE", "Pretendido"],
-        body: lista.map((v) => [`${v.marca ? v.marca + " " : ""}${v.modelo}`, v.placa || "—", v.ano ?? "—", numero(v.km), v.dias ?? "—", brl(v.fipe), brl(v.pret)]),
+        body: lista.map((v) => [`${v.marca ? v.marca + " " : ""}${v.modelo}`, v.placa || "-", v.ano ?? "-", numero(v.km), v.dias ?? "-", brl(v.fipe), brl(v.pret)]),
         foot: ["Total", "", "", "", "", brl(soma(lista, "fipe")), brl(soma(lista, "pret"))],
         fonte: 8,
         colunas: { 0: { cellWidth: 80 }, 1: { cellWidth: 28 }, 2: { cellWidth: 18, halign: "center" }, 3: { cellWidth: 26, ...r }, 4: { cellWidth: 18, halign: "center" }, 5: { cellWidth: 40, ...r }, 6: { cellWidth: 40, ...r } },

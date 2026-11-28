@@ -11,9 +11,9 @@ export async function buscarJurosAcumulado(veiculoId) {
 
 export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], vendas = [], checklist, fotos = [], jsPDF, autoTable, ITENS, DOCUMENTACAO, logo = null, financeiro = true, emitido, jurosAcumulado = 0 }) {
   const doc = novoDocumento(jsPDF, "portrait");
-  const data = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR") : "—");
+  const data = (d) => (d ? new Date(`${d}T12:00:00`).toLocaleDateString("pt-BR") : "-");
   const sim = (x) => (x === true ? "Sim" : x === false ? "Não" : "Não informado");
-  const pct = (r) => (r == null || !investimento ? "—" : `${((r / investimento) * 100).toFixed(2)}%`);
+  const pct = (r) => (r == null || !investimento ? "-" : `${((r / investimento) * 100).toFixed(2)}%`);
 
   const compra = Number(v.preco_compra ?? 0);
   const totalCustos = custos.reduce((s, c) => s + Number(c.valor ?? 0), 0);
@@ -43,7 +43,7 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   y = cartoes(doc, y, financeiro ? indicadores : [
     { rotulo: "Valor FIPE", valor: brl(v.valor_fipe), sub: "referência de mercado" },
     { rotulo: "Valor pretendido", valor: brl(v.preco_venda_pretendido), sub: "preço de venda" },
-    { rotulo: "Status", valor: String(v.status || "—").replace(/_/g, " "), sub: "situação no estoque" },
+    { rotulo: "Status", valor: String(v.status || "-").replace(/_/g, " "), sub: "situação no estoque" },
   ]);
 
   const bloco = (titulo, linhas) => {
@@ -53,22 +53,22 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   };
 
   bloco("1. Identificação e características", [
-    ["Modelo", v.modelo || "—"], ["Marca", v.marca || "—"], ["Placa", v.placa || "—"], ["RENAVAM", v.renavam || "—"],
-    ["Chassi", v.chassi || "—"], ["Data de aquisição", data(v.data_aquisicao)], ["Ano de fabricação", v.ano_fabricacao ?? "—"],
-    ["Ano do modelo", v.ano_modelo ?? "—"], ["Quilometragem", v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString("pt-BR")} km` : "—"],
-    ["Nº do motor", v.numero_motor || "—"], ["Potência do motor", v.potencia_motor || "—"], ["Portas", v.portas ?? "—"],
-    ["Lugares", v.lugares ?? "—"], ["Categoria / carroceria", v.categoria || "—"], ["Cor", v.cor || "—"],
+    ["Modelo", v.modelo || "-"], ["Marca", v.marca || "-"], ["Placa", v.placa || "-"], ["RENAVAM", v.renavam || "-"],
+    ["Chassi", v.chassi || "-"], ["Data de aquisição", data(v.data_aquisicao)], ["Ano de fabricação", v.ano_fabricacao ?? "-"],
+    ["Ano do modelo", v.ano_modelo ?? "-"], ["Quilometragem", v.quilometragem != null ? `${Number(v.quilometragem).toLocaleString("pt-BR")} km` : "-"],
+    ["Nº do motor", v.numero_motor || "-"], ["Potência do motor", v.potencia_motor || "-"], ["Portas", v.portas ?? "-"],
+    ["Lugares", v.lugares ?? "-"], ["Categoria / carroceria", v.categoria || "-"], ["Cor", v.cor || "-"],
     ["Valor de venda pretendido", brl(v.preco_venda_pretendido)],
   ]);
 
   if (financeiro) bloco("2. Análise FIPE x compra", [
     ["Valor FIPE", brl(v.valor_fipe)], ["Valor de compra", brl(v.preco_compra)],
-    ["Diferença em reais", v.valor_fipe && v.preco_compra ? brl(Number(v.valor_fipe) - compra) : "—"],
-    ["Diferença percentual", v.valor_fipe && v.preco_compra ? `${(((Number(v.valor_fipe) - compra) / Number(v.valor_fipe)) * 100).toFixed(2)}%` : "—"],
+    ["Diferença em reais", v.valor_fipe && v.preco_compra ? brl(Number(v.valor_fipe) - compra) : "-"],
+    ["Diferença percentual", v.valor_fipe && v.preco_compra ? `${(((Number(v.valor_fipe) - compra) / Number(v.valor_fipe)) * 100).toFixed(2)}%` : "-"],
   ]);
 
   if (financeiro) bloco("3. Origem do capital", [
-    ["Origem do capital", v.tipo_aquisicao === "financiamento" ? "Financiamento" : v.tipo_aquisicao === "capital_proprio" ? "Capital próprio" : "—"],
+    ["Origem do capital", v.tipo_aquisicao === "financiamento" ? "Financiamento" : v.tipo_aquisicao === "capital_proprio" ? "Capital próprio" : "-"],
     ...(f ? [
       ["Modo de financiamento", String(f.sistema_amortizacao || "").toLowerCase() === "sac" ? "SAC" : "Price"],
       ["Valor financiado", brl(f.valor_financiado)],
@@ -99,7 +99,7 @@ export function gerarPdfVeiculo({ veiculo: v, financiamento: f, custos = [], ven
   bloco("6. Checklist do veículo", checklist
     ? [...ITENS.map(([k, rotulo]) => [rotulo, sim(checklist[k])]),
        ["Documentação", (DOCUMENTACAO.find(([k]) => k === checklist.documentacao_status) || [, "Não informado"])[1]],
-       ["Observações", checklist.observacoes || "—"]]
+       ["Observações", checklist.observacoes || "-"]]
     : [["Checklist", "Não preenchido"]]);
 
   if (fotos.length) {
