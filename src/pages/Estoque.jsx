@@ -138,11 +138,12 @@ export default function Estoque() {
       if (d.type === "novo") navigate("/calcula-car-novo");
       if (d.type === "exportar-pdf") {
         // Abre o popup para escolher os status que entram no relatório
+        // Pop-up sempre com o estoque completo; a seleção da tela é uma opção explícita
         const ids = d.ids || [];
-        const base = ids.length ? brutos.current.filter((v) => ids.includes(v.id)) : brutos.current;
-        if (!base.length) return;
-        const presentes = Object.keys(ROTULO).filter((st) => base.some((v) => v.status === st));
-        setExportacao({ base, escolhidos: presentes });;
+        if (!brutos.current.length) return;
+        const todos = brutos.current;
+        const presentes = Object.keys(ROTULO).filter((st) => todos.some((v) => v.status === st));
+        setExportacao({ base: todos, idsTela: ids, usarTela: false, escolhidos: presentes });;
       }
     };
     window.addEventListener("message", ouvir);
@@ -151,12 +152,14 @@ export default function Estoque() {
 
   const emitirRelatorio = async () => {
     if (!exportacao) return;
-    const lista = exportacao.base.filter((v) => exportacao.escolhidos.includes(v.status));
+    const ativa = exportacao.usarTela && exportacao.idsTela.length ? exportacao.base.filter((v) => exportacao.idsTela.includes(v.id)) : exportacao.base;
+    const lista = ativa.filter((v) => exportacao.escolhidos.includes(v.status));
     setExportacao(null);
     if (!lista.length) return;
     const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
     const logo = await carregarLogo(marcaRef.current?.logo_claro || logoPadrao);
-    const todos = exportacao.escolhidos.length === Object.keys(ROTULO).filter((st) => exportacao.base.some((v) => v.status === st)).length;
+    const presentes = Object.keys(ROTULO).filter((st) => ativa.some((v) => v.status === st));
+    const todos = exportacao.escolhidos.length === presentes.length;
     buildEstoquePDF({ jsPDF, autoTable, itens: lista.map((v) => linhaRelatorio(v, relatorioRef.current)), rotulos: ROTULO, logo, financeiro: podeFinanceiro(perfil?.papel), emitido: emitidoPor(perfil) })
       .save(todos ? "estoque-todos.pdf" : "estoque-selecionados.pdf");
   };
@@ -166,9 +169,14 @@ export default function Estoque() {
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Estoque de veículos" />
         {exportacao && (() => {
-          const presentes = Object.keys(ROTULO).filter((st) => exportacao.base.some((v) => v.status === st));
+          const ativa = exportacao.usarTela && exportacao.idsTela.length ? exportacao.base.filter((v) => exportacao.idsTela.includes(v.id)) : exportacao.base;
+          const presentes = Object.keys(ROTULO).filter((st) => ativa.some((v) => v.status === st));
           const alternar = (st) => setExportacao((p) => ({ ...p, escolhidos: p.escolhidos.includes(st) ? p.escolhidos.filter((x) => x !== st) : [...p.escolhidos, st] }));
-          const total = exportacao.base.filter((v) => exportacao.escolhidos.includes(v.status)).length;
+          const alternarTela = (on) => setExportacao((p) => {
+            const nova = on && p.idsTela.length ? p.base.filter((v) => p.idsTela.includes(v.id)) : p.base;
+            return { ...p, usarTela: on, escolhidos: Object.keys(ROTULO).filter((st) => nova.some((v) => v.status === st)) };
+          });
+          const total = ativa.filter((v) => exportacao.escolhidos.includes(v.status)).length;
           return (
             <div role="dialog" aria-label="Emitir relatório de estoque" onClick={(e) => { if (e.target === e.currentTarget) setExportacao(null); }}
               style={{ position: "fixed", inset: 0, zIndex: 90, background: "rgba(15,23,42,.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
@@ -177,12 +185,18 @@ export default function Estoque() {
                   <span style={{ width: 38, height: 38, borderRadius: 12, background: "#eff6ff", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #dbeafe" }}><FileDown size={18} /></span>
                   <div>
                     <div style={{ fontWeight: 800, color: "#0f172a", fontSize: 16 }}>Emitir relatório de estoque</div>
-                    <div style={{ fontSize: 12, color: "#64748b" }}>Escolha os status que entram no PDF</div>
+                    <div style={{ fontSize: 12, color: "#64748b" }}>Cada status sai em uma seção separada</div>
                   </div>
                 </div>
+                {exportacao.idsTela.length > 0 && (
+                  <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontWeight: 600, color: "#0f172a", marginBottom: 12, cursor: "pointer" }}>
+                    <input type="checkbox" checked={exportacao.usarTela} onChange={(e) => alternarTela(e.target.checked)} style={{ width: 16, height: 16, accentColor: "#2563eb" }} />
+                    Usar apenas os {exportacao.idsTela.length} veículos selecionados na tela
+                  </label>
+                )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {presentes.map((st) => {
-                    const qtd = exportacao.base.filter((v) => v.status === st).length;
+                    const qtd = ativa.filter((v) => v.status === st).length;
                     const marcado = exportacao.escolhidos.includes(st);
                     return (
                       <label key={st} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "11px 14px", borderRadius: 12, border: `1px solid ${marcado ? "#bfdbfe" : "#e2e8f0"}`, background: marcado ? "#eff6ff" : "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#0f172a" }}>
