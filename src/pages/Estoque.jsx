@@ -143,7 +143,7 @@ export default function Estoque() {
         if (!brutos.current.length) return;
         const todos = brutos.current;
         const presentes = Object.keys(ROTULO).filter((st) => todos.some((v) => v.status === st));
-        setExportacao({ base: todos, idsTela: ids, usarTela: false, escolhidos: presentes });;
+        setExportacao({ base: todos, idsTela: [], usarTela: false, escolhidos: presentes });;
       }
     };
     window.addEventListener("message", ouvir);
@@ -188,12 +188,6 @@ export default function Estoque() {
                     <div style={{ fontSize: 12, color: "#64748b" }}>Cada status sai em uma seção separada</div>
                   </div>
                 </div>
-                {exportacao.idsTela.length > 0 && (
-                  <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontWeight: 600, color: "#0f172a", marginBottom: 12, cursor: "pointer" }}>
-                    <input type="checkbox" checked={exportacao.usarTela} onChange={(e) => alternarTela(e.target.checked)} style={{ width: 16, height: 16, accentColor: "#2563eb" }} />
-                    Usar apenas os {exportacao.idsTela.length} veículos selecionados na tela
-                  </label>
-                )}
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {presentes.map((st) => {
                     const qtd = ativa.filter((v) => v.status === st).length;
