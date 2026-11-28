@@ -2,7 +2,8 @@ import { COR, brl, numero, pct, cabecalho, cartoes, secao, tabela, rodape, novoD
 
 /** Junta os dados do veículo com custos, juros do financiamento, juros acumulado e dias em estoque (mesma regra da tela Estoque). */
 export function linhaRelatorio(v, ctx = {}) {
-  const compra = Number(v.preco_compra || 0);
+  // compra vem do cadastro completo (mapa extras), com fallback para a linha original
+  const compra = Number(ctx.extras?.[v.id]?.preco_compra ?? v.preco_compra ?? 0);
   const custos = Number(ctx.custosAd?.[v.id] || 0);
   const fin = Number(ctx.finMap?.[v.id] || 0);
   const jd = Number(ctx.metricas?.[v.id]?.juros_diario_acumulado || 0);
@@ -26,7 +27,7 @@ export function buildEstoquePDF({ jsPDF, autoTable, itens, rotulos, logo, financ
   if (financeiro) {
     y = cartoes(doc, y, [
       { rotulo: "Veículos", valor: numero(itens.length), sub: "unidades listadas" },
-      { rotulo: "Capital investido", valor: brl(soma("capital")), sub: "compra + custos + juros" },
+      { rotulo: "C.E.T atual", valor: brl(soma("capital")), sub: "compra + custos + juros" },
       { rotulo: "Potencial FIPE", valor: brl(soma("fipe")), sub: "soma dos valores FIPE" },
       { rotulo: "Potencial pretendido", valor: brl(soma("pret")), sub: "soma dos valores pretendidos" },
       { rotulo: "Juros em aberto", valor: brl(soma("jd")), sub: "juros acumulado após o 30º dia", cor: [180, 83, 9] },
@@ -41,7 +42,7 @@ export function buildEstoquePDF({ jsPDF, autoTable, itens, rotulos, logo, financ
     const r = { halign: "right" };
     tabela(doc, autoTable, {
       y,
-      head: ["Veículo", "Placa", "Ano", "KM", "Status", "Dias", "Compra", "Custos", "Juros fin.", "Juros acum.", "Capital", "FIPE", "Pretendido", "Margem"],
+      head: ["Veículo", "Placa", "Ano", "KM", "Status", "Dias", "Compra", "Custos", "Juros fin.", "Juros acum.", "C.E.T atual", "FIPE", "Pretendido", "Margem"],
       body: linhas, foot: total, fonte: 7,
       colunas: {
         0: { cellWidth: 34 }, 1: { cellWidth: 16 }, 2: { cellWidth: 12, halign: "center" }, 3: { cellWidth: 15, ...r }, 4: { cellWidth: 17 }, 5: { cellWidth: 11, halign: "center" },

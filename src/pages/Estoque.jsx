@@ -1,6 +1,7 @@
 import { calcularResumo } from "../lib/calculos";
 // sem-rascunho: lista e resumo ficam no documento do design (iframe); os dados vem do banco pelo sistema
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FileDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PageTransition from "../components/PageTransition";
 import Header from "../components/Header";
@@ -36,6 +37,7 @@ export default function Estoque() {
   const [slot, setSlot] = useState(null);
   const itensRef = useRef(itens);
   const relatorioRef = useRef({});
+  const [exportacao, setExportacao] = useState(null);
   itensRef.current = itens;
   const statsRef = useRef(stats);
   statsRef.current = stats;
@@ -135,22 +137,72 @@ export default function Estoque() {
       if (d.type === "abrir") navigate(`/estoque/${d.id}`);
       if (d.type === "novo") navigate("/calcula-car-novo");
       if (d.type === "exportar-pdf") {
+        // Abre o popup para escolher os status que entram no relatório
         const ids = d.ids || [];
-        const filtrados = brutos.current.filter((v) => ids.includes(v.id));
-        if (!filtrados.length) return;
-        const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
-        const logo = await carregarLogo(marcaRef.current?.logo_claro || logoPadrao);
-        buildEstoquePDF({ jsPDF, autoTable, itens: filtrados.map((v) => linhaRelatorio(v, relatorioRef.current)), rotulos: ROTULO, logo, financeiro: podeFinanceiro(perfil?.papel), emitido: emitidoPor(perfil) }).save("estoque.pdf");
+        const base = ids.length ? brutos.current.filter((v) => ids.includes(v.id)) : brutos.current;
+        if (!base.length) return;
+        const presentes = Object.keys(ROTULO).filter((st) => base.some((v) => v.status === st));
+        setExportacao({ base, escolhidos: presentes });;
       }
     };
     window.addEventListener("message", ouvir);
     return () => window.removeEventListener("message", ouvir);
   }, [navigate, enviarMarca, enviarDados]);
 
+  const emitirRelatorio = async () => {
+    if (!exportacao) return;
+    const lista = exportacao.base.filter((v) => exportacao.escolhidos.includes(v.status));
+    setExportacao(null);
+    if (!lista.length) return;
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
+    const logo = await carregarLogo(marcaRef.current?.logo_claro || logoPadrao);
+    const todos = exportacao.escolhidos.length === Object.keys(ROTULO).filter((st) => exportacao.base.some((v) => v.status === st)).length;
+    buildEstoquePDF({ jsPDF, autoTable, itens: lista.map((v) => linhaRelatorio(v, relatorioRef.current)), rotulos: ROTULO, logo, financeiro: podeFinanceiro(perfil?.papel), emitido: emitidoPor(perfil) })
+      .save(todos ? "estoque-todos.pdf" : "estoque-selecionados.pdf");
+  };
+
   return (
     <PageTransition>
       <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
         <Header subtitle="Estoque de veículos" />
+        {exportacao && (() => {
+          const presentes = Object.keys(ROTULO).filter((st) => exportacao.base.some((v) => v.status === st));
+          const alternar = (st) => setExportacao((p) => ({ ...p, escolhidos: p.escolhidos.includes(st) ? p.escolhidos.filter((x) => x !== st) : [...p.escolhidos, st] }));
+          const total = exportacao.base.filter((v) => exportacao.escolhidos.includes(v.status)).length;
+          return (
+            <div role="dialog" aria-label="Emitir relatório de estoque" onClick={(e) => { if (e.target === e.currentTarget) setExportacao(null); }}
+              style={{ position: "fixed", inset: 0, zIndex: 90, background: "rgba(15,23,42,.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+              <div style={{ background: "#fff", borderRadius: 20, padding: 22, width: "100%", maxWidth: 420, boxShadow: "0 30px 60px -20px rgba(15,23,42,.4)", border: "1px solid rgba(226,232,240,.8)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                  <span style={{ width: 38, height: 38, borderRadius: 12, background: "#eff6ff", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #dbeafe" }}><FileDown size={18} /></span>
+                  <div>
+                    <div style={{ fontWeight: 800, color: "#0f172a", fontSize: 16 }}>Emitir relatório de estoque</div>
+                    <div style={{ fontSize: 12, color: "#64748b" }}>Escolha os status que entram no PDF</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {presentes.map((st) => {
+                    const qtd = exportacao.base.filter((v) => v.status === st).length;
+                    const marcado = exportacao.escolhidos.includes(st);
+                    return (
+                      <label key={st} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "11px 14px", borderRadius: 12, border: `1px solid ${marcado ? "#bfdbfe" : "#e2e8f0"}`, background: marcado ? "#eff6ff" : "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#0f172a" }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <input type="checkbox" checked={marcado} onChange={() => alternar(st)} style={{ width: 16, height: 16, accentColor: "#2563eb" }} />
+                          {ROTULO[st]}
+                        </span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#64748b" }}>{qtd}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+                <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 18 }}>
+                  <button type="button" onClick={() => setExportacao(null)} style={{ height: 42, padding: "0 16px", borderRadius: 12, border: "1px solid #cbd5e1", background: "#fff", color: "#0f172a", fontWeight: 700, cursor: "pointer" }}>Cancelar</button>
+                  <button type="button" disabled={!total} onClick={() => emitirRelatorio()} style={{ height: 42, padding: "0 18px", borderRadius: 12, border: "none", background: total ? "#2563eb" : "#94a3b8", color: "#fff", fontWeight: 700, cursor: total ? "pointer" : "not-allowed", boxShadow: "0 8px 16px -4px rgba(37,99,235,.35)" }}>Emitir PDF ({total})</button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         <iframe
           ref={frame}
